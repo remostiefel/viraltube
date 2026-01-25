@@ -98,9 +98,9 @@ function OverviewSection() {
                 <h3 className="text-2xl font-bold mb-4">The Neuro-Code Philosophy</h3>
                 <p className="max-w-3xl text-lg text-muted-foreground leading-relaxed">
                     This system implements the <strong>Biological Iterative Loop</strong> to automate viral success.
-                    It moves beyond simple "script writing" to a full cognitive architecture:
+                    It combines <strong>Bio-Optimization</strong> (upgrading your brain) with <strong>AI Automation</strong> (upgrading your code).
                     <br /><br />
-                    <em>Sense (Scanner) &rarr; Distill (Wisdom) &rarr; Plan (Blueprint) &rarr; Act (Script) &rarr; Measure (Analyst).</em>
+                    <em>1. Bio-Prime (Upgrade) &rarr; 2. Sense (Scanner) &rarr; 3. Build (Project Forge) &rarr; 4. Deploy (Valut).</em>
                 </p>
             </div>
 
@@ -122,31 +122,30 @@ function OverviewSection() {
 function QuickstartSection() {
     const steps = [
         {
-            title: "1. Google Cloud Vault (Storage)",
-            desc: "To save files (Scripts & Images), you need a GCS Bucket.",
+            title: "1. Biological Priming (The Upgrade)",
+            desc: "Before you touch the code, you must upgrade the hardware (your brain).",
             details: [
-                "Go to Google Cloud Console > Storage > Interoperability.",
-                "Create 'User Account HMAC Keys' (Start with GOOG...).",
-                "Create a Bucket (e.g., 'neuro-code-vault').",
-                "Enter these in Settings > S3 Configuration."
+                "Go to 'The Upgrade' module.",
+                "Complete the 10-point Priming Protocol.",
+                "Entering the 'GAMMA' code unlocks the system's full potential."
             ]
         },
         {
-            title: "2. YouTube Intelligence (Scanner)",
-            desc: "To find viral trends, you need a Data API Key.",
+            title: "2. Neural Alignment (Neuro-Sync)",
+            desc: "Sync your brainwaves to the task at hand.",
             details: [
-                "Go to Google Cloud Console > APIs & Services > Credentials.",
-                "Create an API Key.",
-                "Enter it in .env.local as YOUTUBE_API_KEY."
+                "Go to 'Neuro-Sync'.",
+                "Select 'Alpha' for creativity or 'Gamma' for deep work.",
+                "Run the visualizer for 2-5 minutes to enter Flow State."
             ]
         },
         {
-            title: "3. Channel Access (Analyst)",
-            desc: "To analyze YOUR channel data (Data Mirror).",
+            title: "3. Project Initialization",
+            desc: "Start the production loop.",
             details: [
-                "Create an OAuth 2.0 Client ID (Web Application).",
-                "Add 'http://localhost:3000/settings/callback' to Authorized Redirect URIs.",
-                "Copy Client ID & Secret to Settings > Google OAuth."
+                "Use 'Scanner' to find a viral outlier.",
+                "Or go straight to 'Script Forge' and click 'New Project'.",
+                "Your Strategy and Script are now saved together in the Project file."
             ]
         }
     ];
@@ -234,17 +233,69 @@ function ManualSection() {
                 </div>
             </div>
 
-            {/* VAULT */}
+            {/* NEURO-INTERFACE */}
             <div className="mb-12">
-                <h3 className="text-2xl font-bold text-green-400 mb-4 flex items-center gap-2">
-                    <Database className="w-6 h-6" /> Cloud Vault
+                <h3 className="text-2xl font-bold text-cyan-400 mb-4 flex items-center gap-2">
+                    <Map className="w-6 h-6" /> 1. Neural Interface (Dashboard)
                 </h3>
                 <div className="bg-muted/10 p-6 rounded-xl border border-border/40">
-                    <p>Your secure asset store (Google Cloud). Unlike local files, these persist forever.</p>
-                    <ul className="text-sm mt-2">
-                        <li><strong>Auto-Save:</strong> Scripts and Images generated in the Factory can be saved with one click.</li>
-                        <li><strong>Access:</strong> View, download, or drag-and-drop new files directly in the Vault UI.</li>
+                    <p>The central hub. The <strong>Glass Brain</strong> visualizes your system status.</p>
+                    <ul className="text-sm space-y-2 mt-4">
+                        <li><strong>IDLE:</strong> System is cold. Low output potential.</li>
+                        <li><strong>OPTIMIZED (Cyan):</strong> Bio-OS protocols completed. Ready for high-performance work.</li>
                     </ul>
+                </div>
+            </div>
+
+            {/* BIO-OS */}
+            <div className="mb-12">
+                <h3 className="text-2xl font-bold text-pink-500 mb-4 flex items-center gap-2">
+                    <Zap className="w-6 h-6" /> 2. Bio-OS (The Human Layer)
+                </h3>
+                <div className="bg-muted/10 p-6 rounded-xl border border-border/40">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <strong className="text-foreground">The Upgrade</strong>
+                            <p className="text-sm mt-1">A daily checklist to prime your neuro-biology. Unlocks the system.</p>
+                        </div>
+                        <div>
+                            <strong className="text-foreground">Neuro-Sync</strong>
+                            <p className="text-sm mt-1">Audio-visual entrainment. Match your brain frequency to the task.</p>
+                        </div>
+                        <div>
+                            <strong className="text-foreground">Micro-Protocols</strong>
+                            <p className="text-sm mt-1">Acute interventions. Feeling "Foggy"? "Anxious"? There is a protocol for that.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* PRODUCTION CORTEX */}
+            <div className="mb-12">
+                <h3 className="text-2xl font-bold text-purple-500 mb-4 flex items-center gap-2">
+                    <Database className="w-6 h-6" /> 3. Production Cortex
+                </h3>
+                <div className="bg-muted/10 p-6 rounded-xl border border-border/40 space-y-6">
+                    <div>
+                        <strong className="text-blue-400 text-lg">Scanner (Darwin)</strong>
+                        <p className="text-sm mt-1">Find "Outliers" (Viral Videos). Extract their "Wisdom" (Laws/Facts) to build your Strategy.</p>
+                    </div>
+
+                    <div>
+                        <strong className="text-purple-400 text-lg">Script Forge (Crea)</strong>
+                        <p className="text-sm mt-1">The main workspace. Combine Strategy + Scripting.</p>
+                        <div className="bg-yellow-500/10 border border-yellow-500/20 p-3 rounded mt-2 text-sm text-yellow-200">
+                            <strong>⚡️ NEW SAVING WORKFLOW:</strong><br />
+                            We no longer save "Draft Templates". We now use <strong>SAVE PROJECT</strong>.<br />
+                            This saves your Script AND Strategy into one Project file. <br />
+                            Use <strong>"Export Blueprint"</strong> only if you want to save a Strategy to the Library for re-use.
+                        </div>
+                    </div>
+
+                    <div>
+                        <strong className="text-green-400 text-lg">Vault (Omega)</strong>
+                        <p className="text-sm mt-1">Long-term Cloud Storage for finished assets.</p>
+                    </div>
                 </div>
             </div>
         </div>

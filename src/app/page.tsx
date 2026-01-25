@@ -3,200 +3,238 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
-    Brain,
     Activity,
     ArrowRight,
-    CheckCircle2,
-    Play
+    Zap,
+    Play,
+    Scan,
+    PenTool,
+    Film,
+    MonitorPlay,
+    Timer,
+    Flame,
+    Moon
 } from "lucide-react";
 import { StrategyProfile } from "@/lib/gemini";
 import { cn } from "@/lib/utils";
-import { navigation, GROUP_COLORS, NavItem } from "@/config/navigation";
 import { getProjectsAction } from "@/app/actions";
 import { Project } from "@/lib/projects";
+import GlassBrain from "@/components/dashboard/GlassBrain";
 
-export default function Dashboard() {
+export default function NeuralInterface() {
     const [cortexProfile, setCortexProfile] = useState<StrategyProfile | null>(null);
     const [projects, setProjects] = useState<Project[]>([]);
+    const [systemState, setSystemState] = useState<"IDLE" | "ACTIVE" | "OPTIMIZED">("IDLE");
 
     useEffect(() => {
-        const saved = localStorage.getItem("nc_cortex_profile");
-        if (saved) {
-            setCortexProfile(JSON.parse(saved));
+        const savedProfile = localStorage.getItem("nc_cortex_profile");
+        const savedState = localStorage.getItem("nc_system_state");
+
+        if (savedProfile) {
+            setCortexProfile(JSON.parse(savedProfile));
         }
+
+        if (savedState === "OPTIMIZED" || savedState === "ACTIVE") {
+            setSystemState(savedState as "ACTIVE" | "OPTIMIZED");
+        } else if (savedProfile) {
+            setSystemState("ACTIVE");
+        }
+
         loadProjects();
     }, []);
 
     const loadProjects = async () => {
         const data = await getProjectsAction();
-        setProjects(data.slice(0, 5)); // Show top 5
+        setProjects(data.slice(0, 3));
     };
 
-    // ... (rest of component)
-
-
-    // Group items excluding Dashboard itself
-    const groups = navigation.reduce((acc, item) => {
-        if (item.group === "DASHBOARD") return acc;
-        if (!acc[item.group]) acc[item.group] = [];
-        acc[item.group].push(item);
-        return acc;
-    }, {} as Record<string, NavItem[]>);
-
     return (
-        <div className="space-y-4 max-w-7xl mx-auto px-4">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2">
-                        <div className="p-1.5 bg-primary/10 rounded-lg">
-                            <Activity className="w-5 h-5 text-primary" />
+        <div className="space-y-8 max-w-7xl mx-auto px-4 pb-12">
+
+            {/* Header / Top Bar */}
+            <div className="flex items-center justify-between border-b border-border/20 pb-4">
+                <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center border border-primary/20">
+                        <Activity className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                        <div className="flex items-center gap-2">
+                            <h1 className="text-2xl font-bold tracking-tight text-cyan-400 font-mono">NEURO-CODE <span className="text-xs align-top font-mono border border-red-500/30 bg-red-500/10 rounded px-1 ml-1 text-red-500">automated</span></h1>
+                            <Link href="/dream" title="Enter Dream Mode (Sleep)">
+                                <button className="p-1 hover:bg-white/10 rounded-full transition-colors group">
+                                    <Moon className="w-4 h-4 text-indigo-400 group-hover:text-indigo-300" />
+                                </button>
+                            </Link>
                         </div>
-                        Mission Control
-                    </h2>
-                    <p className="text-muted-foreground mt-1 text-sm">
-                        System Overview & Quick Actions
-                    </p>
+                        <p className="text-xs text-muted-foreground tracking-widest uppercase">Biological Recalibration System</p>
+                    </div>
                 </div>
 
-                {/* Cortex Status Badge */}
-                <Link href="/cortex" className="group">
-                    <div className="flex items-center gap-3 bg-card border border-border/50 px-4 py-2 rounded-full hover:border-primary/50 transition-colors cursor-pointer">
-                        <div>
-                            <div className="text-[10px] uppercase font-bold text-muted-foreground">Cortex Strategy</div>
-                            <div className="text-sm font-bold flex items-center gap-2">
-                                <span className={cn(
-                                    "w-2 h-2 rounded-full",
-                                    cortexProfile ? "bg-green-500" : "bg-red-500 animate-pulse"
-                                )} />
+                <div className="flex gap-4">
+                    <div className="bg-card/50 border border-border/40 px-4 py-2 rounded-lg flex flex-col items-end">
+                        <span className="text-[10px] text-muted-foreground uppercase font-bold">Rank</span>
+                        <span className="text-sm font-bold text-white">INITIAND</span>
+                    </div>
+                    <Link href="/cortex" className="group">
+                        <div className="bg-card/50 border border-border/40 px-4 py-2 rounded-lg flex flex-col items-end hover:border-primary/50 transition-colors cursor-pointer">
+                            <span className="text-[10px] text-muted-foreground uppercase font-bold">Strategy</span>
+                            <span className={cn("text-sm font-bold", cortexProfile ? "text-primary" : "text-yellow-500")}>
                                 {cortexProfile ? cortexProfile.tone.toUpperCase() : "UNCALIBRATED"}
-                            </div>
+                            </span>
                         </div>
-                        <Brain className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                    </div>
-                </Link>
+                    </Link>
+                </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* LEFT: System Overview (Modules) */}
-                <div className="lg:col-span-2 space-y-6">
+            {/* MAIN COMMAND DECK */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
 
-                    {/* Render each Group Section */}
-                    {Object.entries(groups).map(([groupName, items]) => {
-                        const groupColor = GROUP_COLORS[groupName] || "var(--foreground)";
-                        return (
-                            <div key={groupName} className="space-y-4">
-                                <h3
-                                    className="font-bold text-lg uppercase tracking-wider flex items-center gap-2"
-                                    style={{ color: groupColor }}
-                                >
-                                    {groupName}
-                                    <div className="h-px flex-1 bg-border/30 ml-4 group-color-border" style={{ backgroundColor: `color-mix(in srgb, ${groupColor} 20%, transparent)` }} />
-                                </h3>
+                {/* LEFT: BIO-OS (Optimization) */}
+                <div className="lg:col-span-3 flex flex-col gap-4">
+                    <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2 pl-2 border-l-2 border-teal-500">
+                        Step 1: Bio-Optimization
+                    </h3>
 
-                                <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3">
-                                    {items.map((item) => (
-                                        <Link key={item.name} href={item.href} className="group block h-full">
-                                            <div
-                                                className="aspect-square bg-card/50 border border-border/40 p-3 rounded-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-lg relative overflow-hidden flex flex-col justify-between"
-                                                style={{
-                                                    // Dynamic border color on hover
-                                                }}
-                                            >
-                                                {/* Hover Glow Effect */}
-                                                <div
-                                                    className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-300 pointer-events-none"
-                                                    style={{ background: `linear-gradient(45deg, ${groupColor}, transparent)` }}
-                                                />
-
-                                                <div className="flex justify-between items-start z-10">
-                                                    <div className="p-2.5 rounded-lg bg-background/50 text-muted-foreground group-hover:text-foreground transition-colors mix-blend-luminosity group-hover:mix-blend-normal">
-                                                        <item.icon className="w-7 h-7" style={{ color: groupColor }} />
-                                                    </div>
-                                                    <ArrowRight
-                                                        className="w-3 h-3 text-muted-foreground group-hover:translate-x-1 transition-transform opacity-0 group-hover:opacity-100"
-                                                        style={{ color: groupColor }}
-                                                    />
-                                                </div>
-
-                                                <div className="z-10">
-                                                    <h4 className="font-bold text-sm leading-tight mb-1 group-hover:text-primary transition-colors">
-                                                        {item.name}
-                                                    </h4>
-                                                    <p className="text-xs text-muted-foreground leading-tight line-clamp-2 opacity-90">
-                                                        {item.subtitle}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </Link>
-                                    ))}
+                    {/* The Upgrade (Main Module) */}
+                    <Link href="/upgrade" className="flex-1">
+                        <div className="h-full bg-gradient-to-br from-teal-900/20 to-black border border-teal-500/30 rounded-2xl p-6 relative group overflow-hidden transition-all hover:border-teal-500/60 hover:shadow-[0_0_30px_-5px_rgba(45,212,191,0.2)]">
+                            <div className="absolute top-0 right-0 p-4 opacity-50 group-hover:opacity-100 transition-opacity">
+                                <Zap className="w-8 h-8 text-teal-500" />
+                            </div>
+                            <div className="flex flex-col justify-end h-full relative z-10">
+                                <h2 className="text-2xl font-bold text-teal-100 mb-1 font-mono">THE UPGRADE</h2>
+                                <p className="text-sm text-teal-400/60 mb-4">15min Guided Neuro-Priming</p>
+                                <div className="flex items-center gap-2 text-xs font-bold text-teal-300 uppercase tracking-wider bg-teal-500/10 px-3 py-2 rounded w-fit group-hover:bg-teal-500 group-hover:text-black transition-colors">
+                                    <Play className="w-3 h-3 fill-current" /> Start Protocol
                                 </div>
                             </div>
-                        );
-                    })}
+                        </div>
+                    </Link>
 
+                    {/* Neuro-Sync */}
+                    <Link href="/sync" className="h-[140px]">
+                        <div className="h-full bg-card/30 border border-border/30 rounded-2xl p-5 relative group overflow-hidden hover:bg-card/50 transition-all">
+                            <div className="flex items-start justify-between mb-2">
+                                <Timer className="w-5 h-5 text-purple-400" />
+                                <span className="text-[10px] uppercase font-bold text-muted-foreground">Audio Tool</span>
+                            </div>
+                            <h3 className="text-lg font-bold text-white mb-1">Neuro-Sync</h3>
+                            <p className="text-xs text-muted-foreground">Binaural 40Hz Flow State</p>
+                        </div>
+                    </Link>
                 </div>
 
-                {/* RIGHT: Notifications & Info */}
-                <div className="space-y-4">
-                    <h3 className="font-bold text-base text-muted-foreground uppercase tracking-wider">System State</h3>
+                {/* CENTER: VISUALIZER (Glass Brain) */}
+                <div className="lg:col-span-6">
+                    <GlassBrain state={systemState} />
 
-                    <div className="bg-card border border-border/40 rounded-xl p-4 space-y-4 sticky top-6">
-                        <div>
-                            <h4 className="font-bold flex items-center gap-2 mb-2">
-                                <Brain className="w-4 h-4 text-primary" /> Active Strategy
-                            </h4>
-                            {cortexProfile ? (
-                                <div className="space-y-2 text-sm">
-                                    <div className="flex justify-between p-2 bg-muted/20 rounded">
-                                        <span className="text-muted-foreground">Tone</span>
-                                        <span className="font-mono font-bold">{cortexProfile.tone.toUpperCase()}</span>
-                                    </div>
-                                    <div className="flex justify-between p-2 bg-muted/20 rounded">
-                                        <span className="text-muted-foreground">Niche</span>
-                                        <span className="font-mono font-bold truncate max-w-[150px]">{cortexProfile.niche}</span>
-                                    </div>
-                                    <div className="flex justify-between p-2 bg-muted/20 rounded">
-                                        <span className="text-muted-foreground">Mode</span>
-                                        <span className="font-mono font-bold">{cortexProfile.emulationMode.toUpperCase()}</span>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="text-center py-6">
-                                    <Link href="/cortex" className="text-primary hover:underline text-sm font-bold">
-                                        Initialize Cortex Now
-                                    </Link>
-                                </div>
-                            )}
+                    {/* Quick Stats below brain */}
+                    <div className="grid grid-cols-2 gap-4 mt-6">
+                        <div className="bg-card/20 border border-border/20 rounded-xl p-4 flex items-center gap-4">
+                            <div className="p-2 bg-yellow-500/10 rounded-lg text-yellow-500">
+                                <Flame className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <div className="text-2xl font-bold text-white leading-none">3</div>
+                                <div className="text-[10px] text-muted-foreground uppercase font-bold">Streak Days</div>
+                            </div>
                         </div>
-
-                        <div className="h-px bg-border/40" />
-
-                        <div>
-                            <h4 className="font-bold flex items-center gap-2 mb-4">
-                                <Play className="w-4 h-4 text-green-500" /> Recent Projects
-                            </h4>
-                            <div className="space-y-4">
-                                {projects.length === 0 && (
-                                    <p className="text-sm text-muted-foreground italic">No projects yet.</p>
-                                )}
-                                {projects.map((p) => (
-                                    <div key={p.id} className="flex gap-3 items-start group cursor-pointer hover:bg-muted/50 p-2 rounded transition-colors" title={p.id}>
-                                        <CheckCircle2 className={cn("w-4 h-4 mt-0.5", p.status === "done" ? "text-green-500" : "text-yellow-500")} />
-                                        <div className="flex-1">
-                                            <div className="text-sm font-bold line-clamp-1">{p.title}</div>
-                                            <div className="text-xs text-muted-foreground flex justify-between">
-                                                <span>{new Date(p.createdAt).toLocaleDateString()}</span>
-                                                <span className="uppercase text-[10px] bg-muted px-1 rounded">{p.status}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
+                        <div className="bg-card/20 border border-border/20 rounded-xl p-4 flex items-center gap-4">
+                            <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500">
+                                <Activity className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <div className="text-2xl font-bold text-white leading-none">12</div>
+                                <div className="text-[10px] text-muted-foreground uppercase font-bold">Sessions</div>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                {/* RIGHT: PRODUCTION CORTEX (Tools) */}
+                <div className="lg:col-span-3 flex flex-col gap-4">
+                    <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2 pl-2 border-l-2 border-primary">
+                        Step 2: Production
+                    </h3>
+
+                    {/* Scanner */}
+                    <Link href="/scanner" className="flex-1">
+                        <div className="h-full bg-card/30 border border-border/30 rounded-2xl p-5 relative group hover:border-blue-500/50 transition-all flex flex-col justify-between">
+                            <div className="flex justify-between items-start">
+                                <div className="p-2 bg-blue-500/20 rounded-lg text-blue-400">
+                                    <Scan className="w-6 h-6" />
+                                </div>
+                                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-blue-400 group-hover:translate-x-1 transition-all" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-white mb-1">Scanner</h3>
+                                <p className="text-xs text-muted-foreground">Trend Scout & Wisdom Extraction</p>
+                            </div>
+                        </div>
+                    </Link>
+
+                    {/* Script Forge (Architect) */}
+                    <Link href="/architect?tab=script" className="flex-1">
+                        <div className="h-full bg-card/30 border border-border/30 rounded-2xl p-5 relative group hover:border-purple-500/50 transition-all flex flex-col justify-between">
+                            <div className="flex justify-between items-start">
+                                <div className="p-2 bg-purple-500/20 rounded-lg text-purple-400">
+                                    <PenTool className="w-6 h-6" />
+                                </div>
+                                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-purple-400 group-hover:translate-x-1 transition-all" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-white mb-1">Script Forge</h3>
+                                <p className="text-xs text-muted-foreground">Voiceover & Script Architecture</p>
+                            </div>
+                        </div>
+                    </Link>
+
+                    {/* Director */}
+                    <Link href="/architect?tab=director" className="flex-1">
+                        <div className="h-full bg-card/30 border border-border/30 rounded-2xl p-5 relative group hover:border-pink-500/50 transition-all flex flex-col justify-between">
+                            <div className="flex justify-between items-start">
+                                <div className="p-2 bg-pink-500/20 rounded-lg text-pink-400">
+                                    <Film className="w-6 h-6" />
+                                </div>
+                                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-pink-400 group-hover:translate-x-1 transition-all" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-white mb-1">Director</h3>
+                                <p className="text-xs text-muted-foreground">Scene Prompts & Visualization</p>
+                            </div>
+                        </div>
+                    </Link>
+
+                </div>
             </div>
+
+            {/* Recents Footer */}
+            <div className="mt-8 pt-8 border-t border-border/20">
+                <h4 className="text-xs font-bold text-muted-foreground uppercase mb-4 flex items-center gap-2">
+                    <MonitorPlay className="w-4 h-4" /> Active Projects
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {projects.length === 0 && (
+                        <div className="text-sm text-muted-foreground italic col-span-3 text-center py-4 bg-card/20 rounded-xl">
+                            No active projects. Start extraction in Scanner.
+                        </div>
+                    )}
+                    {projects.map((p) => (
+                        <Link key={p.id} href={`/project/${p.id}`}>
+                            <div className="bg-card/30 border border-border/20 p-4 rounded-xl hover:bg-card/50 transition-colors flex items-center gap-4 group">
+                                <div className={cn("w-2 h-2 rounded-full", p.status === "done" ? "bg-green-500" : "bg-yellow-500")} />
+                                <div className="flex-1 min-w-0">
+                                    <div className="text-sm font-bold text-white truncate group-hover:text-primary transition-colors">{p.title}</div>
+                                    <div className="text-[10px] text-muted-foreground uppercase">{p.status} • {new Date(p.createdAt).toLocaleDateString()}</div>
+                                </div>
+                                <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </div>
+                        </Link>
+                    ))}
+                </div>
+            </div>
+
         </div>
     );
 }
+

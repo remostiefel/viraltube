@@ -50,22 +50,41 @@ export interface VideoIdea {
 }
 
 
-export async function generateIdeasFromGemini(topic: string, constitution: string = ""): Promise<VideoIdea[]> {
+export async function generateIdeasFromGemini(topic: string, constitution: string = "", format: "Shorts" | "Longform" = "Longform"): Promise<VideoIdea[]> {
     if (!apiKey) {
         throw new Error("Gemini API Key is missing");
     }
 
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-    const prompt = `
-    You are a YouTube viral strategist for a channel called "NEURO-CODE". 
-    
-    ${constitution}
-    
-    Generate 3 viral video ideas for the topic: "${topic}".
-    Return the response as a valid JSON array of objects with keys: title, hook, angle, thumbnailIdea. 
-    Do not wrap in markdown code blocks. Just the raw JSON string.
-  `;
+    let prompt = "";
+
+    if (format === "Shorts") {
+        prompt = `
+        You are a Viral Shorts Strategist.
+        Topic: "${topic}"
+        
+        ${constitution}
+        
+        Generate 3 high-octane 30-60s Short ideas.
+        CRITICAL: 
+        1. MUST include a "Visual Hook" (what we see in sec 0-3).
+        2. Hook Text must be under 1 sentence.
+        3. Thumbnail Idea = The specific frame to freeze on.
+        
+        Return JSON array: [{ title, hook, angle, thumbnailIdea, visualData: "Visual Hook Description" }]
+        `;
+    } else {
+        prompt = `
+        You are a YouTube viral strategist for a channel called "NEURO-CODE". 
+        
+        ${constitution}
+        
+        Generate 3 viral video ideas for the topic: "${topic}".
+        Return the response as a valid JSON array of objects with keys: title, hook, angle, thumbnailIdea. 
+        Do not wrap in markdown code blocks. Just the raw JSON string.
+        `;
+    }
 
     try {
         const result = await model.generateContent(prompt);
@@ -132,6 +151,9 @@ export interface StrategyProfile {
     tone: "hype" | "substance" | "balanced";
     emulationMode: "translate" | "adapt" | "innovate";
     contentDepth: number;
+    perfectLoop?: boolean; // New: Infinite Recursion Mode
+    durationConstraint?: "30s" | "60s" | "long";
+    metaNarrative?: boolean; // New: Origin Story / Process integration
 }
 
 const DEFAULT_PROFILE: StrategyProfile = {
@@ -139,7 +161,10 @@ const DEFAULT_PROFILE: StrategyProfile = {
     language: "DE",
     tone: "balanced",
     emulationMode: "adapt",
-    contentDepth: 70
+    contentDepth: 70,
+    perfectLoop: false,
+    durationConstraint: "long",
+    metaNarrative: false
 };
 
 export async function generateBlueprint(
@@ -336,5 +361,139 @@ export async function synthesizeStrategy(inputs: string): Promise<string> {
     } catch (error) {
         console.error("Strategy Synthesis Error", error);
         return "# Error\nCould not synthesize strategy. Please try again.";
+    }
+}
+
+export interface LoopAssets {
+    musicPrompts: Array<{
+        style: string;
+        prompt: string;
+        bpm: number;
+    }>;
+    imagePrompts: Array<{
+        scene: string;
+        midjourney: string;
+    }>;
+    videoPrompts: Array<{
+        action: string;
+        runway: string;
+    }>;
+}
+
+export async function generateViralLoopAssets(
+    title: string,
+    description: string,
+    blueprintContext: string
+): Promise<LoopAssets> {
+    if (!apiKey) throw new Error("Gemini API Key is missing");
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+    const prompt = `
+    You are a CORTEX Asset Engineer.
+    Project: "${title}"
+    Context: "${description}"
+    Blueprint Summary: "${blueprintContext.slice(0, 500)}..."
+
+    TASK: Generate a "Production Asset Manifest" for a 30s Viral Loop Short.
+    Quality Level: S-Tier (Midjourney v6, Runway Gen-3, Suno v3).
+
+    REQUIREMENTS:
+    1. **Music (3 Options)**:
+       - 1x High Energy / Phonk / Drift
+       - 1x Atmospheric / Tension / Ambient
+       - 1x Viral Trend Style (e.g. "Sigma", "CoreCore")
+       - Format for Suno/Udio (Style description, BPM).
+
+    2. **Images (10 Keyframes)**:
+       - High aesthetic value. 9:16 aspect ratio (--ar 9:16).
+       - Style: Cinematic, Photorealistic, 8k.
+       - Provide the raw Midjourney prompt.
+
+    3. **Video (10 Motion Clips)**:
+       - 3-5s loops.
+       - Describe motion clearly for Runway Gen-3/Pika.
+       - e.g. "Slow zoom into neural network," "Cyberpunk city flyover".
+
+    RETURN JSON ONLY:
+    {
+      "musicPrompts": [{ "style": "...", "prompt": "...", "bpm": 120 }],
+      "imagePrompts": [{ "scene": "...", "midjourney": "/imagine prompt: ..." }],
+      "videoPrompts": [{ "action": "...", "runway": "..." }]
+    }
+    `;
+
+    try {
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text().replace(/```json/g, "").replace(/```/g, "").trim();
+        return JSON.parse(text) as LoopAssets;
+    } catch (error) {
+        console.error("Asset Generation Error", error);
+        return {
+            musicPrompts: [],
+            imagePrompts: [],
+            videoPrompts: []
+        };
+    }
+}
+
+export async function generateSpeechWithGemini(
+    text: string,
+    voiceName: string = "Algieba", // Default per user request
+    speakingRate: number = 1.0,
+    temperature: number = 1.55       // Default per user request
+): Promise<string | null> {
+    if (!apiKey) throw new Error("Gemini API Key is missing");
+
+    // NOTE: This implementation targets the Standard Google TTS endpoint.
+    // If "Algieba" is a specific Gemini Audio model voice, this might need
+    // to target the `generativelanguage.googleapis.com` endpoint with audio modality.
+    // For now, we prepare the payload as requested.
+
+    const endpoint = `https://texttospeech.googleapis.com/v1beta1/text:synthesize?key=${apiKey}`;
+
+    const languageCode = voiceName.includes("-") ? voiceName.split("-").slice(0, 2).join("-") : "en-US";
+
+    const body = {
+        input: { text },
+        voice: {
+            languageCode,
+            name: voiceName
+        },
+        audioConfig: {
+            audioEncoding: "MP3",
+            speakingRate: speakingRate
+            // Standard TTS does not support 'temperature' or 'style_instructions' directly in this payload.
+            // If the user is using the experimental Audio Generation API, the endpoint would be different.
+            // We are keeping this parameter in the function signature for future connection.
+        }
+    };
+
+    try {
+        const response = await fetch(endpoint, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body)
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            console.error("Google TTS API Error:", error);
+
+            // Fallback: If Algieba fails (likely), try standard Journey voice
+            if (voiceName === "Algieba") {
+                console.warn("Retrying with fallback voice 'en-US-Journey-F'...");
+                return generateSpeechWithGemini(text, "en-US-Journey-F", speakingRate, temperature);
+            }
+            return null;
+        }
+
+        const data = await response.json();
+        return data.audioContent; // Base64 string
+    } catch (error) {
+        console.error("Voice Generation Error:", error);
+        return null;
     }
 }

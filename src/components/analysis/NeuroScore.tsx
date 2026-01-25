@@ -6,6 +6,7 @@ interface PEOScore {
     dopamine: { score: number; logic: string };
     cortisol: { score: number; logic: string };
     oxytocin: { score: number; logic: string };
+    depth?: { score: number; logic: string }; // Optional for legacy support
 }
 
 interface NeuroScoreProps {
@@ -71,6 +72,25 @@ export function NeuroScore({ score }: NeuroScoreProps) {
                     </div>
                     <p className="text-xs text-muted-foreground italic">{score.oxytocin.logic}</p>
                 </div>
+
+                {/* Depth (Metaphysics) */}
+                {score.depth && (
+                    <div className="space-y-2">
+                        <div className="flex justify-between items-center text-sm">
+                            <span className="font-bold text-purple-500 flex items-center gap-2">
+                                <Info className="w-4 h-4" /> Depth (Metaphysics)
+                            </span>
+                            <span className="font-mono text-purple-500">{score.depth.score}/100</span>
+                        </div>
+                        <div className="h-2 w-full bg-muted/30 rounded-full overflow-hidden">
+                            <div
+                                className="h-full bg-purple-500 rounded-full transition-all duration-1000 ease-out"
+                                style={{ width: `${score.depth.score}%` }}
+                            />
+                        </div>
+                        <p className="text-xs text-muted-foreground italic">{score.depth.logic}</p>
+                    </div>
+                )}
             </div>
         </div>
     );

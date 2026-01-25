@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Bell, Search, RotateCcw, RotateCw } from "lucide-react";
 import { useActionHistory } from "@/components/context/ActionHistoryContext";
 
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
+
 export function Header() {
     const { undo, redo, canUndo, canRedo, undoStack, redoStack } = useActionHistory();
     const [isOpen, setIsOpen] = useState(false);
@@ -17,7 +19,6 @@ export function Header() {
                     <span className="text-primary mr-2">●</span> SYSTEM ONLINE
                 </div>
 
-                {/* Undo / Redo Controls */}
                 {/* Undo / Redo Controls */}
                 <div className="flex items-center gap-2 bg-card border border-primary/20 p-1.5 rounded-full shadow-sm ml-4">
                     <button
@@ -43,6 +44,8 @@ export function Header() {
             </div>
 
             <div className="flex items-center gap-4">
+                <ThemeToggle />
+
                 <div className="relative">
                     <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                     <input

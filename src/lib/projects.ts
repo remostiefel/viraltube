@@ -1,5 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
+import { GeneratedScript } from "@/lib/openai";
 
 const PROJECTS_FILE = path.join(process.cwd(), "src", "data", "projects.json");
 
@@ -13,6 +14,10 @@ export interface Project {
     // Links to other artifacts
     scriptId?: string;
     viralAnalysisId?: string;
+
+    // Direct Content Storage (The "Single Source of Truth")
+    scriptContent?: string;
+    scriptData?: GeneratedScript;
 }
 
 // Ensure file exists

@@ -7,44 +7,159 @@
   --neuro-light-grey: #C5C6C7;
   --neuro-teal-muted: #45A29E;
   --neuro-teal-bright: #66FCF1;
-  
+
   /* System Parts Colors */
-  --neuro-brain: #FCD34D;    /* Amber/Yellow - Strategy */
-  --neuro-input: #7DD3FC;    /* Sky Blue - Discovery */
-  --neuro-factory: #86EFAC;  /* Green - Creation */
-  --neuro-output: #FCA5A5;   /* Red/Orange - Deployment */
-  --neuro-loop: #D8B4FE;     /* Purple/Violet - Insights */
-  --neuro-dashboard: #F3F4F6; /* White/Gray - Mission Control */
-  --neuro-support: #E5E7EB;   /* White/Gray - Help */
-  
+  --neuro-brain: #FCD34D;
+  /* Amber/Yellow - Strategy */
+  --neuro-input: #7DD3FC;
+  /* Sky Blue - Discovery */
+  --neuro-factory: #86EFAC;
+  /* Green - Creation */
+  --neuro-output: #FCA5A5;
+  /* Red/Orange - Deployment */
+  --neuro-loop: #D8B4FE;
+  /* Purple/Violet - Insights */
+  --neuro-dashboard: #F3F4F6;
+  /* White/Gray - Mission Control */
+  --neuro-support: #E5E7EB;
+  /* White/Gray - Help */
+
   /* Fallback / Semantics */
   --background: var(--neuro-anthrazit);
   --foreground: var(--neuro-light-grey);
-  
+
   --card: var(--neuro-dark-grey);
   --card-foreground: var(--neuro-light-grey);
-  
+
   --popover: var(--neuro-dark-grey);
   --popover-foreground: var(--neuro-light-grey);
-  
+
   --primary: var(--neuro-teal-bright);
   --primary-foreground: var(--neuro-anthrazit);
-  
+
   --secondary: var(--neuro-teal-muted);
   --secondary-foreground: var(--neuro-anthrazit);
-  
+
   --muted: #111216;
   --muted-foreground: #6b7280;
-  
+
   --accent: var(--neuro-dark-grey);
   --accent-foreground: var(--neuro-teal-bright);
-  
+
   --destructive: #7f1d1d;
   --destructive-foreground: #fef2f2;
+
+  /* Gold Theme Colors */
+  --neuro-gold-muted: #B78A02;
+  --neuro-gold-bright: #FFD700;
+
+  /* Amber Theme Colors */
+  --neuro-amber-muted: #B45309;
+  --neuro-amber-bright: #F59E0B;
 
   --border: #2d3748;
   --input: #1F2833;
   --ring: var(--neuro-teal-bright);
+}
+
+.theme-gold {
+  --primary: var(--neuro-gold-bright);
+  --primary-foreground: #000000;
+
+  --secondary: var(--neuro-gold-muted);
+  --secondary-foreground: #000000;
+
+  --ring: var(--neuro-gold-bright);
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--neuro-gold-bright);
+  }
+
+  /* AGGRESSIVE OVERRIDES FOR A/B TEST (Force Teal/Cyan -> Gold) */
+  .text-teal-400,
+  .text-teal-500,
+  .text-cyan-400,
+  .text-cyan-500,
+  .text-primary {
+    color: var(--neuro-gold-bright) !important;
+  }
+
+  .text-teal-100 {
+    color: #FEF3C7 !important;
+    /* Amber-100 */
+  }
+
+  .bg-teal-400,
+  .bg-teal-500,
+  .bg-cyan-500 {
+    background-color: var(--neuro-gold-bright) !important;
+  }
+
+  .bg-teal-900\/20 {
+    background-color: rgba(183, 138, 2, 0.2) !important;
+    /* Gold Muted / 20 */
+  }
+
+  .border-teal-400,
+  .border-teal-500,
+  .border-cyan-500 {
+    border-color: var(--neuro-gold-muted) !important;
+  }
+
+  /* Handle specific glowing shadows if possible, otherwise they remain teal-ish but less visible */
+  .shadow-\[0_0_15px_-5px_rgba\(45\,212\,191\,0\.2\)\] {
+    box-shadow: 0 0 15px -5px rgba(255, 215, 0, 0.3) !important;
+  }
+}
+
+.theme-amber {
+  --primary: var(--neuro-amber-bright);
+  --primary-foreground: #000000;
+
+  --secondary: var(--neuro-amber-muted);
+  --secondary-foreground: #000000;
+
+  --ring: var(--neuro-amber-bright);
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--neuro-amber-bright);
+  }
+
+  /* AGGRESSIVE OVERRIDES FOR A/B TEST (Force Teal/Cyan -> Amber) */
+  .text-teal-400,
+  .text-teal-500,
+  .text-cyan-400,
+  .text-cyan-500,
+  .text-primary {
+    color: var(--neuro-amber-bright) !important;
+  }
+
+  .text-teal-100 {
+    color: #FEF3C7 !important;
+    /* Amber-100 */
+  }
+
+  .bg-teal-400,
+  .bg-teal-500,
+  .bg-cyan-500 {
+    background-color: var(--neuro-amber-bright) !important;
+  }
+
+  .bg-teal-900\/20 {
+    background-color: rgba(180, 83, 9, 0.2) !important;
+    /* Amber Muted / 20 */
+  }
+
+  .border-teal-400,
+  .border-teal-500,
+  .border-cyan-500 {
+    border-color: var(--neuro-amber-muted) !important;
+  }
+
+  /* Handle specific glowing shadows if possible, otherwise they remain teal-ish but less visible */
+  .shadow-\[0_0_15px_-5px_rgba\(45\,212\,191\,0\.2\)\] {
+    box-shadow: 0 0 15px -5px rgba(245, 158, 11, 0.3) !important;
+  }
 }
 
 @theme inline {
@@ -67,7 +182,7 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  
+
   --radius-sm: 0.125rem;
   --radius-md: 0.375rem;
   --radius-lg: 0.5rem;
@@ -84,13 +199,16 @@ body {
 ::-webkit-scrollbar {
   width: 8px;
 }
+
 ::-webkit-scrollbar-track {
   background: var(--neuro-anthrazit);
 }
+
 ::-webkit-scrollbar-thumb {
   background: var(--neuro-teal-muted);
   border-radius: 4px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: var(--neuro-teal-bright);
 }

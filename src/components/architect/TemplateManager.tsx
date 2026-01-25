@@ -17,6 +17,8 @@ interface TemplateManagerProps {
 }
 
 export function TemplateManager({ isOpen, onClose, templates, onLoad, onRefresh }: TemplateManagerProps) {
+    const [activeTab, setActiveTab] = useState<"drafts" | "blueprints" | "prompts">("drafts");
+
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editName, setEditName] = useState("");
     const [status, setStatus] = useState<"idle" | "active">("idle");
@@ -43,110 +45,109 @@ export function TemplateManager({ isOpen, onClose, templates, onLoad, onRefresh 
         onRefresh();
     };
 
-    // Filter blueprints vs drafts vs prompts
-    const blueprints = templates.filter(t => t.type === "viral-wisdom" || t.name.includes("🧬"));
-    const prompts = templates.filter(t => t.type === "prompt");
-    const drafts = templates.filter(t => !blueprints.includes(t) && !prompts.includes(t));
+    // SORTING: Newest first & Filter Invalid
+    const sortedTemplates = templates
+        .filter(t => t && t.name && t.type) // Defensive check
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    // Filter logic
+    const blueprints = sortedTemplates.filter(t => t.type === "viral-wisdom" || t.name.includes("🧬"));
+    const prompts = sortedTemplates.filter(t => ["prompt", "visual", "audio"].includes(t.type));
+    // Drafts are scripts that are NOT blueprints
+    const drafts = sortedTemplates.filter(t => t.type === "script" && !t.name.includes("🧬") && !blueprints.includes(t));
+
+    const getActiveList = () => {
+        switch (activeTab) {
+            case "blueprints": return blueprints;
+            case "prompts": return prompts;
+            default: return drafts;
+        }
+    };
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col p-0 overflow-hidden bg-background/95 backdrop-blur-xl border-white/10">
-                <DialogHeader className="p-6 border-b border-border/40 bg-muted/20">
-                    <DialogTitle className="text-2xl font-bold flex items-center gap-2">
-                        <FolderOpen className="w-6 h-6 text-primary" /> Template Library
-                    </DialogTitle>
-                    <DialogDescription>
-                        Manage your Saved Drafts and Strategy Blueprints.
+            <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col p-0 overflow-hidden bg-background/95 backdrop-blur-xl border-white/10">
+                <DialogHeader className="p-6 pb-0 border-b border-border/40 bg-muted/20">
+                    <div className="flex items-center justify-between mb-4">
+                        <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+                            <FolderOpen className="w-6 h-6 text-primary" /> Template Library
+                        </DialogTitle>
+                    </div>
+
+                    {/* TABS HEADER */}
+                    <div className="flex items-center gap-1 bg-background/50 p-1 rounded-lg border border-border/50 w-fit">
+                        <button
+                            onClick={() => setActiveTab("drafts")}
+                            className={cn(
+                                "px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2",
+                                activeTab === "drafts"
+                                    ? "bg-white text-black shadow-sm"
+                                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                            )}
+                        >
+                            <FileText className="w-4 h-4" /> Script Drafts
+                            <span className="bg-black/10 text-xs px-1.5 rounded-full">{drafts.length}</span>
+                        </button>
+                        <button
+                            onClick={() => setActiveTab("blueprints")}
+                            className={cn(
+                                "px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2",
+                                activeTab === "blueprints"
+                                    ? "bg-purple-500 text-white shadow-sm"
+                                    : "text-muted-foreground hover:text-purple-400 hover:bg-purple-500/10"
+                            )}
+                        >
+                            <Sparkles className="w-4 h-4" /> Strategy Blueprints
+                            <span className="bg-purple-500/20 text-xs px-1.5 rounded-full">{blueprints.length}</span>
+                        </button>
+                        <button
+                            onClick={() => setActiveTab("prompts")}
+                            className={cn(
+                                "px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2",
+                                activeTab === "prompts"
+                                    ? "bg-amber-500 text-white shadow-sm"
+                                    : "text-muted-foreground hover:text-amber-500 hover:bg-amber-500/10"
+                            )}
+                        >
+                            <Clapperboard className="w-4 h-4" /> Saved Prompts
+                            <span className="bg-amber-500/20 text-xs px-1.5 rounded-full">{prompts.length}</span>
+                        </button>
+                    </div>
+
+                    <DialogDescription className="mt-2 text-xs">
+                        {activeTab === "drafts" && "Manage your written scripts and works in progress."}
+                        {activeTab === "blueprints" && "Re-usable strategic frameworks and viral patterns."}
+                        {activeTab === "prompts" && "Exportable assets: Video Prompts, Audio Direction, and Visual Concepts."}
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="flex-1 overflow-y-auto p-6 space-y-8">
-                    {/* DRAFTS SECTION */}
-                    <section>
-                        <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-4 flex items-center gap-2">
-                            <FileText className="w-4 h-4" /> Script Drafts
-                        </h3>
-                        {drafts.length === 0 ? (
-                            <p className="text-sm text-muted-foreground italic">No drafts saved yet. Save from the Script Architect.</p>
-                        ) : (
-                            <div className="grid grid-cols-1 gap-2">
-                                {drafts.map(t => (
-                                    <TemplateRow
-                                        key={t.id}
-                                        template={t}
-                                        editingId={editingId}
-                                        editName={editName}
-                                        onEditStart={handleEditStart}
-                                        onEditChange={setEditName}
-                                        onEditSave={handleEditSave}
-                                        onEditCancel={() => setEditingId(null)}
-                                        onDelete={handleDelete}
-                                        onLoad={onLoad}
-                                        isLoading={status === "active"}
-                                    />
-                                ))}
+                <div className="flex-1 overflow-y-auto p-6 bg-muted/10">
+                    <div className="space-y-2">
+                        {getActiveList().length === 0 ? (
+                            <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground opacity-50 border-2 border-dashed border-border rounded-xl">
+                                <FolderOpen className="w-12 h-12 mb-4 opacity-20" />
+                                <p>No {activeTab} found.</p>
                             </div>
-                        )}
-                    </section>
-
-                    {/* BLUEPRINTS SECTION */}
-                    <section>
-                        <h3 className="text-sm font-bold text-purple-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                            <Sparkles className="w-4 h-4" /> Strategy Blueprints
-                        </h3>
-                        {blueprints.length === 0 ? (
-                            <p className="text-sm text-muted-foreground italic">No blueprints saved yet. Create one in the Strategy Forge.</p>
                         ) : (
-                            <div className="grid grid-cols-1 gap-2">
-                                {blueprints.map(t => (
-                                    <TemplateRow
-                                        key={t.id}
-                                        template={t}
-                                        editingId={editingId}
-                                        editName={editName}
-                                        onEditStart={handleEditStart}
-                                        onEditChange={setEditName}
-                                        onEditSave={handleEditSave}
-                                        onEditCancel={() => setEditingId(null)}
-                                        onDelete={handleDelete}
-                                        onLoad={onLoad}
-                                        isLoading={status === "active"}
-                                        isBlueprint
-                                    />
-                                ))}
-                            </div>
+                            getActiveList().map(t => (
+                                <TemplateRow
+                                    key={t.id}
+                                    template={t}
+                                    editingId={editingId}
+                                    editName={editName}
+                                    onEditStart={handleEditStart}
+                                    onEditChange={setEditName}
+                                    onEditSave={handleEditSave}
+                                    onEditCancel={() => setEditingId(null)}
+                                    onDelete={handleDelete}
+                                    onLoad={onLoad}
+                                    isLoading={status === "active"}
+                                    isBlueprint={activeTab === "blueprints"}
+                                    isPrompt={activeTab === "prompts"} // Use generic styling or specific?
+                                />
+                            ))
                         )}
-                    </section>
-
-
-                    {/* PROMPTS SECTION */}
-                    <section>
-                        <h3 className="text-sm font-bold text-amber-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-                            <Clapperboard className="w-4 h-4" /> Saved Video Prompts
-                        </h3>
-                        {prompts.length === 0 ? (
-                            <p className="text-sm text-muted-foreground italic">No prompts saved yet. Generate and save them in Director Mode.</p>
-                        ) : (
-                            <div className="grid grid-cols-1 gap-2">
-                                {prompts.map(t => (
-                                    <TemplateRow
-                                        key={t.id}
-                                        template={t}
-                                        editingId={editingId}
-                                        editName={editName}
-                                        onEditStart={handleEditStart}
-                                        onEditChange={setEditName}
-                                        onEditSave={handleEditSave}
-                                        onEditCancel={() => setEditingId(null)}
-                                        onDelete={handleDelete}
-                                        onLoad={onLoad}
-                                        isLoading={status === "active"}
-                                        isPrompt
-                                    />
-                                ))}
-                            </div>
-                        )}
-                    </section>
+                    </div>
                 </div>
             </DialogContent>
         </Dialog >

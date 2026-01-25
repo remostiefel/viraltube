@@ -57,7 +57,10 @@ export async function generateScriptWithOpenAI(
     topic: string,
     context: string = "Neuroscience & Biohacking",
     language: "DE" | "EN" = "DE",
-    strategyContext?: string
+    strategyContext?: string,
+    perfectLoop?: boolean,
+    duration?: "30s" | "60s" | "long",
+    metaNarrative?: boolean
 ): Promise<GeneratedScript | null> {
     if (!openai) {
         console.error("OpenAI API Key missing");
@@ -71,9 +74,10 @@ export async function generateScriptWithOpenAI(
     const constitution = await getViralConstitution();
 
     let systemPrompt = `
-    You are the "Neuro-Code Architect", an elite scriptwriter for a YouTube channel focusing on Neuroscience, Biohacking, and High Performance (Andrew Huberman style).
+    You are the "Neuro-Code Architect", an elite scriptwriter for a high-performance YouTube channel.
     
     Your goal: Create a highly engaging, scientifically grounded video script structure.
+    Context/Niche: ${context || "General High-Performance"}
     ${langInstruction}
     
     Tone:
@@ -106,6 +110,64 @@ export async function generateScriptWithOpenAI(
     This strategy takes precedence over general viral patterns:
     ${strategyContext}
     `;
+    }
+
+    // INJECT PERFECT LOOP INSTRUCTION
+    if (perfectLoop) {
+        systemPrompt += `
+        
+        [INFINITE RECURSION MODE ACTIVE]
+        CRITICAL STRUCTURAL REQUIREMENT:
+        You are creating a "Looping Short" (Infinite Loop).
+        The LAST sentence of the script MUST grammatically and logically lead seamlessly into the FIRST sentence of the script.
+        
+        Mandatory Ending Phrase: ${language === "DE" ? '"...und deshalb:"' : '"...and that is why:"'}
+        
+        Example Structure:
+        Start: "Your focus is destroyed by this one habit..."
+        ... [Content] ...
+        End: "This overstimulation kills your attention span, ...and that is why:"
+        (Loop back to Start)
+        `;
+    }
+
+    // INJECT DURATION CONSTRAINTS
+    if (duration === "30s") {
+        systemPrompt += `
+        
+        [FORMAT: 30-SECOND SHORT]
+        STRICT CONSTRAINT: Maximum 70-80 Words Total.
+        Rule: One single core idea. No fluff.
+        Structure: 
+        1. Visual Hook (0-3s): Immediate visual interrupt.
+        2. The Problem (3-15s): Relatable pain point.
+        3. The Solution (15-25s): The "Secret" / Turning point.
+        4. Loop/CTA (25-30s): Connect back to start.
+        `;
+    } else if (duration === "60s") {
+        systemPrompt += `
+        
+        [FORMAT: 60-SECOND SHORT]
+        STRICT CONSTRAINT: Maximum 140-150 Words.
+        Structure: Hook -> Agitation -> Solution -> Evidence -> Call to Action.
+        `;
+    }
+
+    // INJECT META-NARRATIVE ENGINE
+    if (metaNarrative) {
+        systemPrompt += `
+        
+        [META-NARRATIVE ENGINE ACTIVE]
+        Requirement: The Process is the Product.
+        You must explicitly mention the "Source of Wisdom" in the script.
+        
+        Examples:
+        - "I analyzed 50 viral videos and found this pattern..."
+        - "My data shows that 90% of you skip this part..."
+        - "According to the Neuro-Code analysis of [Topic]..."
+        
+        Effect: Use this to build authority. You are not just guessing; you have DATA.
+        `;
     }
 
     try {
@@ -348,10 +410,11 @@ export async function analyzeViralVideoContent(
     TASK: Perform a deep forensic analysis of the provided YouTube transcript to extract its "Viral DNA".
     You are looking for specific Biological Triggers and Structural Patterns that allowed this video to succeed.
 
-    1. **NEURO-SCORING (PEO)**: Analyze the psychological impact throughout the video.
+    1. **NEURO-SCORING (PEO + Depth)**: Analyze the psychological impact throughout the video.
        - **Dopamine**: Where is the Anticipation/Reward? (Novelty, "Secret" revealed).
        - **Cortisol**: Where is the Tension/Fear/Urgency? (The "Hook", the Stakes).
        - **Oxytocin**: Where is the Connection/Vulnerability? (Story, "Us vs Them").
+       - **Depth (Metaphysics)**: Does it touch on a "Universal Law" or "Timeless Truth"? (Resonance, Wisdom).
        Returns a score (0-100) and the specific logic/moment found.
 
     2. **STRUCTURAL ANATOMY**: Break the video into 3-5 structural phases (e.g., The Hook, The Setup, The Turn, The Payoff).
@@ -373,7 +436,8 @@ export async function analyzeViralVideoContent(
       "neuroScore": {
           "dopamine": { "score": 85, "logic": "High novelty in the 'Secret Protocol' reveal." },
           "cortisol": { "score": 70, "logic": "Strong hook about 'Silent Killers' created urgency." },
-          "oxytocin": { "score": 40, "logic": "Scientific tone, low personal connection." }
+          "oxytocin": { "score": 40, "logic": "Scientific tone, low personal connection." },
+          "depth": { "score": 90, "logic": "Taps into the universal fear of wasted potential." }
       },
       "structureAnalysis": [
           { "phase": "The Hook", "description": "counter-intuitive statement...", "visualTrigger": "Fast-paced montage" },
@@ -434,6 +498,7 @@ export interface PEOScore {
     dopamine: { score: number; logic: string };
     cortisol: { score: number; logic: string };
     oxytocin: { score: number; logic: string };
+    depth: { score: number; logic: string }; // Metaphysical Resonance
 }
 
 export async function analyzePEONeurotransmitters(content: string): Promise<PEOScore | null> {
@@ -486,7 +551,7 @@ export interface VideoPrompt {
     prompt: string;
 }
 
-export async function generateVideoPrompts(scriptContent: string): Promise<VideoPrompt[]> {
+export async function generateVideoPrompts(scriptContent: string, targetCount: number = 8): Promise<VideoPrompt[]> {
     if (!openai) {
         console.error("OpenAI API Key missing");
         return [];
@@ -501,7 +566,7 @@ export async function generateVideoPrompts(scriptContent: string): Promise<Video
     Aesthetic: High-contrast, kinetic energy, macro-biological, sci-fi medical, "Huberman Lab meets Cyberpunk".
     
     Your Task:
-    Break down the provided VoiceOver Script into 8 to 10 distinct, high-impact 5-second video loops. 
+    Break down the provided VoiceOver Script into exactly ${targetCount} distinct, high-impact video loops (approx 3s each). 
     For each segment, generate a precise Image Generation Prompt.
     
     ${constitution}

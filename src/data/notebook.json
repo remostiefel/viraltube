@@ -1,0 +1,332 @@
+[
+  {
+    "id": "6d44900d-aa13-424a-a057-63f3e101b9df",
+    "type": "step",
+    "title": "VoiceOver Script als plain text ",
+    "description": "DOCX download optimieren",
+    "status": "Backlog",
+    "createdAt": "2026-01-25T12:44:11.533Z",
+    "updatedAt": "2026-01-25T12:44:11.533Z",
+    "tags": [],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "57c7c72e-b506-46f5-8a6b-66f6c11af175",
+    "type": "topic",
+    "title": "Short-12",
+    "description": "loop Prozess für 30sec Short (Dienstag, 27.Jan)",
+    "status": "Idea",
+    "createdAt": "2026-01-25T12:19:06.779Z",
+    "updatedAt": "2026-01-25T12:19:06.779Z",
+    "tags": [
+      "Cortex"
+    ],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "cf057900-5b55-4c5d-bbba-4d85ad7ced45",
+    "type": "step",
+    "title": "Tools für Videoproduktion finden",
+    "description": "Maus MX4 optimieren, CapCut 7 Tage testen",
+    "status": "Backlog",
+    "createdAt": "2026-01-25T11:07:57.830Z",
+    "updatedAt": "2026-01-25T11:07:57.830Z",
+    "tags": [],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "fe395cb9-f146-43a1-af16-ce629c2b7fde",
+    "type": "step",
+    "title": "HUB = Übersicht",
+    "description": "erstellte Videos, gestreifte Themen, neue Ideen\nWissen übersichtlich aufbereiten, vernetzen, darstellen\nProdukt PDF?, App?",
+    "status": "Backlog",
+    "createdAt": "2026-01-25T11:07:12.866Z",
+    "updatedAt": "2026-01-25T11:07:12.866Z",
+    "tags": [],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "5deaa636-509f-43d4-847c-76012a52ff42",
+    "type": "step",
+    "title": "STATS der Videos",
+    "description": "Übersicht in App, Chat aus NotebookLM zur Optimierung",
+    "status": "Backlog",
+    "createdAt": "2026-01-25T11:05:51.661Z",
+    "updatedAt": "2026-01-25T11:05:51.661Z",
+    "tags": [],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "ba74e6b9-518f-46fc-8cbb-a6314db681eb",
+    "type": "step",
+    "title": "Screenshots vidIQ",
+    "description": "für Erweiterungen",
+    "status": "Backlog",
+    "createdAt": "2026-01-25T11:05:01.901Z",
+    "updatedAt": "2026-01-25T11:05:01.901Z",
+    "tags": [
+      "Cortex"
+    ],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "f00bc693-2247-4211-b193-720dc650c87b",
+    "type": "step",
+    "title": "Konkurrenz studieren",
+    "description": "outliers finden (Themen und Formate)",
+    "status": "Backlog",
+    "createdAt": "2026-01-25T11:04:04.774Z",
+    "updatedAt": "2026-01-25T11:04:04.775Z",
+    "tags": [],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "ccacce96-6495-4262-8b77-46e1cec8bafd",
+    "type": "step",
+    "title": "BRAIN BUILD",
+    "description": "",
+    "status": "Backlog",
+    "createdAt": "2026-01-25T11:02:39.036Z",
+    "updatedAt": "2026-01-25T11:02:39.036Z",
+    "tags": [
+      "Cortex"
+    ],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "76d380e0-ce65-4801-ab08-96a79549d87f",
+    "type": "step",
+    "title": "VIRT VISION",
+    "description": "mockup Daten, Screen captures für Shorts und longform",
+    "status": "Backlog",
+    "createdAt": "2026-01-25T11:02:22.570Z",
+    "updatedAt": "2026-01-25T11:02:22.570Z",
+    "tags": [
+      "Cortex",
+      "longform",
+      "shorts"
+    ],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "b4450b5a-3403-40f2-b7a9-d5d662a9a0e9",
+    "type": "topic",
+    "title": "Wurm kontrolliert Insektenhirn",
+    "description": "Gruselfaktor",
+    "status": "Idea",
+    "createdAt": "2026-01-25T10:25:22.356Z",
+    "updatedAt": "2026-01-25T10:25:35.922Z",
+    "tags": [
+      "Ekel"
+    ],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "3d47202c-de57-4d80-9f23-2fdfdf015ce5",
+    "type": "topic",
+    "title": "Zucker: Hirnscans",
+    "description": "Gehirn auf Zucker vs normales Hirn",
+    "status": "Idea",
+    "createdAt": "2026-01-25T10:21:36.302Z",
+    "updatedAt": "2026-01-25T10:21:36.302Z",
+    "tags": [
+      "Brain"
+    ],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "c9afb0ef-1c9d-49df-9899-3d3a30303b6e",
+    "type": "topic",
+    "title": "Mutterschaft verändert Gehirn für immer",
+    "description": "",
+    "status": "Idea",
+    "createdAt": "2026-01-25T10:20:33.396Z",
+    "updatedAt": "2026-01-25T10:20:33.396Z",
+    "tags": [
+      "research needed"
+    ],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "a4cc4e2e-9817-4a7d-8e47-a9dd99a0b9d0",
+    "type": "topic",
+    "title": "Stress killt Gedächtnis",
+    "description": "1-Minuten-Trick",
+    "status": "Idea",
+    "createdAt": "2026-01-25T10:20:03.833Z",
+    "updatedAt": "2026-01-25T10:20:03.833Z",
+    "tags": [
+      "research needed"
+    ],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "bdf8fe50-94e9-49a0-b3c9-95036ebce11d",
+    "type": "topic",
+    "title": "Schlaf wie ein Baby",
+    "description": "",
+    "status": "Idea",
+    "createdAt": "2026-01-25T10:19:04.630Z",
+    "updatedAt": "2026-01-25T10:19:24.698Z",
+    "tags": [
+      "Huberman"
+    ],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "d7449f7a-cf38-47ee-bef4-2fa9f5ebfbb4",
+    "type": "topic",
+    "title": "Warum du dich NICHT konzentrieren kannst",
+    "description": "",
+    "status": "Idea",
+    "createdAt": "2026-01-25T10:18:40.106Z",
+    "updatedAt": "2026-01-25T10:18:40.106Z",
+    "tags": [
+      "research needed"
+    ],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "47e10285-88f4-4134-9b76-ee459a54bed0",
+    "type": "topic",
+    "title": "gesundes Frühstück",
+    "description": "",
+    "status": "Idea",
+    "createdAt": "2026-01-25T10:18:01.579Z",
+    "updatedAt": "2026-01-25T10:18:01.580Z",
+    "tags": [],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "4f4a60a4-6376-4926-b8ef-d9b8d24eb17a",
+    "type": "topic",
+    "title": "Morgengewohnheiten",
+    "description": "Gehirn zerstören",
+    "status": "Idea",
+    "createdAt": "2026-01-25T10:17:44.368Z",
+    "updatedAt": "2026-01-25T10:17:44.368Z",
+    "tags": [
+      "research needed"
+    ],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "964f205f-29d3-43c5-91ed-50cbb006d439",
+    "type": "topic",
+    "title": "longevity",
+    "description": "100 too young to die",
+    "status": "Idea",
+    "createdAt": "2026-01-25T10:05:52.908Z",
+    "updatedAt": "2026-01-25T10:05:52.908Z",
+    "tags": [
+      "research needed"
+    ],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "2b8301c1-cae8-4202-8056-359034dee61e",
+    "type": "topic",
+    "title": "Peptide",
+    "description": "",
+    "status": "Idea",
+    "createdAt": "2026-01-25T10:03:56.353Z",
+    "updatedAt": "2026-01-25T10:03:56.353Z",
+    "tags": [],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "e91489a7-78e6-409f-913e-95c2ff9aba80",
+    "type": "topic",
+    "title": "Kaffee supplements",
+    "description": "\"Tu das in deinen Kaffee!\", Nootropics, MCT-Öl",
+    "status": "Idea",
+    "createdAt": "2026-01-25T10:03:22.871Z",
+    "updatedAt": "2026-01-25T10:03:22.871Z",
+    "tags": [],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "fb88f1aa-9791-48e5-b059-dc7658e3d13b",
+    "type": "topic",
+    "title": "Schlaf als Reinigung",
+    "description": "chemische Reinigung, Abwassersystem, Müll entsorgen, Brain fog, guter Schlaf sehr wichtig (urspr. Video 8 to 12 ff.)",
+    "status": "Idea",
+    "createdAt": "2026-01-25T10:02:35.268Z",
+    "updatedAt": "2026-01-25T10:02:35.268Z",
+    "tags": [],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "2b07ece6-1d0b-438f-ba13-d868e52d1519",
+    "type": "topic",
+    "title": "Frustrationen",
+    "description": "Acetylcholin, Lernen, deep work (urspr. Video 7 to 12 ff.)",
+    "status": "Idea",
+    "createdAt": "2026-01-25T10:01:38.319Z",
+    "updatedAt": "2026-01-25T10:01:38.320Z",
+    "tags": [],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "33ef687b-52ba-4db2-8eb2-fc1c7cf75754",
+    "type": "step",
+    "title": "next Video Prozess dokumentieren",
+    "description": "next Video Prozess dokumentieren, präzisieren, building",
+    "status": "Backlog",
+    "createdAt": "2026-01-24T15:47:17.960Z",
+    "updatedAt": "2026-01-24T16:07:06.705Z",
+    "tags": [
+      "Cortex"
+    ],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "4f705b9d-4731-4b12-8483-bba3c39162eb",
+    "type": "topic",
+    "title": "Glücks-Hormon",
+    "description": "Glücks-Forschung, Huberman was?, Buch über Glück",
+    "status": "Idea",
+    "createdAt": "2026-01-24T15:46:29.246Z",
+    "updatedAt": "2026-01-24T15:46:29.246Z",
+    "tags": [],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "621302d8-baed-49e4-84bd-4d078bfff5ff",
+    "type": "topic",
+    "title": "Protein-Lüge",
+    "description": "",
+    "status": "Idea",
+    "createdAt": "2026-01-24T15:45:59.719Z",
+    "updatedAt": "2026-01-25T10:04:49.320Z",
+    "tags": [
+      "research needed"
+    ],
+    "priority": "medium",
+    "isArchived": false
+  }
+]

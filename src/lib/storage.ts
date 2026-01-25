@@ -144,3 +144,26 @@ export async function saveContentToVault(config: S3Config, content: string, fold
         return null;
     }
 }
+
+export async function saveBufferToVault(config: S3Config, buffer: Buffer, folder: string, filename: string, contentType: string = "image/png"): Promise<string | null> {
+    try {
+        const client = getS3Client(config);
+        const key = `${folder}/${filename}`;
+
+        await client.send(new PutObjectCommand({
+            Bucket: config.bucket,
+            Key: key,
+            Body: buffer,
+            ContentType: contentType
+        }));
+
+        if (config.endpoint) {
+            return `${config.endpoint}/${config.bucket}/${key}`;
+        } else {
+            return `https://${config.bucket}.s3.${config.region}.amazonaws.com/${key}`;
+        }
+    } catch (e) {
+        console.error("Save Buffer to Vault Error:", e);
+        return null; // Return null on failure
+    }
+}

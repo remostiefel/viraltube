@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Brain, Compass, Sliders, Zap, Save, CheckCircle } from "lucide-react";
+import { Brain, Compass, Sliders, Zap, Save, CheckCircle, Infinity, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { StrategyProfile } from "@/lib/gemini";
 
@@ -10,7 +10,8 @@ const DEFAULT_PROFILE: StrategyProfile = {
     language: "DE",
     tone: "balanced",
     emulationMode: "adapt",
-    contentDepth: 70
+    contentDepth: 70,
+    perfectLoop: false
 };
 
 export default function Cortex() {
@@ -34,9 +35,9 @@ export default function Cortex() {
         <div className="max-w-4xl mx-auto space-y-8">
             <div className="flex items-center justify-between">
                 <div>
-                    <h2 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
+                    <h2 className="text-3xl font-bold tracking-tight text-cyan-400 flex items-center gap-3">
                         <Brain className="w-8 h-8 text-primary" />
-                        Identity Core
+                        Identity Core <span className="text-xs align-top font-mono border border-red-500/30 bg-red-500/10 rounded px-1 ml-1 text-red-500">automated</span>
                     </h2>
                     <p className="text-muted-foreground mt-2">
                         Calibrate the strategic compass for your AI agents.
@@ -128,60 +129,125 @@ export default function Cortex() {
                             className="w-full bg-muted/30 border border-border/50 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary/50 outline-none"
                         />
                     </div>
-                </div>
 
-                {/* Tone Calibration */}
-                <div className="bg-card border border-border/40 rounded-xl p-6 space-y-6">
-                    <h3 className="font-bold flex items-center gap-2 text-lg">
-                        <Zap className="w-5 h-5 text-yellow-500" /> Tonal Calibration
-                    </h3>
-
-                    <div className="space-y-4">
-                        <label className="text-sm font-medium flex justify-between">
-                            <span>Hype vs. Substance</span>
-                            <span className="text-primary font-mono">{profile.tone.toUpperCase()}</span>
+                    <div className="space-y-3">
+                        <label className="text-sm font-medium flex items-center justify-between">
+                            <span>Infinite Scroll Architecture</span>
+                            {profile.perfectLoop && <span className="text-green-400 text-xs font-mono">ACTIVE</span>}
                         </label>
-                        <div className="flex bg-muted/30 p-1 rounded-lg">
-                            {(["hype", "balanced", "substance"] as const).map(tone => (
-                                <button
-                                    key={tone}
-                                    onClick={() => setProfile({ ...profile, tone: tone })}
-                                    className={cn(
-                                        "flex-1 py-2 rounded-md text-xs font-bold transition-all",
-                                        profile.tone === tone ? "bg-yellow-500 text-black shadow-sm" : "hover:bg-muted/50 text-muted-foreground"
-                                    )}
-                                >
-                                    {tone.charAt(0).toUpperCase() + tone.slice(1)}
-                                </button>
-                            ))}
-                        </div>
+                        <button
+                            onClick={() => setProfile({ ...profile, perfectLoop: !profile.perfectLoop })}
+                            className={cn(
+                                "w-full py-3 rounded-lg border transition-all flex items-center justify-center gap-2",
+                                profile.perfectLoop
+                                    ? "bg-green-500/20 border-green-500 text-green-400"
+                                    : "bg-muted/20 border-transparent text-muted-foreground hover:border-border"
+                            )}
+                        >
+                            <Infinity className="w-5 h-5" />
+                            {profile.perfectLoop ? "Perfect Short Loop (Enabled)" : "Standard Linear Structure"}
+                        </button>
                         <p className="text-xs text-muted-foreground">
-                            {profile.tone === "hype" && "MrBeast Style: Fast cuts, high emotion, broad appeal."}
-                            {profile.tone === "balanced" && "Hybrid: Engaging hook + solid value (Modern Wisdom style)."}
-                            {profile.tone === "substance" && "Huberman Style: Deep, slow, authoritative, data-heavy."}
+                            If enabled, the script will be designed so the last sentence seamlessly connects to the first ("...und deshalb").
                         </p>
                     </div>
 
-                    <div className="space-y-4">
-                        <label className="text-sm font-medium flex justify-between">
-                            <span>Content Depth</span>
-                            <span className="text-primary font-mono">{profile.contentDepth}%</span>
-                        </label>
-                        <input
-                            type="range"
-                            min="0"
-                            max="100"
-                            value={profile.contentDepth}
-                            onChange={(e) => setProfile({ ...profile, contentDepth: parseInt(e.target.value) })}
-                            className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
-                        />
-                        <div className="flex justify-between text-xs text-muted-foreground">
-                            <span>Snackable (Shorts)</span>
-                            <span>Deep Dive (Longform)</span>
+                    <div className="space-y-3">
+                        <label className="text-sm font-medium">Target Duration</label>
+                        <div className="flex bg-muted/30 p-1 rounded-lg">
+                            {(["30s", "60s", "long"] as const).map(d => (
+                                <button
+                                    key={d}
+                                    onClick={() => setProfile({ ...profile, durationConstraint: d })}
+                                    className={cn(
+                                        "flex-1 py-2 rounded-md text-xs font-bold transition-all",
+                                        profile.durationConstraint === d
+                                            ? "bg-red-500 text-white shadow-sm"
+                                            : "hover:bg-muted/50 text-muted-foreground"
+                                    )}
+                                >
+                                    {d === "long" ? "Longform" : `Shorts (${d})`}
+                                </button>
+                            ))}
                         </div>
+                    </div>
+
+                    <div className="space-y-3">
+                        <label className="text-sm font-medium flex items-center justify-between">
+                            <span>Meta-Narrative Engine</span>
+                            {profile.metaNarrative && <span className="text-purple-400 text-xs font-mono">ON</span>}
+                        </label>
+                        <button
+                            onClick={() => setProfile({ ...profile, metaNarrative: !profile.metaNarrative })}
+                            className={cn(
+                                "w-full py-3 rounded-lg border transition-all flex items-center justify-center gap-2",
+                                profile.metaNarrative
+                                    ? "bg-purple-500/20 border-purple-500 text-purple-400"
+                                    : "bg-muted/20 border-transparent text-muted-foreground hover:border-border"
+                            )}
+                        >
+                            <Search className="w-4 h-4" />
+                            {profile.metaNarrative ? "Origin Story Mode (Transparent)" : "Standard Delivery (Hidden)"}
+                        </button>
+                        <p className="text-xs text-muted-foreground">
+                            If enabled, the script will explicitly mention the analysis source ("I analyzed X and found...", "My data shows...").
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Tone Calibration */}
+            <div className="bg-card border border-border/40 rounded-xl p-6 space-y-6">
+                <h3 className="font-bold flex items-center gap-2 text-lg">
+                    <Zap className="w-5 h-5 text-yellow-500" /> Tonal Calibration
+                </h3>
+
+                <div className="space-y-4">
+                    <label className="text-sm font-medium flex justify-between">
+                        <span>Hype vs. Substance</span>
+                        <span className="text-primary font-mono">{profile.tone.toUpperCase()}</span>
+                    </label>
+                    <div className="flex bg-muted/30 p-1 rounded-lg">
+                        {(["hype", "balanced", "substance"] as const).map(tone => (
+                            <button
+                                key={tone}
+                                onClick={() => setProfile({ ...profile, tone: tone })}
+                                className={cn(
+                                    "flex-1 py-2 rounded-md text-xs font-bold transition-all",
+                                    profile.tone === tone ? "bg-yellow-500 text-black shadow-sm" : "hover:bg-muted/50 text-muted-foreground"
+                                )}
+                            >
+                                {tone.charAt(0).toUpperCase() + tone.slice(1)}
+                            </button>
+                        ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                        {profile.tone === "hype" && "MrBeast Style: Fast cuts, high emotion, broad appeal."}
+                        {profile.tone === "balanced" && "Hybrid: Engaging hook + solid value (Modern Wisdom style)."}
+                        {profile.tone === "substance" && "Huberman Style: Deep, slow, authoritative, data-heavy."}
+                    </p>
+                </div>
+
+                <div className="space-y-4">
+                    <label className="text-sm font-medium flex justify-between">
+                        <span>Content Depth</span>
+                        <span className="text-primary font-mono">{profile.contentDepth}%</span>
+                    </label>
+                    <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={profile.contentDepth}
+                        onChange={(e) => setProfile({ ...profile, contentDepth: parseInt(e.target.value) })}
+                        className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+                    />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>Snackable (Shorts)</span>
+                        <span>Deep Dive (Longform)</span>
                     </div>
                 </div>
             </div>
         </div>
+
     );
 }

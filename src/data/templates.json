@@ -1713,5 +1713,181 @@
     ],
     "id": "b2aa949a-b6ba-4874-9165-bcad33b039ae",
     "createdAt": "2026-01-22T05:54:29.725Z"
+  },
+  {
+    "type": "script",
+    "name": "Draft: Short-12",
+    "content": "## Visual Hook\n\nStellen Sie sich vor, Sie könnten Ihre Produktivität mit einem Klick verdoppeln.\n\n## The Problem\n\nEin schlafendes Gehirn kämpft ohne genug Dopamin. Resultat? Keine Motivation.\n\n## The Solution\n\nStudien zeigen: Aktivitäten wie kurze Workouts erhöhen Dopamin sofort.\n\n## Loop/CTA\n\nNutzen Sie dieses Wissen und starten Sie Ihren Tag produktiv!",
+    "id": "3c7ae2c6-b8d3-4f97-bb7a-ec491a521d20",
+    "createdAt": "2026-01-25T12:11:39.484Z"
+  },
+  {
+    "type": "prompt",
+    "name": "🎬 Prompts: Short-12",
+    "content": [
+      {
+        "sceneId": 1,
+        "voiceoverSegment": "Stellen Sie sich vor, Sie könnten Ihre Produktivität mit einem Klick verdoppeln.",
+        "focus": "The power of imagination",
+        "visualFocus": "Wide",
+        "prompt": "Vast open space with a futuristic cityscape, flowing data streams integrated into architecture, glowing interfaces, fast perspective-swaps, and dynamic camera angles, atmosphere of potential and opportunity, macro 8k, highly detailed texture, cinematic lighting, photorealistic, depth of field, 35mm lens."
+      },
+      {
+        "sceneId": 2,
+        "voiceoverSegment": "Ein schlafendes Gehirn kämpft ohne genug Dopamin.",
+        "focus": "The struggle of the brain",
+        "visualFocus": "Macro",
+        "prompt": "Extreme close-up of a dormant brain synapse, engulfed in shadows and static, few bioluminescent particles hinting at activity, lack of motion creating tension, deep blue and violet hues, meditative stillness, macro 8k, highly detailed texture, cinematic lighting, photorealistic, depth of field, 35mm lens."
+      },
+      {
+        "sceneId": 3,
+        "voiceoverSegment": "Resultat? Keine Motivation.",
+        "focus": "Lack of motivation",
+        "visualFocus": "POV",
+        "prompt": "Over-the-shoulder view of a person staring into a foggy, lifeless urban alley, muted colors with desaturated greys reflecting lack of inspiration, slow gentle motion causes subtle blur, feeling of stagnation, macro 8k, highly detailed texture, cinematic lighting, photorealistic, depth of field, 35mm lens."
+      },
+      {
+        "sceneId": 4,
+        "voiceoverSegment": "Studien zeigen: Aktivitäten wie kurze Workouts erhöhen Dopamin sofort.",
+        "focus": "Boosting dopamine",
+        "visualFocus": "Wide",
+        "prompt": "Dynamic fitness scene, subject engaging in high-intensity training, energy pulses through surrounding atmosphere, trails of glowing cyan and gold light, speed-ramps highlighting movements, invigorating and electrifying mood, macro 8k, highly detailed texture, cinematic lighting, photorealistic, depth of field, 35mm lens."
+      },
+      {
+        "sceneId": 5,
+        "voiceoverSegment": "Nutzen Sie dieses Wissen und starten Sie Ihren Tag produktiv!",
+        "focus": "Seizing opportunity",
+        "visualFocus": "Wide",
+        "prompt": "Sunrise over a bustling city filled with focus-driven individuals, warm golden light flooding the streets, rapid transitions between productive morning routines, kinetic energy, atmosphere of determination and action, macro 8k, highly detailed texture, cinematic lighting, photorealistic, depth of field, 35mm lens."
+      },
+      {
+        "sceneId": 6,
+        "voiceoverSegment": "Starten Sie Ihren Tag mit voller Energie!",
+        "focus": "Full energy start",
+        "visualFocus": "Macro",
+        "prompt": "Close-up of a glowing, high-tech clockwork engine in motion, vivid colors representing energy and power, corkscrew motion combined with fast perspective-swaps, intense pulsing lights of cyan and red, high-octane and inspiring atmosphere, macro 8k, highly detailed texture, cinematic lighting, photorealistic, depth of field, 35mm lens."
+      }
+    ],
+    "id": "ca0f6eb9-9209-4588-b14a-8873939ff8f0",
+    "createdAt": "2026-01-25T12:11:52.067Z"
+  },
+  {
+    "type": "audio",
+    "name": "🎵 Audio: Short-12",
+    "content": {
+      "mood": "Motivational / Empowering",
+      "suno": "Uplifting cinematic electronic, motivational build-up, 128bpm, bright synths, driving percussion",
+      "udio": "inspirational electronic, neuro-motivational, up-tempo beats, positive energy, modern productivity",
+      "voiceover": "Confident, energizing and persuasive. Steady pace with an uplift in tone to inspire action."
+    },
+    "id": "3c0a025b-2866-4372-8d26-31e2e2b5255f",
+    "createdAt": "2026-01-25T12:11:54.577Z"
+  },
+  {
+    "type": "visual",
+    "name": "🖼️ Visuals: Short-12",
+    "content": [
+      {
+        "id": 1,
+        "segmentContext": "Intro hook about sleep deprivation",
+        "midjourney": "A surreal landscape depicting a human brain floating above a city skyline at night, symbolizing sleep deprivation, with dim ambient lighting casting eerie shadows --ar 16:9 --v 6.0 --style raw",
+        "dalle": "A human brain hovering over a city at night, illustrating the idea of sleep deprivation. The scene is lit by moonlight, creating a mysterious and somber mood."
+      },
+      {
+        "id": 2,
+        "segmentContext": "Explanation of dopamine's role in motivation",
+        "midjourney": "An artistic representation of dopamine molecules glowing inside a transparent brain, with motivational symbols like light bulbs and targets in the background, bright and inspiring mood --ar 16:9 --v 6.0 --style raw",
+        "dalle": "Illustration showing dopamine molecules glowing amidst the neurons of a brain, with symbols of motivation like a glowing light bulb and target in the background."
+      },
+      {
+        "id": 3,
+        "segmentContext": "Discussion on increasing dopamine through exercise",
+        "midjourney": "An energetic scene showing a diverse group of people engaging in a morning workout in a park, light streaming through trees creating a vibrant and refreshing atmosphere --ar 16:9 --v 6.0 --style raw",
+        "dalle": "A lively morning workout session in a park with people of different backgrounds exercising, sunlight filtering through the trees, creating a fresh and energizing scene."
+      },
+      {
+        "id": 4,
+        "segmentContext": "Call to action to start the day productively",
+        "midjourney": "A motivational image featuring a diverse individual confidently stepping out of their home into a sunlit street, symbolizing a productive start to the day, with warm golden lighting --ar 16:9 --v 6.0 --style raw",
+        "dalle": "An inspiring scene of a person from a diverse background opening their front door to a sunlit street, representing the beginning of a productive day, bathed in warm, inviting sunlight."
+      }
+    ],
+    "id": "adc77f1b-0d0d-4609-95e5-3e15d5b0f837",
+    "createdAt": "2026-01-25T12:12:01.485Z"
+  },
+  {
+    "type": "prompt",
+    "name": "🎬 Prompts: Maximieren Sie Ihre Produktivität: Der Wissenschaft auf der Spur",
+    "content": [
+      {
+        "sceneId": 1,
+        "voiceoverSegment": "Stellen Sie sich vor, Sie könnten Ihre Produktivität mit einem Klick verdoppeln.",
+        "focus": "The mechanism of action",
+        "visualFocus": "POV",
+        "prompt": "High-tech control panel interface, futuristic holographic displays with rapid data flow, dynamic camera angles, glowing green and orange digital pulses, intense focus, high-impact visualization, macro 8k, highly detailed texture, cinematic lighting, photorealistic, depth of field, 35mm lens"
+      },
+      {
+        "sceneId": 2,
+        "voiceoverSegment": "Ein schlafendes Gehirn kämpft ohne genug Dopamin.",
+        "focus": "Challenge of low dopamine",
+        "visualFocus": "Macro",
+        "prompt": "Extreme macro of neural pathways, dimly lit with flickering synaptic signals, deep blue and violet tones, slow rhythmic motion, meditative stillness capturing struggle, macro 8k, highly detailed texture, cinematic lighting, photorealistic, depth of field, 35mm lens"
+      },
+      {
+        "sceneId": 3,
+        "voiceoverSegment": "Resultat? Keine Motivation.",
+        "focus": "Impact of deficit",
+        "visualFocus": "Macro",
+        "prompt": "Close-up of dormant neural circuits, absence of light pulses, dark and muted tones, subtle highlights on neural structures, quiet and stagnant, macro 8k, highly detailed texture, cinematic lighting, photorealistic, depth of field, 35mm lens"
+      },
+      {
+        "sceneId": 4,
+        "voiceoverSegment": "Studien zeigen: Aktivitäten wie kurze Workouts erhöhen Dopamin sofort.",
+        "focus": "Dopamine boost",
+        "visualFocus": "Wide",
+        "prompt": "Dynamic gym environment, people in mid-workout surrounded by glowing synapse overlays, fast perspective-swaps, vibrant energy, saturated cyan and gold hues, kinetic movement, macro 8k, highly detailed texture, cinematic lighting, photorealistic, depth of field, 35mm lens"
+      },
+      {
+        "sceneId": 5,
+        "voiceoverSegment": "Nutzen Sie dieses Wissen und starten Sie Ihren Tag produktiv!",
+        "focus": "Call to Action",
+        "visualFocus": "Wide",
+        "prompt": "Bright morning light over a bustling tech workspace, individuals enthusiastically engaging with holographic displays and tools, corkscrew motion through the scene, uplifting atmosphere, invigorating energy, macro 8k, highly detailed texture, cinematic lighting, photorealistic, depth of field, 35mm lens"
+      }
+    ],
+    "id": "8df87a9c-0135-41f8-9d54-edf9c4fb645e",
+    "createdAt": "2026-01-25T12:37:41.266Z"
+  },
+  {
+    "type": "visual",
+    "name": "🖼️ Visuals: Maximieren Sie Ihre Produktivität: Der Wissenschaft auf der Spur",
+    "content": [
+      {
+        "id": 1,
+        "segmentContext": "Visual Hook about increasing productivity",
+        "midjourney": "A futuristic workstation with holographic screens and a humanoid figure clicking a button labeled 'Boost Productivity', bright ambient lighting, high-tech aesthetic, ultrawide lens capturing a dynamic digital interface --ar 16:9 --v 6.0 --style raw",
+        "dalle": "A sleek futuristic office with a person pressing a glowing button labeled 'Boost Productivity', surrounded by holographic digital screens displaying data, bright white and blue tones"
+      },
+      {
+        "id": 2,
+        "segmentContext": "The Problem - Sleep deprivation and lack of dopamine",
+        "midjourney": "A person in a dimly lit room with droopy posture, surrounded by empty coffee cups and a cluttered desk, their head surrounded by visual symbols of low dopamine levels like dull orbs, soft focused lens to depict tiredness --ar 16:9 --v 6.0 --style raw",
+        "dalle": "A tired individual slumped over a cluttered office desk, coffee cups scattered, dim light, symbols of low dopamine like grey cloud bubbles over their head"
+      },
+      {
+        "id": 3,
+        "segmentContext": "The Solution - Exercise to boost dopamine",
+        "midjourney": "A vibrant gym setting where a person is energetically lifting weights, bright focused lighting, visible neurotransmitter-like sparks around them to symbolize increased dopamine, dynamic angle showing motion --ar 16:9 --v 6.0 --style raw",
+        "dalle": "A motivated individual working out in a gym, lifting weights with a bright atmosphere, with visual sparks surrounding them symbolizing dopamine boost"
+      },
+      {
+        "id": 4,
+        "segmentContext": "Loop/CTA encouraging productive mornings",
+        "midjourney": "A sunrise over an urban cityscape seen through a window, casting a warm golden light onto a desk setup with a planner and motivational quotes, crisp and sharp lens capturing the essence of a new beginning --ar 16:9 --v 6.0 --style raw",
+        "dalle": "Golden sunrise over a city skyline, warm light flooding a room where a desk holds a journal and motivational note, symbolizing a fresh productive start"
+      }
+    ],
+    "id": "1b75f06c-da44-460c-8990-56720277701e",
+    "createdAt": "2026-01-25T12:39:26.210Z"
   }
 ]

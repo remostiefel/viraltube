@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { analyzeViralVideoAction, saveTemplateAction, getTemplatesAction } from "../actions";
 import { ViralAnalysisResult } from "@/lib/openai";
-import { Loader2, Copy, Check, Info, Save, Book, Play, Activity, Layout, Eye } from "lucide-react";
+import { Loader2, Copy, Check, Info, Save, Book, Play, Activity, Layout, Eye, BrainCircuit } from "lucide-react";
 import { Template } from "@/lib/templates";
 import { NeuroScore } from "@/components/analysis/NeuroScore";
+import { IdeationConsole } from "@/components/creative/IdeationConsole";
 
 export default function IterativeLoopPage() {
     const [url, setUrl] = useState("");
@@ -29,7 +30,7 @@ export default function IterativeLoopPage() {
     };
 
     // Library State
-    const [viewMode, setViewMode] = useState<"analyze" | "library">("analyze");
+    const [viewMode, setViewMode] = useState<"analyze" | "library" | "ideation">("ideation");
     const [libraryItems, setLibraryItems] = useState<Template[]>([]);
 
     const loadLibrary = async () => {
@@ -120,10 +121,16 @@ export default function IterativeLoopPage() {
                     {/* Mode Toggle */}
                     <div className="flex justify-center gap-4 mt-8">
                         <button
+                            onClick={() => setViewMode("ideation")}
+                            className={`px-6 py-2 rounded-full font-bold transition-all flex items-center gap-2 ${viewMode === "ideation" ? "bg-white text-black" : "bg-gray-800 text-gray-400 hover:bg-gray-700"}`}
+                        >
+                            <BrainCircuit className="w-4 h-4" /> Creative Loop
+                        </button>
+                        <button
                             onClick={() => setViewMode("analyze")}
                             className={`px-6 py-2 rounded-full font-bold transition-all ${viewMode === "analyze" ? "bg-white text-black" : "bg-gray-800 text-gray-400 hover:bg-gray-700"}`}
                         >
-                            Analyze New
+                            Analyze External
                         </button>
                         <button
                             onClick={() => { setViewMode("library"); loadLibrary(); }}
@@ -132,9 +139,23 @@ export default function IterativeLoopPage() {
                             <Book className="w-4 h-4" /> Neural Library
                         </button>
                     </div>
+
+                    {/* Metaphysical Toggle (Hidden Layer) */}
+                    <div className="flex justify-center mt-2 group">
+                        <button
+                            onClick={() => alert("Recursion Mode: The Output becomes the Input. (Feature active in subconscious)")}
+                            className="text-[10px] text-gray-800 uppercase tracking-[0.3em] hover:text-purple-500 transition-colors duration-500"
+                        >
+                            ∞ Infinite Recursion Active
+                        </button>
+                    </div>
                 </div>
 
-                {viewMode === "analyze" ? (
+                {viewMode === "ideation" ? (
+                    <div className="animate-in fade-in slide-in-from-bottom-8">
+                        <IdeationConsole onOpenAnalysis={() => setViewMode("analyze")} />
+                    </div>
+                ) : viewMode === "analyze" ? (
                     <>
                         {/* Input Section */}
                         <div className="flex gap-4 max-w-3xl mx-auto">

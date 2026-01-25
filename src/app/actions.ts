@@ -61,8 +61,8 @@ export async function generateVideoIdeas(topic: string): Promise<VideoIdea[]> {
     return await generateIdeasFromGemini(topic, constitution);
 }
 
-export async function generateScriptAction(topic: string, language: "DE" | "EN" = "DE", strategyContext?: string): Promise<GeneratedScript | null> {
-    return await generateScriptWithOpenAI(topic, "Neuroscience", language, strategyContext);
+export async function generateScriptAction(topic: string, language: "DE" | "EN" = "DE", strategyContext?: string, perfectLoop?: boolean, duration?: "30s" | "60s" | "long", metaNarrative?: boolean): Promise<GeneratedScript | null> {
+    return await generateScriptWithOpenAI(topic, "High-Performance Authority", language, strategyContext, perfectLoop, duration, metaNarrative);
 }
 
 export async function generateImagePromptsAction(scene: string): Promise<ImagePrompt[]> {
@@ -92,6 +92,12 @@ import {
 
 export async function generateAudioPromptsAction(context: string): Promise<AudioPrompt | null> {
     return await generateAudioPrompts(context);
+}
+
+import { generateSpeechWithGemini } from "@/lib/gemini";
+
+export async function generateSpeechAction(text: string, voice: string, speed: number, temperature: number = 1.55): Promise<string | null> {
+    return await generateSpeechWithGemini(text, voice, speed, temperature);
 }
 
 // Template Actions
@@ -223,8 +229,8 @@ export async function extendScriptAction(currentScript: string, language: "DE" |
     return await extendScriptWithOpenAI(currentScript, language);
 }
 
-export async function generateVideoPromptsAction(scriptContent: string): Promise<VideoPrompt[]> {
-    return await generateVideoPrompts(scriptContent);
+export async function generateVideoPromptsAction(scriptContent: string, targetCount: number = 8): Promise<VideoPrompt[]> {
+    return await generateVideoPrompts(scriptContent, targetCount);
 }
 
 export async function generateScriptImagePromptsAction(scriptContent: string): Promise<ScriptImagePrompt[]> {
@@ -432,6 +438,7 @@ import { synthesizeStrategy } from "@/lib/gemini";
 
 export async function searchOutliersAction(query: string, publishedAfter?: string, maxSubs?: number): Promise<OutlierVideo[]> {
     const apiKey = process.env.YOUTUBE_API_KEY || "";
+    console.log("[DEBUG] YouTube Key present:", !!apiKey, apiKey ? `(ends: ${apiKey.slice(-4)})` : "");
     return await searchOutlierVideos(query, apiKey, publishedAfter, maxSubs);
 }
 
@@ -598,12 +605,37 @@ export async function predictPerformanceAction(title: string, scriptContent: str
 // Storage Actions
 import { generateUploadUrl, listFiles, S3Config, StoredFile, saveUrlToVault, saveContentToVault } from "@/lib/storage";
 
+// Helper to get S3 Config from Server Env if available
+function getServerS3Config(clientConfig: S3Config): S3Config {
+    // If client provides credentials, use them
+    if (clientConfig.accessKeyId && clientConfig.secretAccessKey && clientConfig.bucket) {
+        return clientConfig;
+    }
+
+    // Fallback to Server Environment
+    const serverConfig: S3Config = {
+        endpoint: process.env.NEXT_PUBLIC_S3_ENDPOINT || process.env.S3_ENDPOINT || clientConfig.endpoint,
+        region: process.env.NEXT_PUBLIC_S3_REGION || process.env.S3_REGION || clientConfig.region || "auto",
+        accessKeyId: process.env.NEXT_PUBLIC_S3_ACCESS_KEY || process.env.S3_ACCESS_KEY || "",
+        secretAccessKey: process.env.NEXT_PUBLIC_S3_SECRET_KEY || process.env.S3_SECRET_KEY || "",
+        bucket: process.env.NEXT_PUBLIC_S3_BUCKET || process.env.S3_BUCKET || ""
+    };
+
+    if (!serverConfig.accessKeyId || !serverConfig.secretAccessKey) {
+        console.warn("Server S3 Config missing. Neither client nor server (env) credentials found.");
+    }
+
+    return serverConfig;
+}
+
 export async function getUploadUrlAction(config: S3Config, key: string, contentType: string): Promise<string | null> {
-    return await generateUploadUrl(config, key, contentType);
+    const fullConfig = getServerS3Config(config);
+    return await generateUploadUrl(fullConfig, key, contentType);
 }
 
 export async function listFilesAction(config: S3Config, prefix?: string): Promise<StoredFile[]> {
-    return await listFiles(config, prefix);
+    const fullConfig = getServerS3Config(config);
+    return await listFiles(fullConfig, prefix);
 }
 
 export async function saveAssetToVaultAction(config: S3Config, assetUrl: string, type: 'image' | 'script' | 'audio', context: string = "generated"): Promise<string | null> {
@@ -615,7 +647,8 @@ export async function saveAssetToVaultAction(config: S3Config, assetUrl: string,
     const safeContext = context.replace(/[^a-zA-Z0-9]/g, "-").slice(0, 30);
     const filename = `${timestamp}-${safeContext}.${extension}`;
 
-    return await saveUrlToVault(config, assetUrl, folder, filename);
+    const fullConfig = getServerS3Config(config);
+    return await saveUrlToVault(fullConfig, assetUrl, folder, filename);
 }
 
 export async function getSystemStatusAction() {
@@ -633,10 +666,250 @@ export async function saveScriptToVaultAction(config: S3Config, content: string,
         const filename = `${safeTitle}-${Date.now()}.md`;
         const folder = "scripts";
 
-        const key = await saveContentToVault(config, content, folder, filename);
+        const fullConfig = getServerS3Config(config);
+        const key = await saveContentToVault(fullConfig, content, folder, filename);
         if (key) return { success: true, key };
         return { success: false, error: "Upload failed" };
     } catch (e) {
         return { success: false, error: String(e) };
+    }
+}
+
+export async function saveBase64ImageToVaultAction(config: S3Config, base64Data: string, title: string, context: string = "snapshot"): Promise<{ success: boolean; url?: string; error?: string }> {
+    try {
+        const fullConfig = getServerS3Config(config);
+
+        // Remove header if present (data:image/png;base64,...)
+        const base64Content = base64Data.replace(/^data:image\/\w+;base64,/, "");
+        const buffer = Buffer.from(base64Content, 'base64');
+
+        const safeTitle = title.replace(/[^a-z0-9]/gi, '-').toLowerCase().slice(0, 50);
+        const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+        const filename = `${timestamp}-${safeTitle}.png`;
+        const folder = "images";
+
+        const { saveBufferToVault } = await import("@/lib/storage");
+        const url = await saveBufferToVault(fullConfig, buffer, folder, filename, "image/png");
+
+        if (url) return { success: true, url };
+        return { success: false, error: "Upload failed" };
+    } catch (e) {
+        console.error("Base64 Upload Error", e);
+        return { success: false, error: String(e) };
+    }
+}
+
+
+
+export async function saveSnapshotLocallyAction(base64Data: string, title: string): Promise<{ success: boolean; path?: string; error?: string }> {
+    try {
+        // Remove header
+        const base64Content = base64Data.replace(/^data:image\/\w+;base64,/, "");
+        const buffer = Buffer.from(base64Content, 'base64');
+
+        const safeTitle = title.replace(/[^a-z0-9]/gi, '-').toLowerCase().slice(0, 50);
+        const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+        const filename = `${timestamp}-${safeTitle}.png`;
+
+        // Target Path: ../Screenshots Process (Relative to project root)
+        const targetDir = path.resolve(process.cwd(), "../Screenshots Process");
+
+        await fs.mkdir(targetDir, { recursive: true });
+
+        const filePath = path.join(targetDir, filename);
+        await fs.writeFile(filePath, buffer);
+
+        return { success: true, path: filePath };
+    } catch (e) {
+        console.error("Local Save Error", e);
+        return { success: false, error: String(e) };
+    }
+}
+
+// Notebook Actions
+import {
+    getNotebookItems,
+    createNotebookItem,
+    updateNotebookItem,
+    deleteNotebookItem
+} from "@/lib/notebook";
+import {
+    NotebookItem,
+    NotebookItemType
+} from "@/lib/notebook-types";
+
+export async function getNotebookItemsAction(): Promise<NotebookItem[]> {
+    return await getNotebookItems();
+}
+
+export async function createNotebookItemAction(
+    type: NotebookItemType,
+    title: string,
+    description?: string,
+    priority?: "low" | "medium" | "high",
+    tags?: string[]
+): Promise<NotebookItem> {
+    return await createNotebookItem(type, title, description, priority, tags);
+}
+
+export async function updateNotebookItemAction(id: string, updates: Partial<NotebookItem>): Promise<NotebookItem | null> {
+    return await updateNotebookItem(id, updates);
+}
+
+export async function deleteNotebookItemAction(id: string): Promise<void> {
+    return await deleteNotebookItem(id);
+}
+
+// Notebook Config Actions
+import {
+    getNotebookConfig,
+    updateTagColor,
+    saveNotebookConfig
+} from "@/lib/notebook-config";
+import { NotebookConfig } from "@/lib/notebook-config-types";
+import { saveNotebookItems } from "@/lib/notebook";
+
+export async function getNotebookConfigAction(): Promise<NotebookConfig> {
+    return await getNotebookConfig();
+}
+
+export async function updateTagColorAction(tag: string, color: string): Promise<NotebookConfig> {
+    return await updateTagColor(tag, color);
+}
+
+export async function renameTagAction(oldName: string, newName: string): Promise<void> {
+    if (!oldName || !newName || oldName === newName) return;
+
+    // 1. Update Items
+    const items = await getNotebookItems();
+    let itemsChanged = false;
+    const newItems = items.map(item => {
+        if (item.tags && item.tags.includes(oldName)) {
+            itemsChanged = true;
+            return {
+                ...item,
+                tags: item.tags.map(t => t === oldName ? newName : t)
+            };
+        }
+        return item;
+    });
+
+    if (itemsChanged) {
+        await saveNotebookItems(newItems);
+    }
+
+    // 2. Update Config (Colors)
+    const config = await getNotebookConfig();
+    if (config.tagColors && config.tagColors[oldName]) {
+        const color = config.tagColors[oldName];
+        const newColors = { ...config.tagColors };
+        delete newColors[oldName];
+        newColors[newName] = color;
+        await saveNotebookConfig({ ...config, tagColors: newColors });
+    }
+}
+
+// Genesis Automation Action
+import fs from "fs/promises";
+import path from "path";
+
+export async function startGenesisAction(item: NotebookItem): Promise<{ success: boolean; path?: string; error?: string }> {
+    try {
+        console.log(`[Genesis] Starting automation for: ${item.title}`);
+
+        // 1. Generate Content (Blueprint)
+        // We reuse generateBlueprint. We need a basic "context" if we don't have a video transcript.
+        // For a new idea, the context is the description itself + title.
+
+        const context = `
+PROJECT TITLE: ${item.title}
+DESCRIPTION: ${item.description || "No description provided."}
+TAGS: ${item.tags?.join(", ") || "None"}
+
+INSTRUCTION: Create a Viral Video Blueprint for this concept.
+        `.trim();
+
+        // We use a dummy ID or just pass context directly if we refactor generateBlueprint, 
+        // but generateBlueprint expects a transcript. 
+        // Let's us generateIdeasFromGemini logic but strictly for a Blueprint structure.
+        // Actually, let's call Gemini directly here or simple wrapper? 
+        // Using generateBlueprint requires a "contextContent" string. perfectly fine to pass our context there.
+
+        const { getViralConstitution } = await import("@/lib/openai");
+        const constitution = await getViralConstitution(); // Use this for "Style"
+
+        const blueprint = await generateBlueprint(context, item.title, "DE", undefined, {
+            // Override instructions to treat context as the "Seed" not just a transcript
+            "ROLE": "You are the Genesis Engine. You take a raw idea and expand it into a full production blueprint."
+        });
+
+        // 2. Generate Image Prompts (Legacy)
+        const imagePrompts = await generateImagePromptsAction(item.title);
+
+        // 2b. Generate Loop Assets (Shorts Mode)
+        // We always generate these now as per user request for "Fastmode"
+        const { generateViralLoopAssets } = await import("@/lib/gemini");
+        const loopAssets = await generateViralLoopAssets(item.title, item.description, blueprint.original.hook);
+
+
+        // 3. File System Operations
+        // Path: /Users/remo.stiefel/Desktop/YT NC optimized/NeuroCode_Teasers/[SafeTitle]
+        const safeTitle = item.title.replace(/[^a-z0-9äöüß]/gi, '_').replace(/_+/g, '_');
+        const teaserDir = path.join("/Users/remo.stiefel/Desktop/YT NC optimized/NeuroCode_Teasers", safeTitle);
+
+        await fs.mkdir(teaserDir, { recursive: true });
+
+        // Write Blueprint
+        const blueprintContent = `
+# ${item.title}
+> Status: ${item.status} | Priority: ${item.priority}
+
+## VIRAL HOOK
+${blueprint.original.hook}
+
+## CORE VALUE
+${blueprint.original.twist}
+
+## SCRIPT OUTLINE
+${blueprint.original.structure.map(s => `- ${s}`).join("\n")}
+
+## TITLE IDEAS
+${blueprint.adaptation.differentiation.map(t => `- ${t}`).join("\n")}
+
+## THUMBNAIL CONCEPTS / KEYFRAMES
+${loopAssets.imagePrompts.map(img => `### ${img.scene}\n> Midjourney: \`${img.midjourney}\``).join("\n\n")}
+
+## VIDEO PROMPTS (Motion)
+${loopAssets.videoPrompts.map(v => `- [${v.action}] Runway: \`${v.runway}\``).join("\n")}
+
+## MUSIC PROMPTS (Suno/Udio)
+${loopAssets.musicPrompts.map(m => `- [${m.style}] ${m.bpm} BPM: \`${m.prompt}\``).join("\n")}
+
+---
+*Generated by Neuro-Code Genesis Engine*
+        `.trim();
+
+        await fs.writeFile(path.join(teaserDir, "blueprint.md"), blueprintContent, "utf-8");
+
+        // Write Metadata/Prompts
+        const metadata = {
+            id: item.id,
+            origin: "Notebook",
+            timestamp: new Date().toISOString(),
+            legacyPrompts: imagePrompts,
+            assets: loopAssets
+        };
+
+        await fs.writeFile(path.join(teaserDir, "metadata.json"), JSON.stringify(metadata, null, 2), "utf-8");
+
+        // Also save explicit prompts.json for easier copy-paste
+        await fs.writeFile(path.join(teaserDir, "prompts.json"), JSON.stringify(loopAssets, null, 2), "utf-8");
+
+        console.log(`[Genesis] Assets saved to: ${teaserDir}`);
+        return { success: true, path: teaserDir };
+
+    } catch (e: any) {
+        console.error("[Genesis] Failed:", e);
+        return { success: false, error: e.message };
     }
 }

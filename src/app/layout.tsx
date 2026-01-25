@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "VIRAL TUBE",
-  description: "Automated Growth Engine",
+  title: "CORTEX",
+  description: "The Creator's Operating System",
 };
 
 export default function RootLayout({
