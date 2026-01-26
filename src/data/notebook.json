@@ -1,28 +1,168 @@
 [
   {
-    "id": "6d44900d-aa13-424a-a057-63f3e101b9df",
+    "id": "4e4cda17-db34-452e-b757-c8d89c996210",
     "type": "step",
-    "title": "VoiceOver Script als plain text ",
-    "description": "DOCX download optimieren",
+    "title": "notebook Spalten schmaler + Farben in headern",
+    "description": "so dass vier Spalten neben einander sichtbar (ohne scrollen)",
+    "status": "Done",
+    "createdAt": "2026-01-26T11:28:56.738Z",
+    "updatedAt": "2026-01-26T11:41:47.928Z",
+    "tags": [],
+    "priority": "low",
+    "isArchived": false
+  },
+  {
+    "id": "0260a441-cca4-45d9-b81e-4ce8a3a96b6e",
+    "type": "step",
+    "title": "Farben sidemenu ohne grau",
+    "description": "",
+    "status": "Done",
+    "createdAt": "2026-01-26T11:28:19.238Z",
+    "updatedAt": "2026-01-26T11:52:55.409Z",
+    "tags": [],
+    "priority": "low",
+    "isArchived": false
+  },
+  {
+    "id": "f0757bce-8dd8-472e-9e1b-68475957ec65",
+    "type": "step",
+    "title": "sidemenu einklappbar machen",
+    "description": "",
+    "status": "Done",
+    "createdAt": "2026-01-26T11:27:57.112Z",
+    "updatedAt": "2026-01-26T11:52:52.523Z",
+    "tags": [],
+    "priority": "low",
+    "isArchived": false
+  },
+  {
+    "id": "7091cbf6-97e8-4e0e-927b-39ea89f0ff09",
+    "type": "step",
+    "title": "full User Journey",
+    "description": "user journey (Idea -> Strategy -> Script -> Test)",
     "status": "Backlog",
-    "createdAt": "2026-01-25T12:44:11.533Z",
-    "updatedAt": "2026-01-25T12:44:11.533Z",
+    "createdAt": "2026-01-26T11:25:01.360Z",
+    "updatedAt": "2026-01-26T11:25:01.360Z",
     "tags": [],
     "priority": "medium",
     "isArchived": false
   },
   {
-    "id": "57c7c72e-b506-46f5-8a6b-66f6c11af175",
-    "type": "topic",
-    "title": "Short-12",
-    "description": "loop Prozess für 30sec Short (Dienstag, 27.Jan)",
-    "status": "Idea",
-    "createdAt": "2026-01-25T12:19:06.779Z",
-    "updatedAt": "2026-01-25T12:19:06.779Z",
+    "id": "33ef8003-d7ad-4ca7-a25e-049244f1ee40",
+    "type": "step",
+    "title": "in Notebook: Steps/Topics selbst vertikal ordnen",
+    "description": "Steps und Topics verschieben in eigene Reihenfolge bringen",
+    "status": "Done",
+    "createdAt": "2026-01-26T11:23:52.781Z",
+    "updatedAt": "2026-01-26T11:48:36.197Z",
+    "tags": [],
+    "priority": "low",
+    "isArchived": false
+  },
+  {
+    "id": "6a70ca2a-db2f-425e-97cf-92d2af9e2f26",
+    "type": "step",
+    "title": "Hover over Hilfen",
+    "description": "in allen Module gesamte App mit sinnvollen Tipps und Erklärungen ergänzen",
+    "status": "Backlog",
+    "createdAt": "2026-01-26T11:22:27.673Z",
+    "updatedAt": "2026-01-26T11:22:27.674Z",
+    "tags": [],
+    "priority": "low",
+    "isArchived": false
+  },
+  {
+    "id": "3c57926c-4aee-4f04-801f-f43436f7dc51",
+    "type": "step",
+    "title": "DOCX-Namen bei downloads",
+    "description": "benenne alle DOCX-Downloads sinnvoll und strukturiert",
+    "status": "Backlog",
+    "createdAt": "2026-01-26T07:00:50.002Z",
+    "updatedAt": "2026-01-26T07:00:57.824Z",
     "tags": [
       "Cortex"
     ],
+    "priority": "low",
+    "isArchived": false
+  },
+  {
+    "id": "6d44900d-aa13-424a-a057-63f3e101b9df",
+    "type": "step",
+    "title": "VoiceOver Script als plain text ",
+    "description": "DOCX download optimieren",
+    "status": "Next",
+    "createdAt": "2026-01-25T12:44:11.533Z",
+    "updatedAt": "2026-01-26T12:49:27.934Z",
+    "tags": [],
     "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "4f705b9d-4731-4b12-8483-bba3c39162eb",
+    "type": "topic",
+    "title": "Glücks-Hormon",
+    "description": "Glücks-Forschung, Huberman was?, Buch über Glück",
+    "status": "Idea",
+    "createdAt": "2026-01-24T15:46:29.246Z",
+    "updatedAt": "2026-01-26T09:22:17.839Z",
+    "tags": [],
+    "priority": "high",
+    "isArchived": false
+  },
+  {
+    "id": "621302d8-baed-49e4-84bd-4d078bfff5ff",
+    "type": "topic",
+    "title": "Protein-Lüge",
+    "description": "",
+    "status": "Idea",
+    "createdAt": "2026-01-24T15:45:59.719Z",
+    "updatedAt": "2026-01-26T09:22:35.530Z",
+    "tags": [
+      "research needed"
+    ],
+    "priority": "high",
+    "isArchived": false
+  },
+  {
+    "id": "3d47202c-de57-4d80-9f23-2fdfdf015ce5",
+    "type": "topic",
+    "title": "Zucker: Hirnscans",
+    "description": "Gehirn auf Zucker vs normales Hirn",
+    "status": "Idea",
+    "createdAt": "2026-01-25T10:21:36.302Z",
+    "updatedAt": "2026-01-26T09:21:48.858Z",
+    "tags": [
+      "Brain"
+    ],
+    "priority": "high",
+    "isArchived": false
+  },
+  {
+    "id": "a4cc4e2e-9817-4a7d-8e47-a9dd99a0b9d0",
+    "type": "topic",
+    "title": "Stress killt Gedächtnis",
+    "description": "1-Minuten-Trick",
+    "status": "Idea",
+    "createdAt": "2026-01-25T10:20:03.833Z",
+    "updatedAt": "2026-01-26T09:22:01.089Z",
+    "tags": [
+      "research needed"
+    ],
+    "priority": "high",
+    "isArchived": false
+  },
+  {
+    "id": "57c7c72e-b506-46f5-8a6b-66f6c11af175",
+    "type": "topic",
+    "title": "inside the engine (planned Short 21)",
+    "description": "loop Prozess",
+    "status": "Idea",
+    "createdAt": "2026-01-25T12:19:06.779Z",
+    "updatedAt": "2026-01-26T09:21:29.592Z",
+    "tags": [
+      "Cortex"
+    ],
+    "priority": "low",
     "isArchived": false
   },
   {
@@ -30,9 +170,9 @@
     "type": "step",
     "title": "Tools für Videoproduktion finden",
     "description": "Maus MX4 optimieren, CapCut 7 Tage testen",
-    "status": "Backlog",
+    "status": "Done",
     "createdAt": "2026-01-25T11:07:57.830Z",
-    "updatedAt": "2026-01-25T11:07:57.830Z",
+    "updatedAt": "2026-01-26T11:53:10.313Z",
     "tags": [],
     "priority": "medium",
     "isArchived": false
@@ -42,9 +182,9 @@
     "type": "step",
     "title": "HUB = Übersicht",
     "description": "erstellte Videos, gestreifte Themen, neue Ideen\nWissen übersichtlich aufbereiten, vernetzen, darstellen\nProdukt PDF?, App?",
-    "status": "Backlog",
+    "status": "Review",
     "createdAt": "2026-01-25T11:07:12.866Z",
-    "updatedAt": "2026-01-25T11:07:12.866Z",
+    "updatedAt": "2026-01-26T12:49:17.148Z",
     "tags": [],
     "priority": "medium",
     "isArchived": false
@@ -54,11 +194,25 @@
     "type": "step",
     "title": "STATS der Videos",
     "description": "Übersicht in App, Chat aus NotebookLM zur Optimierung",
-    "status": "Backlog",
+    "status": "Review",
     "createdAt": "2026-01-25T11:05:51.661Z",
-    "updatedAt": "2026-01-25T11:05:51.661Z",
+    "updatedAt": "2026-01-26T12:49:05.132Z",
     "tags": [],
     "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "ccacce96-6495-4262-8b77-46e1cec8bafd",
+    "type": "step",
+    "title": "BRAIN BUILD",
+    "description": "",
+    "status": "Next",
+    "createdAt": "2026-01-25T11:02:39.036Z",
+    "updatedAt": "2026-01-26T11:53:43.394Z",
+    "tags": [
+      "Cortex"
+    ],
+    "priority": "low",
     "isArchived": false
   },
   {
@@ -82,23 +236,9 @@
     "description": "outliers finden (Themen und Formate)",
     "status": "Backlog",
     "createdAt": "2026-01-25T11:04:04.774Z",
-    "updatedAt": "2026-01-25T11:04:04.775Z",
+    "updatedAt": "2026-01-26T07:38:03.678Z",
     "tags": [],
-    "priority": "medium",
-    "isArchived": false
-  },
-  {
-    "id": "ccacce96-6495-4262-8b77-46e1cec8bafd",
-    "type": "step",
-    "title": "BRAIN BUILD",
-    "description": "",
-    "status": "Backlog",
-    "createdAt": "2026-01-25T11:02:39.036Z",
-    "updatedAt": "2026-01-25T11:02:39.036Z",
-    "tags": [
-      "Cortex"
-    ],
-    "priority": "medium",
+    "priority": "high",
     "isArchived": false
   },
   {
@@ -108,13 +248,13 @@
     "description": "mockup Daten, Screen captures für Shorts und longform",
     "status": "Backlog",
     "createdAt": "2026-01-25T11:02:22.570Z",
-    "updatedAt": "2026-01-25T11:02:22.570Z",
+    "updatedAt": "2026-01-26T11:53:35.103Z",
     "tags": [
       "Cortex",
       "longform",
       "shorts"
     ],
-    "priority": "medium",
+    "priority": "low",
     "isArchived": false
   },
   {
@@ -132,20 +272,6 @@
     "isArchived": false
   },
   {
-    "id": "3d47202c-de57-4d80-9f23-2fdfdf015ce5",
-    "type": "topic",
-    "title": "Zucker: Hirnscans",
-    "description": "Gehirn auf Zucker vs normales Hirn",
-    "status": "Idea",
-    "createdAt": "2026-01-25T10:21:36.302Z",
-    "updatedAt": "2026-01-25T10:21:36.302Z",
-    "tags": [
-      "Brain"
-    ],
-    "priority": "medium",
-    "isArchived": false
-  },
-  {
     "id": "c9afb0ef-1c9d-49df-9899-3d3a30303b6e",
     "type": "topic",
     "title": "Mutterschaft verändert Gehirn für immer",
@@ -153,20 +279,6 @@
     "status": "Idea",
     "createdAt": "2026-01-25T10:20:33.396Z",
     "updatedAt": "2026-01-25T10:20:33.396Z",
-    "tags": [
-      "research needed"
-    ],
-    "priority": "medium",
-    "isArchived": false
-  },
-  {
-    "id": "a4cc4e2e-9817-4a7d-8e47-a9dd99a0b9d0",
-    "type": "topic",
-    "title": "Stress killt Gedächtnis",
-    "description": "1-Minuten-Trick",
-    "status": "Idea",
-    "createdAt": "2026-01-25T10:20:03.833Z",
-    "updatedAt": "2026-01-25T10:20:03.833Z",
     "tags": [
       "research needed"
     ],
@@ -296,37 +408,11 @@
     "description": "next Video Prozess dokumentieren, präzisieren, building",
     "status": "Backlog",
     "createdAt": "2026-01-24T15:47:17.960Z",
-    "updatedAt": "2026-01-24T16:07:06.705Z",
+    "updatedAt": "2026-01-26T07:39:23.849Z",
     "tags": [
       "Cortex"
     ],
-    "priority": "medium",
-    "isArchived": false
-  },
-  {
-    "id": "4f705b9d-4731-4b12-8483-bba3c39162eb",
-    "type": "topic",
-    "title": "Glücks-Hormon",
-    "description": "Glücks-Forschung, Huberman was?, Buch über Glück",
-    "status": "Idea",
-    "createdAt": "2026-01-24T15:46:29.246Z",
-    "updatedAt": "2026-01-24T15:46:29.246Z",
-    "tags": [],
-    "priority": "medium",
-    "isArchived": false
-  },
-  {
-    "id": "621302d8-baed-49e4-84bd-4d078bfff5ff",
-    "type": "topic",
-    "title": "Protein-Lüge",
-    "description": "",
-    "status": "Idea",
-    "createdAt": "2026-01-24T15:45:59.719Z",
-    "updatedAt": "2026-01-25T10:04:49.320Z",
-    "tags": [
-      "research needed"
-    ],
-    "priority": "medium",
+    "priority": "low",
     "isArchived": false
   }
 ]

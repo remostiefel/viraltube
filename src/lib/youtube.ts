@@ -78,7 +78,7 @@ export async function getChannelData(apiKey: string): Promise<ChannelData | null
     try {
         const response = await fetch(
             `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=${NEURO_CODE_CHANNEL_ID}&key=${apiKey}`,
-            { next: { revalidate: 3600 } } // Cache for 1 hour
+            { next: { revalidate: 0 } } // No cache for real-time validation
         );
 
         if (!response.ok) {
@@ -182,20 +182,25 @@ export interface OutlierVideo {
 
 // ... existing code ...
 
-export async function searchOutlierVideos(
+export async function searchOutliers(
     query: string,
     apiKey: string,
     publishedAfter?: string, // ISO Date string
-    maxSubs?: number
+    maxSubs?: number,
+    gapMode?: boolean // CORTEX v2: Find "Content Gaps" (High Demand, Low Supply/Old)
 ): Promise<OutlierVideo[]> {
     if (!apiKey) throw new Error("API Key missing");
 
     try {
-        let apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&order=viewCount&maxResults=15&key=${apiKey}`;
+        let apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&order=${gapMode ? 'viewCount' : 'viewCount'}&maxResults=${gapMode ? 25 : 15}&key=${apiKey}`;
 
         if (publishedAfter) {
             apiUrl += `&publishedAfter=${publishedAfter}`;
         }
+        // gapMode implies we look for OLD videos usually, but API makes it hard to filter "before". 
+        // Instead, if gapMode is ON, we might NOT want to restrict by date, or we restrict by "publishedBefore" (not standard search param).
+        // Actually, for Gaps we want to see what is winning NOW. 
+        // If we find an old video with high views, that's a gap. So we search broadly.
 
         const searchRes = await fetch(apiUrl, { next: { revalidate: 3600 } });
 
@@ -250,10 +255,33 @@ export async function searchOutlierVideos(
                 outlierScore: parseFloat(score.toFixed(2)),
                 publishedAt: v.snippet.publishedAt
             };
-        }).sort((a: OutlierVideo, b: OutlierVideo) => b.outlierScore - a.outlierScore);
+        });
+
+        // CORTEX GAP LOGIC
+        if (gapMode) {
+            const oneYearAgo = new Date();
+            oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
+            // A "Gap" is defined as:
+            // 1. High Views (> 50k)
+            // 2. EITHER Old (> 1 year) OR Small Channel (< 10k subs)
+            outliers = outliers.filter(o => {
+                const isOld = new Date(o.publishedAt) < oneYearAgo;
+                const isSmall = o.channelSubs < 20000;
+                const hasDemand = o.viewCount > 50000;
+
+                return hasDemand && (isOld || isSmall);
+            });
+
+            // Sort gaps by View Count (Absolute Demand) rather than outlier score
+            outliers.sort((a, b) => b.viewCount - a.viewCount);
+        } else {
+            // Standard Outlier Sort
+            outliers.sort((a: OutlierVideo, b: OutlierVideo) => b.outlierScore - a.outlierScore);
+        }
 
         // 5. Apply Filters
-        if (maxSubs) {
+        if (maxSubs && !gapMode) {
             outliers = outliers.filter(o => o.channelSubs < maxSubs);
         }
 
@@ -272,14 +300,15 @@ export async function getChannelRecentVideos(channelId: string, apiKey: string):
     try {
         // 1. Get Channel Stats first (for outlier score)
         const channelRes = await fetch(
-            `https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${apiKey}`
+            `https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${apiKey}`,
+            { next: { revalidate: 0 } }
         );
         const channelData = await channelRes.json();
         const subs = parseInt(channelData?.items?.[0]?.statistics?.subscriberCount || "1000000");
 
         // 2. Get Recent Videos
         const searchRes = await fetch(
-            `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&type=video&order=date&maxResults=10&key=${apiKey}`,
+            `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&type=video&order=date&maxResults=50&key=${apiKey}`,
             { next: { revalidate: 3600 } }
         );
 

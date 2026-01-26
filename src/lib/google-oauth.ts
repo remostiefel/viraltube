@@ -1,6 +1,6 @@
 export const GOOGLE_OAUTH_SCOPES = [
     "https://www.googleapis.com/auth/youtube.readonly",
-    "https://www.googleapis.com/auth/youtube.analytics.readonly"
+    "https://www.googleapis.com/auth/yt-analytics.readonly"
 ];
 
 export const getAuthUrl = (clientId: string, redirectUri: string) => {

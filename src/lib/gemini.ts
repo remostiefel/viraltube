@@ -322,6 +322,103 @@ export async function generatePrognosis(data: PrognosisRequest): Promise<Prognos
     }
 }
 
+export interface ChannelAuditData {
+    views: number;
+    subsGained: number;
+    avd: string;
+    minutesWatched: number;
+    topVideos: string;
+}
+
+export interface InsightItem {
+    title: string;
+    description: string;
+}
+
+export interface ChannelAuditResult {
+    wins: InsightItem[];
+    losses: InsightItem[];
+    opportunities: InsightItem[];
+    overallSentiment: "Bullish" | "Bearish" | "Neutral";
+    executiveSummary: string;
+}
+
+export async function generateChannelAudit(data: ChannelAuditData, promptOverrides?: Record<string, string>): Promise<ChannelAuditResult> {
+    if (!apiKey) throw new Error("Gemini API Key is missing");
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+    const template = promptOverrides?.["audit"] || SYSTEM_PROMPTS.audit.template;
+
+    const prompt = fillTemplate(template, {
+        views: data.views,
+        subsGained: data.subsGained,
+        avd: data.avd,
+        minutesWatched: data.minutesWatched,
+        topVideos: data.topVideos
+    });
+
+    try {
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text().replace(/```json/g, "").replace(/```/g, "").trim();
+        return JSON.parse(text) as ChannelAuditResult;
+    } catch (error) {
+        console.error("Channel Audit Error", error);
+        return {
+            wins: [],
+            losses: [],
+            opportunities: [],
+            overallSentiment: "Neutral",
+            executiveSummary: "Audit failed due to AI service disruption."
+        };
+    }
+}
+
+export interface RetentionAnalysis {
+    hookScore: number;
+    dropOffRisk: "High" | "Medium" | "Low";
+    triggerUsed: string;
+    improvement: string;
+}
+
+export async function analyzeHookRetention(transcriptSnippet: string): Promise<RetentionAnalysis> {
+    if (!apiKey) throw new Error("Gemini API Key is missing");
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+    // We reuse the Surgeon prompt logic but structured for specific Retention Analysis
+    const prompt = `
+    You are "The Surgeon". Analyze this YouTube Video Opening (First 60s).
+    TRANSCRIPT: "${transcriptSnippet.slice(0, 1000)}..."
+
+    TASK:
+    1. Identify the primary Psychological Hook Trigger.
+    2. Estimate "30s Drop-Off Risk" based on pacing/clarity.
+    3. Suggest ONE improvement.
+
+    RETURN JSON:
+    {
+        "hookScore": number (1-100),
+        "dropOffRisk": "High" | "Medium" | "Low",
+        "triggerUsed": "Name of trigger (e.g. Open Loop, Negativity Bias)",
+        "improvement": "Specific advice"
+    }
+    `;
+
+    try {
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text().replace(/```json/g, "").replace(/```/g, "").trim();
+        return JSON.parse(text) as RetentionAnalysis;
+    } catch (error) {
+        return {
+            hookScore: 0,
+            dropOffRisk: "High",
+            triggerUsed: "Unknown",
+            improvement: "Analysis Failed"
+        };
+    }
+}
+
 export async function synthesizeStrategy(inputs: string): Promise<string> {
     if (!apiKey) throw new Error("Gemini API Key is missing");
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });

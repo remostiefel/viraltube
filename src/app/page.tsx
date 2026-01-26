@@ -75,9 +75,9 @@ export default function NeuralInterface() {
                         <span className="text-[10px] text-muted-foreground uppercase font-bold">Rank</span>
                         <span className="text-sm font-bold text-white">INITIAND</span>
                     </div>
-                    <Link href="/cortex" className="group">
+                    <Link href="/core-identity" className="group">
                         <div className="bg-card/50 border border-border/40 px-4 py-2 rounded-lg flex flex-col items-end hover:border-primary/50 transition-colors cursor-pointer">
-                            <span className="text-[10px] text-muted-foreground uppercase font-bold">Strategy</span>
+                            <span className="text-[10px] text-muted-foreground uppercase font-bold">Core Identity</span>
                             <span className={cn("text-sm font-bold", cortexProfile ? "text-primary" : "text-yellow-500")}>
                                 {cortexProfile ? cortexProfile.tone.toUpperCase() : "UNCALIBRATED"}
                             </span>

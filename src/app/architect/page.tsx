@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Send, Bot, User, RefreshCw, MessageSquare, PencilRuler, FileText, Loader2, PlayCircle, Clock, Save, FolderOpen, Trash2, Eye, Binary, BrainCircuit, Activity, Cloud, Sparkles, Zap, Layout, CheckCircle2, Brain, FileDown, Clapperboard, Copy, Check, Maximize2, GraduationCap } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { processChat, generateScriptAction, saveTemplateAction, getTemplatesAction, deleteTemplateAction, generateBlueprintAction, saveScriptToVaultAction, getProjectByIdAction, updateProjectAction, synthesizeStrategyAction, refineScriptAction, extendScriptAction, searchOutliersAction, generateVideoPromptsAction, generateImagePromptsAction, generateAudioPromptsAction, generateScriptImagePromptsAction } from "@/app/actions";
@@ -19,11 +19,13 @@ import { OraclePrediction } from "@/lib/oracle";
 import { predictPerformanceAction } from "@/app/actions";
 import { OracleCard } from "@/components/analysis/OracleCard";
 import { TemplateManager } from "@/components/architect/TemplateManager";
-import { saveAs } from "file-saver";
+// Removed static import of saveAs to prevent build issues
+// import { saveAs } from "file-saver";
 
 import { generateDocx, generatePromptsDocx, generateImagePromptsDocx, generateAudioPromptsDocx } from "@/lib/docx-exporter";
 import { VideoPrompt, ScriptImagePrompt, AudioPrompt } from "@/lib/openai";
 import { SnapshotButton } from "@/components/SnapshotButton";
+import { VIRAL_PROTOCOLS } from "@/lib/protocols";
 
 
 
@@ -31,7 +33,17 @@ import { SnapshotButton } from "@/components/SnapshotButton";
 
 export const dynamic = "force-dynamic";
 
-export default function Architect() {
+export default function ArchitectPage() {
+    return (
+        <div className="h-[calc(100vh-8rem)] flex items-center justify-center">
+            <React.Suspense fallback={<div className="flex flex-col items-center gap-2"><Loader2 className="w-8 h-8 animate-spin text-primary" /><p className="text-muted-foreground text-sm">Loading Architect...</p></div>}>
+                <ArchitectContent />
+            </React.Suspense>
+        </div>
+    );
+}
+
+function ArchitectContent() {
     const searchParams = useSearchParams();
     const projectId = searchParams.get("project");
     const templateId = searchParams.get("templateId"); // Support direct loading
@@ -245,6 +257,7 @@ export default function Architect() {
     const [scriptResult, setScriptResult] = useState<GeneratedScript | null>(null);
     const [scriptLoading, setScriptLoading] = useState(false);
     const [targetLanguage, setTargetLanguage] = useState<"DE" | "EN">("DE");
+    const [selectedProtocol, setSelectedProtocol] = useState<string>(""); // Default: no specific protocol
 
     // Source Selector State
     const [sourceMode, setSourceMode] = useState<"strategy" | "wisdom" | "scratch">("strategy");
@@ -363,7 +376,8 @@ export default function Architect() {
                 contextToUse,
                 cortexProfile?.perfectLoop,
                 cortexProfile?.durationConstraint,
-                cortexProfile?.metaNarrative
+                cortexProfile?.metaNarrative,
+                selectedProtocol || undefined // PASS PROTOCOL
             );
             setScriptResult(data);
             if (data) {
@@ -426,7 +440,8 @@ export default function Architect() {
                 strategyContext,
                 cortexProfile?.perfectLoop,
                 cortexProfile?.durationConstraint,
-                cortexProfile?.metaNarrative
+                cortexProfile?.metaNarrative,
+                selectedProtocol || undefined // PASS PROTOCOL
             );
 
             if (!script) {
@@ -624,6 +639,7 @@ export default function Architect() {
         if (!content) return;
         try {
             const blob = await generateDocx(content, scriptResult?.title || "Draft Script");
+            const { saveAs } = await import("file-saver");
             saveAs(blob, `${(scriptResult?.title || "script-draft").replace(/[^a-z0-9]/gi, '_').toLowerCase()}.docx`);
         } catch (e) {
             console.error("Export failed", e);
@@ -969,18 +985,36 @@ export default function Architect() {
                                             )}
                                         </div>
 
-                                        {/* Genesis Toggle */}
-                                        <div className="flex items-center gap-2 mt-2">
-                                            <button
-                                                type="button"
-                                                onClick={() => setGenesisMode(!genesisMode)}
-                                                className={cn("text-xs font-bold uppercase tracking-widest px-2 py-1 rounded border transition-colors",
-                                                    genesisMode ? "bg-red-500/20 text-red-500 border-red-500/50" : "bg-muted text-muted-foreground border-transparent hover:border-border"
-                                                )}
+                                    </div>
+
+                                    {/* Protocol Selection */}
+                                    <div className="flex items-center gap-2 mt-2">
+                                        <div className="flex items-center gap-2 bg-blue-500/10 px-2 py-1 rounded border border-blue-500/20">
+                                            <span className="text-xs font-bold text-blue-400 uppercase tracking-widest">Structure:</span>
+                                            <select
+                                                value={selectedProtocol}
+                                                onChange={e => setSelectedProtocol(e.target.value)}
+                                                className="bg-transparent text-xs focus:outline-none text-blue-200 font-medium min-w-[150px]"
                                             >
-                                                {genesisMode ? "🔴 GENESIS PROTOCOL: ARMED" : "⚪ AUTO-PILOT: OFF"}
-                                            </button>
+                                                <option value="" className="text-black">Standard (Smart)</option>
+                                                {VIRAL_PROTOCOLS.map(p => (
+                                                    <option key={p.id} value={p.id} className="text-black">{p.name}</option>
+                                                ))}
+                                            </select>
                                         </div>
+                                    </div>
+
+                                    {/* Genesis Toggle */}
+                                    <div className="flex items-center gap-2 mt-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => setGenesisMode(!genesisMode)}
+                                            className={cn("text-xs font-bold uppercase tracking-widest px-2 py-1 rounded border transition-colors",
+                                                genesisMode ? "bg-red-500/20 text-red-500 border-red-500/50" : "bg-muted text-muted-foreground border-transparent hover:border-border"
+                                            )}
+                                        >
+                                            {genesisMode ? "🔴 GENESIS PROTOCOL: ARMED" : "⚪ AUTO-PILOT: OFF"}
+                                        </button>
                                     </div>
                                     <button
                                         type={genesisMode ? "button" : "submit"}
@@ -1345,6 +1379,7 @@ ${res.adaptation.differentiation.map(e => `- ${e}`).join('\n')}
                                             <button
                                                 onClick={async () => {
                                                     const blob = await generateImagePromptsDocx(imagePrompts, `Visuals - ${scriptResult?.title || "Untitled"}`);
+                                                    const { saveAs } = await import("file-saver");
                                                     saveAs(blob, `Visuals - ${scriptResult?.title || "Untitled"}.docx`);
                                                 }}
                                                 className="px-4 py-2 rounded-lg font-bold flex items-center gap-2 border border-blue-500/30 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 transition-colors"
@@ -1458,6 +1493,7 @@ ${res.adaptation.differentiation.map(e => `- ${e}`).join('\n')}
                                             <button
                                                 onClick={async () => {
                                                     const blob = await generateAudioPromptsDocx(audioPrompts, `Audio - ${scriptResult?.title || "Untitled"}`);
+                                                    const { saveAs } = await import("file-saver");
                                                     saveAs(blob, `Audio - ${scriptResult?.title || "Untitled"}.docx`);
                                                 }}
                                                 className="px-4 py-2 rounded-lg font-bold flex items-center gap-2 border border-blue-500/30 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 transition-colors"
@@ -1624,6 +1660,7 @@ ${res.adaptation.differentiation.map(e => `- ${e}`).join('\n')}
                                         <button
                                             onClick={async () => {
                                                 const blob = await generatePromptsDocx(videoPrompts, `Prompts - ${scriptResult?.title || "Untitled"}`);
+                                                const { saveAs } = await import("file-saver");
                                                 saveAs(blob, `Prompts - ${scriptResult?.title || "Untitled"}.docx`);
                                             }}
                                             className="px-4 py-2 rounded-lg font-bold flex items-center gap-2 border border-blue-500/30 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 transition-colors"
@@ -1768,9 +1805,9 @@ ${res.adaptation.differentiation.map(e => `- ${e}`).join('\n')}
                     onLoad={handleLoadTemplate}
                     onRefresh={loadTemplates}
                 />
-            </div>
+            </div >
             {/* End of Workspace Wrapper */}
-        </div>
+        </div >
     );
 }
 // Ensure handleLoadTemplate can handle prompt loading

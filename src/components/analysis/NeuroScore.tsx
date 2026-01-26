@@ -14,12 +14,27 @@ interface NeuroScoreProps {
 }
 
 export function NeuroScore({ score }: NeuroScoreProps) {
+    const totalScore = (score.dopamine.score + score.cortisol.score + score.oxytocin.score + (score.depth?.score || 0)) / (score.depth ? 4 : 3);
+    const passed = totalScore >= 75;
+
     return (
-        <div className="bg-card border border-border/40 rounded-xl p-6 shadow-sm space-y-6">
-            <h3 className="text-lg font-bold flex items-center gap-2">
-                <Activity className="w-5 h-5 text-primary" />
-                Neuro-Scoring (P.E.O.)
-            </h3>
+        <div className="bg-card border border-border/40 rounded-xl p-6 shadow-sm space-y-6 relative overflow-hidden">
+            {/* Pass/Fail Stamp */}
+            <div className={`absolute top-0 right-0 p-4 border-l-2 border-b-2 rounded-bl-xl font-black text-xs uppercase tracking-widest ${passed ? 'bg-green-500/10 border-green-500 text-green-500' : 'bg-red-500/10 border-red-500 text-red-500'}`}>
+                {passed ? "PROTOCOL CLEARED" : "PROTOCOL FAILED"}
+            </div>
+
+            <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-lg ${passed ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
+                    <Activity className="w-5 h-5" />
+                </div>
+                <div>
+                    <h3 className="text-lg font-bold">Neuro-Audit</h3>
+                    <p className={`text-xs font-mono mb-1 ${passed ? 'text-green-500' : 'text-red-500'}`}>
+                        Score: {Math.round(totalScore)}/100
+                    </p>
+                </div>
+            </div>
 
             <div className="space-y-6">
                 {/* Dopamine */}

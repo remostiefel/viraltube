@@ -11,7 +11,11 @@ const MOCK_DATA = Array.from({ length: 20 }, (_, i) => ({
     adrenaline: 5 + Math.random() * 10 + i,
 }));
 
-export default function ViralPredictor() {
+interface ViralPredictorProps {
+    godMode?: boolean;
+}
+
+export default function ViralPredictor({ godMode }: ViralPredictorProps) {
     const [data, setData] = useState<any[]>(MOCK_DATA.slice(0, 5));
 
     useEffect(() => {

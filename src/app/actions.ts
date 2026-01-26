@@ -61,8 +61,31 @@ export async function generateVideoIdeas(topic: string): Promise<VideoIdea[]> {
     return await generateIdeasFromGemini(topic, constitution);
 }
 
-export async function generateScriptAction(topic: string, language: "DE" | "EN" = "DE", strategyContext?: string, perfectLoop?: boolean, duration?: "30s" | "60s" | "long", metaNarrative?: boolean): Promise<GeneratedScript | null> {
-    return await generateScriptWithOpenAI(topic, "High-Performance Authority", language, strategyContext, perfectLoop, duration, metaNarrative);
+import { generateChannelAudit, ChannelAuditResult, ChannelAuditData } from "@/lib/gemini";
+
+export async function generateChannelAuditAction(
+    analyticsData: AnalyticsData,
+    recentVideos: OutlierVideo[]
+): Promise<ChannelAuditResult | null> {
+
+    // Format Videos for Context
+    const topVideosContext = recentVideos.slice(0, 3).map(v =>
+        `- "${v.title}" (${v.viewCount} views, Score: ${v.outlierScore})`
+    ).join("\n");
+
+    const auditData: ChannelAuditData = {
+        views: analyticsData.views,
+        subsGained: analyticsData.subscribersGained,
+        avd: (analyticsData.averageViewDuration / 60).toFixed(1) + " min",
+        minutesWatched: analyticsData.estimatedMinutesWatched,
+        topVideos: topVideosContext || "No recent outlier data available."
+    };
+
+    return await generateChannelAudit(auditData);
+}
+
+export async function generateScriptAction(topic: string, language: "DE" | "EN" = "DE", strategyContext?: string, perfectLoop?: boolean, duration?: "30s" | "60s" | "long", metaNarrative?: boolean, protocol?: string): Promise<GeneratedScript | null> {
+    return await generateScriptWithOpenAI(topic, "High-Performance Authority", language, strategyContext, perfectLoop, duration, metaNarrative, protocol);
 }
 
 export async function generateImagePromptsAction(scene: string): Promise<ImagePrompt[]> {
@@ -71,6 +94,26 @@ export async function generateImagePromptsAction(scene: string): Promise<ImagePr
 
 export async function generateImageAction(prompt: string): Promise<string | null> {
     return await generateImageWithOpenAI(prompt);
+}
+
+import { analyzeHookRetention, RetentionAnalysis } from "@/lib/gemini";
+
+export async function analyzeHookRetentionAction(videoId: string): Promise<RetentionAnalysis | null> {
+    let transcript = await getVideoTranscript(videoId);
+
+    // Metadata Fallback if transcript fails (common for Shorts)
+    if (!transcript) {
+        const apiKey = process.env.YOUTUBE_API_KEY;
+        if (apiKey) {
+            const metadata = await getVideoMetadata(videoId, apiKey);
+            if (metadata) {
+                transcript = `[NOTE: TRANSCRIPT UNAVAILABLE - ANALYZING METADATA]\n\nVIDEO TITLE: ${metadata.title}\n\nVIDEO DESCRIPTION:\n${metadata.description}`;
+            }
+        }
+    }
+
+    if (!transcript) return null;
+    return await analyzeHookRetention(transcript);
 }
 
 import { analyzePEONeurotransmitters, PEOScore } from "@/lib/openai";
@@ -155,10 +198,10 @@ export async function previewConsolidationAction(templateIds: string[]): Promise
 
 import { revalidatePath } from "next/cache";
 
-export async function saveTemplateAction(type: "script" | "prompt" | "visual" | "audio" | "viral-wisdom", name: string, content: any, projectId?: string, tags?: string[], rating?: number, wisdomCategory?: "LAW" | "FACT" | "GROWTH"): Promise<Template> {
+export async function saveTemplateAction(type: "script" | "prompt" | "visual" | "audio" | "viral-wisdom", name: string, content: any, projectId?: string, tags?: string[], rating?: number, wisdomCategory?: "LAW" | "FACT" | "GROWTH", skipStandardization?: boolean): Promise<Template> {
 
-    // Auto-Standardize Wisdom if needed
-    if (type === "viral-wisdom" && Array.isArray(content)) {
+    // Auto-Standardize Wisdom if needed (ONLY if not skipped)
+    if (!skipStandardization && type === "viral-wisdom" && Array.isArray(content)) {
         try {
             const standardized = await standardizeWisdom(content);
             if (standardized) content = standardized;
@@ -329,6 +372,43 @@ export async function extractWisdomFromTextAction(
     }
 }
 
+export async function generateWisdomDNAAction(
+    input: { principle: string, explanation: string },
+    language: "DE" | "EN" = "DE"
+): Promise<WisdomNugget | null> {
+    try {
+        const { extractWisdomFromTranscript, standardizeWisdom } = await import("@/lib/openai");
+
+        // We construct a synthetic "transcript" from the user input to feed the extractor
+        const syntheticInput = `PRINCIPLE: ${input.principle}\n\nEXPLANATION: ${input.explanation}`;
+
+        // We use the "LAW" extraction to find the pattern
+        const nuggets = await extractWisdomFromTranscript(syntheticInput, language, "LAW");
+
+        if (!nuggets || nuggets.length === 0) return null;
+
+        // We take the first result, but we ensure we KEEP the user's specific principle/explanation if the AI drifted too far,
+        // OR we accept the AI's refined version.
+        // Better: We explicitly run a "Standardization" pass on this single nugget to get the Universal Law.
+
+        let result = nuggets[0];
+
+        // Ensure standardization (Universal Law)
+        if (!result.universalLaw) {
+            const standardized = await standardizeWisdom([result]);
+            if (standardized && standardized.length > 0) {
+                result = standardized[0];
+            }
+        }
+
+        return result;
+
+    } catch (e) {
+        console.error("Wisdom DNA Generation Failed", e);
+        return null;
+    }
+}
+
 export async function optimizeTitleAction(title: string): Promise<OptimizationResult> {
     return await optimizeTitleWithGemini(title);
 }
@@ -433,13 +513,13 @@ export async function deleteProjectAction(id: string): Promise<void> {
 }
 
 // Trend Scout Action
-import { searchOutlierVideos, OutlierVideo, getChannelRecentVideos } from "@/lib/youtube";
+import { searchOutliers, OutlierVideo, getChannelRecentVideos } from "@/lib/youtube";
 import { synthesizeStrategy } from "@/lib/gemini";
 
-export async function searchOutliersAction(query: string, publishedAfter?: string, maxSubs?: number): Promise<OutlierVideo[]> {
-    const apiKey = process.env.YOUTUBE_API_KEY || "";
-    console.log("[DEBUG] YouTube Key present:", !!apiKey, apiKey ? `(ends: ${apiKey.slice(-4)})` : "");
-    return await searchOutlierVideos(query, apiKey, publishedAfter, maxSubs);
+export async function searchOutliersAction(query: string, publishedAfter?: string, maxSubs?: number, gapMode?: boolean): Promise<OutlierVideo[]> {
+    const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY || "";
+    if (!apiKey) throw new Error("API Key configuration missing");
+    return await searchOutliers(query, apiKey, publishedAfter, maxSubs, gapMode);
 }
 
 export async function synthesizeStrategyAction(inputs: string, context?: string): Promise<string> {
@@ -731,7 +811,8 @@ import {
     getNotebookItems,
     createNotebookItem,
     updateNotebookItem,
-    deleteNotebookItem
+    deleteNotebookItem,
+    reorderNotebookItem
 } from "@/lib/notebook";
 import {
     NotebookItem,
@@ -752,12 +833,26 @@ export async function createNotebookItemAction(
     return await createNotebookItem(type, title, description, priority, tags);
 }
 
-export async function updateNotebookItemAction(id: string, updates: Partial<NotebookItem>): Promise<NotebookItem | null> {
-    return await updateNotebookItem(id, updates);
+
+
+export async function updateNotebookItemAction(id: string, updates: Partial<NotebookItem>): Promise<{ success: true } | { success: false }> {
+    try {
+        await updateNotebookItem(id, updates);
+        revalidatePath("/notebook");
+        return { success: true };
+    } catch (e) {
+        console.error("Update Notebook Item Failed", e);
+        return { success: false };
+    }
 }
 
 export async function deleteNotebookItemAction(id: string): Promise<void> {
     return await deleteNotebookItem(id);
+}
+
+export async function reorderNotebookItemAction(id: string, direction: "up" | "down"): Promise<void> {
+    await reorderNotebookItem(id, direction);
+    revalidatePath("/notebook");
 }
 
 // Notebook Config Actions

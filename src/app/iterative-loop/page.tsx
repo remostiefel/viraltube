@@ -42,8 +42,13 @@ export default function IterativeLoopPage() {
         // Handle legacy string vs new object structure
         if (typeof template.content === 'string') {
             setResult({
-                wordwall: [], // Legacy items might lack wordwall
-                optimizationPrompt: template.content
+                wordwall: [],
+                optimizationPrompt: template.content,
+                viralScore: 0,
+                targetAudience: "Unknown (Legacy)",
+                hookAnalysis: "No legacy data available",
+                sentiments: [],
+                actionableTakeaway: "No legacy data available"
             });
         } else {
             setResult(template.content as ViralAnalysisResult);
@@ -61,7 +66,12 @@ export default function IterativeLoopPage() {
             // Create the final approved result object
             const approvedResult: ViralAnalysisResult = {
                 wordwall: finalWordwall,
-                optimizationPrompt: editablePrompt // Use the edited prompt
+                optimizationPrompt: editablePrompt,
+                viralScore: result.viralScore || 0,
+                targetAudience: result.targetAudience || "Unknown",
+                hookAnalysis: result.hookAnalysis || "None",
+                sentiments: result.sentiments || [],
+                actionableTakeaway: result.actionableTakeaway || "None"
             };
 
             const name = `Viral Wisdom: ${url.split('v=')[1]?.slice(0, 8) || 'Video'} Analysis`;

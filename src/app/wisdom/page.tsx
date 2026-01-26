@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { BookOpen, Sparkles, TrendingUp, Lightbulb, GraduationCap, Edit, Trash2, Archive, ArrowRightLeft, Eye, X, FileDown } from "lucide-react";
 import { getTemplatesAction, deleteTemplateAction, updateWisdomTypeAction, toggleArchiveStatusAction } from "@/app/actions";
 import { Template } from "@/lib/templates";
@@ -9,11 +9,21 @@ import { cn } from "@/lib/utils";
 import { useSearchParams } from "next/navigation";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { useToast } from "@/components/ui/Toast";
 
 export const dynamic = "force-dynamic";
 
-export default function WisdomHub() {
+export default function WisdomHubPage() {
+    return (
+        <React.Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading Wisdom Pool...</div>}>
+            <WisdomHubContent />
+        </React.Suspense>
+    );
+}
+
+function WisdomHubContent() {
     const searchParams = useSearchParams();
+    const { toast } = useToast();
     const [wisdoms, setWisdoms] = useState<Template[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -47,6 +57,7 @@ export default function WisdomHub() {
             setWisdoms(temps);
         } catch (e) {
             console.error(e);
+            toast({ title: "Error loading wisdom", description: "Could not fetch the knowledge pool.", variant: "destructive" });
         } finally {
             setLoading(false);
         }
@@ -63,10 +74,11 @@ export default function WisdomHub() {
                 await deleteTemplateAction(id);
             }
             setSelectedIds([]);
+            toast({ title: "Deleted", description: "Wisdom nuggets permanently removed.", variant: "success" });
             await loadWisdom();
         } catch (e) {
             console.error("Delete failed", e);
-            alert("Deletion failed. Please try again.");
+            toast({ title: "Deletion failed", description: "Could not delete selected items.", variant: "destructive" });
         } finally {
             setLoading(false);
         }
@@ -74,11 +86,18 @@ export default function WisdomHub() {
 
     const handleBatchArchive = async (archive: boolean) => {
         setLoading(true);
-        for (const id of selectedIds) {
-            await toggleArchiveStatusAction(id, archive);
+        try {
+            for (const id of selectedIds) {
+                await toggleArchiveStatusAction(id, archive);
+            }
+            setSelectedIds([]);
+            toast({ title: archive ? "Archived" : "Restored", description: `Items have been ${archive ? 'archived' : 'restored'}.`, variant: "success" });
+            await loadWisdom();
+        } catch (e) {
+            toast({ title: "Archive failed", description: "Could not update archive status.", variant: "destructive" });
+        } finally {
+            setLoading(false);
         }
-        setSelectedIds([]);
-        await loadWisdom();
     };
 
     const handleBatchMove = async (targetType: "LAW" | "FACT" | "GROWTH") => {
@@ -92,10 +111,11 @@ export default function WisdomHub() {
             await new Promise(resolve => setTimeout(resolve, 500));
 
             setSelectedIds([]);
+            toast({ title: "Moved", description: `Wisdom moved to ${targetType}.`, variant: "success" });
             await loadWisdom();
         } catch (e) {
             console.error("Move failed", e);
-            alert("Move failed.");
+            toast({ title: "Move failed", description: "Could not move items.", variant: "destructive" });
             setLoading(false);
         }
     };
@@ -111,10 +131,11 @@ export default function WisdomHub() {
                 // Set the FIRST synthesized principle as the draft to edit
                 setDraftPrinciple(result[0]);
                 setDraftTitle("Master Principle: " + result[0].principle.substring(0, 30));
+                toast({ title: "Synthesis Complete", description: "Draft created from selected nuggets.", variant: "success" });
             }
         } catch (e) {
             console.error(e);
-            alert("Consolidation preview failed.");
+            toast({ title: "Consolidation failed", description: "Could not synthesize nuggets.", variant: "destructive" });
         } finally {
             setConsolidating(false);
         }
@@ -122,6 +143,42 @@ export default function WisdomHub() {
 
     const [draftCategory, setDraftCategory] = useState<"LAW" | "FACT" | "GROWTH">("LAW");
     const [editingId, setEditingId] = useState<string | null>(null);
+    const [isGenerating, setIsGenerating] = useState(false);
+
+    const handleGenerateDNA = async () => {
+        if (!draftPrinciple || (!draftPrinciple.principle && !draftPrinciple.explanation)) {
+            toast({ title: "Input Required", description: "Please enter at least a Principle or Explanation.", variant: "destructive" });
+            return;
+        }
+
+        setIsGenerating(true);
+        try {
+            const { generateWisdomDNAAction } = await import("@/app/actions");
+            const result = await generateWisdomDNAAction({
+                principle: draftPrinciple.principle,
+                explanation: draftPrinciple.explanation
+            });
+
+            if (result) {
+                setDraftPrinciple({
+                    ...draftPrinciple,
+                    universalLaw: result.universalLaw || draftPrinciple.universalLaw,
+                    actionableTip: result.actionableTip || draftPrinciple.actionableTip,
+                    // We set these, but allow user to edit further
+                    principle: result.principle || draftPrinciple.principle,
+                    explanation: result.explanation || draftPrinciple.explanation
+                });
+                toast({ title: "DNA Generated", description: "Universal Law and structure extracted.", variant: "success" });
+            } else {
+                toast({ title: "Generation failed", description: "Could not extract DNA.", variant: "destructive" });
+            }
+        } catch (e) {
+            console.error(e);
+            toast({ title: "Error", description: "AI Processing failed.", variant: "destructive" });
+        } finally {
+            setIsGenerating(false);
+        }
+    };
 
     const handleSaveDraft = async () => {
         if (!draftPrinciple) return;
@@ -137,7 +194,7 @@ export default function WisdomHub() {
                     content: [draftPrinciple],
                     wisdomCategory: draftCategory
                 });
-                alert("Wisdom Updated!");
+                toast({ title: "Wisdom Updated", description: "Your changes have been saved.", variant: "success" });
             } else {
                 // CREATE new
                 await saveTemplateAction(
@@ -147,9 +204,10 @@ export default function WisdomHub() {
                     undefined,
                     tags,
                     5,
-                    draftCategory
+                    draftCategory,
+                    true // Skip Standardization (Use our manually generated/edited data)
                 );
-                alert("Master Principle Saved to Pool!");
+                toast({ title: "Saved to Pool", description: "Master Principle created successfully.", variant: "success" });
             }
 
             setDraftPrinciple(null);
@@ -158,7 +216,7 @@ export default function WisdomHub() {
             loadWisdom();
         } catch (e) {
             console.error(e);
-            alert("Failed to save.");
+            toast({ title: "Save failed", description: "Could not save wisdom.", variant: "destructive" });
         }
     };
 
@@ -173,9 +231,10 @@ export default function WisdomHub() {
             const blob = await generateWisdomDocx(selectedTemplates, "Wisdom Collection Export");
             const date = new Date().toISOString().slice(0, 10);
             saveAs(blob, `NeuroCode_Wisdom_${date}.docx`);
+            toast({ title: "Export Complete", description: "DOCX file downloaded.", variant: "success" });
         } catch (e) {
             console.error("Export failed", e);
-            alert("Export failed");
+            toast({ title: "Export failed", description: "Could not generate DOCX.", variant: "destructive" });
         } finally {
             setExportingDocx(false);
         }
@@ -194,6 +253,8 @@ export default function WisdomHub() {
             contentToEdit = target.content;
         } else if (typeof target.content === 'string') {
             contentToEdit = {
+                type: "LAW",
+                category: "hook",
                 principle: target.content,
                 explanation: "",
                 universalLaw: "",
@@ -201,13 +262,33 @@ export default function WisdomHub() {
             };
         } else {
             // Fallback for empty/legacy
-            contentToEdit = { principle: "", explanation: "", universalLaw: "", actionableTip: "" };
+            contentToEdit = {
+                type: "LAW",
+                category: "hook",
+                principle: "",
+                explanation: "",
+                universalLaw: "",
+                actionableTip: ""
+            };
         }
 
         setDraftPrinciple(contentToEdit);
         setDraftCategory(target.wisdomCategory || "LAW");
         setDraftTitle(target.name.replace("Wisdom: ", "").replace("Master Principle: ", "").replace("👑 ", ""));
         setEditingId(target.id);
+    };
+
+    const handleCreateNew = () => {
+        setDraftPrinciple({
+            principle: "",
+            explanation: "",
+            universalLaw: "",
+            actionableTip: ""
+        });
+        setDraftTitle("");
+        setEditingId(null);
+        setDraftCategory("LAW");
+        setSelectedIds([]);
     };
 
     const toggleSelection = (id: string) => {
@@ -231,6 +312,12 @@ export default function WisdomHub() {
                 </div>
                 {/* Action Bar */}
                 <div className="flex gap-2">
+                    <button
+                        onClick={handleCreateNew}
+                        className="bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 text-white font-bold px-3 py-2 rounded-lg shadow-lg animate-in fade-in flex items-center gap-2 text-xs mr-2"
+                    >
+                        <Sparkles className="w-4 h-4" /> Create Axion
+                    </button>
                     {selectedIds.length > 0 && !draftPrinciple && (
                         <>
                             {filterMode === "ARCHIVED" ? (
@@ -424,10 +511,19 @@ export default function WisdomHub() {
                 <div className="w-1/2 p-8 overflow-y-auto bg-background/50 relative">
                     <div className="max-w-xl mx-auto">
                         {!draftPrinciple ? (
-                            <div className="text-center py-20 opacity-50">
-                                <Edit className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                            <div className="text-center py-20 opacity-50 flex flex-col items-center">
+                                <Edit className="w-16 h-16 mx-auto mb-4 text-muted-foreground transition-transform hover:scale-110 duration-300" />
                                 <h3 className="text-xl font-bold mb-2">Workbench Empty</h3>
-                                <p className="text-sm text-muted-foreground">Select multiple nuggets from the pool and click "Merge" to synthesize a Master Principle.</p>
+                                <p className="text-sm text-muted-foreground max-w-xs mx-auto mb-6">
+                                    Select multiple nuggets from the pool to merge, or start fresh with a new manual entry.
+                                </p>
+                                <button
+                                    onClick={handleCreateNew}
+                                    className="bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95 flex items-center gap-2"
+                                >
+                                    <Sparkles className="w-5 h-5" />
+                                    Create New Axion
+                                </button>
                             </div>
                         ) : (
                             <div className="animate-in slide-in-from-bottom-5 fade-in space-y-6">
@@ -518,6 +614,15 @@ export default function WisdomHub() {
                                             ))}
                                         </div>
                                     </div>
+
+                                    <button
+                                        onClick={handleGenerateDNA}
+                                        disabled={isGenerating}
+                                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3 rounded-lg shadow-lg transition-all mt-6 flex items-center justify-center gap-2"
+                                    >
+                                        {isGenerating ? <Sparkles className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                                        Generate Wisdom DNA (AI)
+                                    </button>
 
                                     <button
                                         onClick={handleSaveDraft}

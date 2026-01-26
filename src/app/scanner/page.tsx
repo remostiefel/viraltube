@@ -43,6 +43,7 @@ export default function Scanner() {
     const [outliers, setOutliers] = useState<OutlierVideo[]>([]);
     const [loadingScout, setLoadingScout] = useState(false);
     const [scoutSearched, setScoutSearched] = useState(false);
+    const [gapMode, setGapMode] = useState(false);
 
 
     // Wisdom Extraction State
@@ -285,20 +286,27 @@ GOAL: Combine the strongest hooks, pacing, and visual styles of these videos int
             // Calculate Date
             let publishedAfter: string | undefined;
             const now = new Date();
-            if (timeframe === "month") {
-                now.setMonth(now.getMonth() - 1);
-                publishedAfter = now.toISOString();
-            } else if (timeframe === "year") {
-                now.setFullYear(now.getFullYear() - 1);
-                publishedAfter = now.toISOString();
+
+            // Filters only apply if NOT in Gap Mode (Gap mode defaults to broad search to find old gems)
+            if (!gapMode) {
+                if (timeframe === "month") {
+                    now.setMonth(now.getMonth() - 1);
+                    publishedAfter = now.toISOString();
+                } else if (timeframe === "year") {
+                    now.setFullYear(now.getFullYear() - 1);
+                    publishedAfter = now.toISOString();
+                }
             }
 
             // Calculate Max Subs
             let maxSubs: number | undefined;
-            if (channelSize === "underdog") maxSubs = 50000;
-            else if (channelSize === "rising") maxSubs = 500000;
+            // Gap mode handles subs internally (Small vs Big)
+            if (!gapMode) {
+                if (channelSize === "underdog") maxSubs = 50000;
+                else if (channelSize === "rising") maxSubs = 500000;
+            }
 
-            const results = await searchOutliersAction(query, publishedAfter, maxSubs);
+            const results = await searchOutliersAction(query, publishedAfter, maxSubs, gapMode);
             setOutliers(results);
         } catch (error: any) {
             console.error(error);
@@ -875,6 +883,17 @@ ${short.voiceOver || "N/A"}
                                         <option value="any">Any Size</option>
                                     </select>
                                 </label>
+                                <button
+                                    type="button"
+                                    onClick={() => setGapMode(!gapMode)}
+                                    className={cn(
+                                        "px-3 py-1.5 rounded-md border text-sm font-bold flex items-center gap-2 transition-all",
+                                        gapMode ? "bg-blue-600 border-blue-400 text-white shadow-[0_0_15px_rgba(37,99,235,0.5)]" : "bg-background/50 border-border/50 text-muted-foreground hover:text-foreground"
+                                    )}
+                                >
+                                    {gapMode ? <Target className="w-4 h-4 animate-pulse" /> : <Target className="w-4 h-4" />}
+                                    Gap Hunter {gapMode ? "ON" : "OFF"}
+                                </button>
                             </div>
 
                             <form onSubmit={handleTrendScoutSearch} className="flex gap-4">
@@ -896,12 +915,14 @@ ${short.voiceOver || "N/A"}
                             </form>
                         </div>
 
-                        {errorMsg && (
-                            <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-4 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
-                                <AlertCircle className="w-5 h-5 shrink-0" />
-                                <p className="font-bold">{errorMsg}</p>
-                            </div>
-                        )}
+                        {
+                            errorMsg && (
+                                <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-4 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
+                                    <AlertCircle className="w-5 h-5 shrink-0" />
+                                    <p className="font-bold">{errorMsg}</p>
+                                </div>
+                            )
+                        }
 
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {outliers.map((video) => (
@@ -972,7 +993,7 @@ ${short.voiceOver || "N/A"}
                                 </div>
                             )}
                         </div>
-                    </div>
+                    </div >
                 )
             }
 

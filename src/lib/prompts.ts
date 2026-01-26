@@ -120,6 +120,7 @@ PERFORMANCE METRICS:
 - Views: {{views}} (Avg)
 - Retention: {{retention}}% (Avg)
 - CTR: {{ctr}}%
+- Subs Gained: {{subsGained}}
 
 TASK:
 1. Analyze the correlation between strategy and metrics.
@@ -137,6 +138,40 @@ RETURN JSON:
         "emulationMode": "translate" | "adapt" | "innovate",
         "contentDepth": number
     }
+}`
+    },
+
+    audit: {
+        id: "audit",
+        label: "The Auditor (Insight Engine)",
+        category: "LOOP",
+        description: "Deep dive channel audit with Stop/Start/Continue advice.",
+        template: `You are a High-Level YouTube Strategist (like Hayden Hillier-Smith or Paddy Galloway).
+        
+CHANNEL METRICS (Last 30 Days):
+- Views: {{views}}
+- Subscribers Gained: {{subsGained}}
+- Avg View Duration: {{avd}}
+- Est. Minutes Watched: {{minutesWatched}}
+
+TOP OUTLIER VIDEOS (Context):
+{{topVideos}}
+
+TASK:
+Conduct a ruthless but constructive audit of this channel's recent performance. Focus on PATTERNS.
+Generate 3 Strategic Insights in the "Stop / Start / Continue" framework, but make them specific to the data.
+
+1. **WIN (Continue)**: What is working? (e.g. "High retention on long-form", "Specific topic performing well").
+2. **LOSS (Stop)**: What is bleeding usage? (e.g. "Low CTR topics", "Confusing thumbnails").
+3. **OPPORTUNITY (Start)**: What is the obvious missing piece?
+
+RETURN JSON:
+{
+    "wins": [{ "title": "Headline", "description": "Explanation..." }],
+    "losses": [{ "title": "Headline", "description": "Explanation..." }],
+    "opportunities": [{ "title": "Headline", "description": "Explanation..." }],
+    "overallSentiment": "Bullish" | "Bearish" | "Neutral",
+    "executiveSummary": "2-3 sentences summarizing the state of the channel."
 }`
     },
 

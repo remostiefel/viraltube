@@ -18,7 +18,11 @@ import {
     Tag,
     X,
     Palette,
-    Settings
+    Settings,
+    Copy,
+    Check,
+    ChevronUp,
+    ChevronDown
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -36,7 +40,8 @@ import {
     getNotebookConfigAction,
     updateTagColorAction,
     startGenesisAction,
-    renameTagAction
+    renameTagAction,
+    reorderNotebookItemAction
 } from "@/app/actions";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
@@ -45,7 +50,7 @@ export default function NotebookPage() {
     const [loading, setLoading] = useState(true);
     const [tagColors, setTagColors] = useState<Record<string, string>>({});
 
-    const [activeTab, setActiveTab] = useState<NotebookItemType>("topic");
+    const [activeTab, setActiveTab] = useState<NotebookItemType>("step");
     const [viewMode, setViewMode] = useState<"active" | "archived">("active");
 
     // Modal States
@@ -162,7 +167,69 @@ export default function NotebookPage() {
         await renameTagAction(oldName, editingTagValue.trim());
         setEditingTagName(null);
         await loadItems();
-        await loadConfig();
+    };
+
+    const handleCopy = (item: NotebookItem) => {
+        const textToCopy = `${item.title}\n\n${item.description || ""}`;
+        navigator.clipboard.writeText(textToCopy);
+
+        // Indicate success briefly via button state if we had local state per item,
+        // or just a toast. Using a simple toast here for consistency with other actions.
+        const toast = document.createElement("div");
+        toast.className = "fixed bottom-4 right-4 bg-foreground text-background px-4 py-2 rounded-lg shadow-lg z-[100] flex items-center gap-2 animate-in slide-in-from-right fade-in duration-300";
+        toast.innerHTML = `
+            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span class="font-bold text-sm">Copied to Clipboard</span>
+        `;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2000);
+    };
+
+    const handleReorder = async (item: NotebookItem, direction: "up" | "down", e?: React.KeyboardEvent | React.MouseEvent) => {
+        if (e) {
+            e.preventDefault(); // Stop scrolling
+            e.stopPropagation();
+        }
+
+        // Optimistic Update
+        const index = items.findIndex(i => i.id === item.id);
+        if (index === -1) return;
+
+        let targetIndex = -1;
+
+        if (direction === "up") {
+            for (let i = index - 1; i >= 0; i--) {
+                if (
+                    items[i].status === item.status &&
+                    items[i].type === item.type &&
+                    items[i].isArchived === item.isArchived
+                ) {
+                    targetIndex = i;
+                    break;
+                }
+            }
+        } else {
+            for (let i = index + 1; i < items.length; i++) {
+                if (
+                    items[i].status === item.status &&
+                    items[i].type === item.type &&
+                    items[i].isArchived === item.isArchived
+                ) {
+                    targetIndex = i;
+                    break;
+                }
+            }
+        }
+
+        if (targetIndex !== -1) {
+            const newItems = [...items];
+            newItems.splice(index, 1);
+            newItems.splice(targetIndex, 0, item);
+            setItems(newItems); // This changes order. React key ensures focus stays on the element.
+
+            // Server Action
+            await reorderNotebookItemAction(item.id, direction);
+        }
     };
 
 
@@ -181,10 +248,9 @@ export default function NotebookPage() {
             // Optimistic update
             setItems(prev => prev.map(i => i.id === item.id ? { ...i, status: newStatus } : i));
 
-            // GENESIS TRIGGER
+            // GENESIS TRIGGER (Only for Topics)
             if (
-                (item.type === "topic" && newStatus === "Scripting") ||
-                (item.type === "step" && newStatus === "In Progress")
+                item.type === "topic" && newStatus === "Scripting"
             ) {
                 // Determine trigger name
                 const triggerName = item.type === "topic" ? "Scripting Protocol" : "Production Protocol";
@@ -228,12 +294,29 @@ export default function NotebookPage() {
     };
 
     const handleUpdate = async (id: string, updates: Partial<NotebookItem>) => {
-        // Include updated tags
+        // 1. OPTIMISTIC UI: Close modal immediately
+        setEditingItem(null);
+
+        // 2. OPTIMISTIC UPDATE: Update local state immediately
+        // Include updated tags in the optimistic update
         const finalUpdates = { ...updates, tags: editItemTags };
 
-        await updateNotebookItemAction(id, finalUpdates);
-        setEditingItem(null);
-        await loadItems();
+        setItems(prev => prev.map(item =>
+            item.id === id ? { ...item, ...finalUpdates, updatedAt: new Date().toISOString() } : item
+        ));
+
+        // 3. BACKGROUND SYNC
+        try {
+            const result = await updateNotebookItemAction(id, finalUpdates);
+            if (!result.success) {
+                // If failed, revert the optimistic update
+                console.error("Server denied update");
+                await loadItems();
+            }
+        } catch (e) {
+            console.error("Failed to update item", e);
+            await loadItems(); // Revert to server state
+        }
     };
 
     const handleArchive = async (item: NotebookItem) => {
@@ -263,6 +346,32 @@ export default function NotebookPage() {
             return { backgroundColor: color + "20", color: color, borderColor: color + "40" };
         }
         return {}; // Default style provided by CSS classes
+    };
+
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            // Topics
+            case "Idea": return "border-slate-500/50 bg-slate-500/10 text-slate-400";
+            case "Researching": return "border-blue-500/50 bg-blue-500/10 text-blue-400";
+            case "Scripting": return "border-purple-500/50 bg-purple-500/10 text-purple-400";
+            case "Filming": return "border-red-500/50 bg-red-500/10 text-red-400";
+            case "Polishing": return "border-pink-500/50 bg-pink-500/10 text-pink-400";
+            case "Ready": return "border-emerald-500/50 bg-emerald-500/10 text-emerald-400";
+
+            // Steps (User Requested Customization)
+            // DONE -> grau
+            case "Done": return "border-slate-500/50 bg-slate-500/10 text-slate-400";
+            // Review -> orange
+            case "Review": return "border-orange-500/50 bg-orange-500/10 text-orange-400";
+            // IN PROGRESS -> grün (emerald matches 'Ready')
+            case "In Progress": return "border-emerald-500/50 bg-emerald-500/10 text-emerald-400";
+            // next -> blau
+            case "Next": return "border-sky-500/50 bg-sky-500/10 text-sky-400";
+            // Backlog -> weiss
+            case "Backlog": return "border-foreground/50 bg-foreground/10 text-foreground";
+
+            default: return "border-border/50 bg-muted/20 text-muted-foreground";
+        }
     };
 
     return (
@@ -417,15 +526,16 @@ export default function NotebookPage() {
 
             {/* Kanban Board */}
             <div className="flex-1 overflow-x-auto overflow-y-hidden">
-                <div className="flex gap-4 h-full min-w-max pb-4">
+                <div className="flex gap-3 h-full min-w-max pb-4">
                     {statuses.map((status) => {
                         const columnItems = filteredItems.filter(i => i.status === status);
+                        const statusStyle = getStatusColor(status);
                         return (
-                            <div key={status} className="w-80 flex flex-col bg-muted/20 border border-border/50 rounded-xl h-full">
+                            <div key={status} className="w-64 min-w-[16rem] flex flex-col bg-muted/20 border border-border/50 rounded-xl h-full">
                                 {/* Column Header */}
-                                <div className="p-4 border-b border-border/50 flex items-center justify-between sticky top-0 bg-muted/20 backdrop-blur-sm rounded-t-xl z-10">
-                                    <h3 className="font-bold text-sm tracking-wide uppercase text-muted-foreground">{status}</h3>
-                                    <span className="bg-muted text-xs font-bold px-2 py-0.5 rounded-full text-muted-foreground">
+                                <div className={cn("p-4 border-b rounded-t-xl z-10 flex items-center justify-between sticky top-0 backdrop-blur-sm", statusStyle)}>
+                                    <h3 className="font-bold text-sm tracking-wide uppercase">{status}</h3>
+                                    <span className="bg-background/20 text-xs font-bold px-2 py-0.5 rounded-full">
                                         {columnItems.length}
                                     </span>
                                 </div>
@@ -433,7 +543,15 @@ export default function NotebookPage() {
                                 {/* Items */}
                                 <div className="flex-1 overflow-y-auto p-3 space-y-3">
                                     {columnItems.map(item => (
-                                        <div key={item.id} className="bg-card border border-border/50 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow group relative">
+                                        <div
+                                            key={item.id}
+                                            tabIndex={0}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'ArrowUp') handleReorder(item, 'up', e);
+                                                if (e.key === 'ArrowDown') handleReorder(item, 'down', e);
+                                            }}
+                                            className="bg-card border border-border/50 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow group relative focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                                        >
                                             {/* Priority Stripe */}
                                             <div className={cn("absolute left-0 top-0 bottom-0 w-1 rounded-l-lg",
                                                 item.priority === "high" ? "bg-red-500" :
@@ -443,13 +561,43 @@ export default function NotebookPage() {
 
                                             <div className="ml-2">
                                                 <div className="flex justify-between items-start mb-2">
-                                                    <h4 className="font-bold text-sm leading-tight">{item.title}</h4>
-                                                    <button
-                                                        onClick={() => setEditingItem(item)}
-                                                        className="opacity-0 group-hover:opacity-100 p-1 hover:bg-muted rounded text-muted-foreground hover:text-foreground transition-all"
-                                                    >
-                                                        <Pencil className="w-3.5 h-3.5" />
-                                                    </button>
+                                                    <h4 className="font-bold text-sm leading-tight flex-1 mr-2">{item.title}</h4>
+                                                    <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <button
+                                                            onClick={(e) => handleReorder(item, "up", e)}
+                                                            className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-foreground transition-all"
+                                                            title="Move Up"
+                                                        >
+                                                            <ChevronUp className="w-3.5 h-3.5" />
+                                                        </button>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setEditingItem(item);
+                                                            }}
+                                                            className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-foreground transition-all"
+                                                            title="Edit"
+                                                        >
+                                                            <Pencil className="w-3.5 h-3.5" />
+                                                        </button>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleCopy(item);
+                                                            }}
+                                                            className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-foreground transition-all"
+                                                            title="Copy to Clipboard"
+                                                        >
+                                                            <Copy className="w-3.5 h-3.5" />
+                                                        </button>
+                                                        <button
+                                                            onClick={(e) => handleReorder(item, "down", e)}
+                                                            className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-foreground transition-all"
+                                                            title="Move Down"
+                                                        >
+                                                            <ChevronDown className="w-3.5 h-3.5" />
+                                                        </button>
+                                                    </div>
                                                 </div>
 
                                                 {/* Tags Display */}

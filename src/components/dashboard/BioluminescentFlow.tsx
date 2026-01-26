@@ -28,7 +28,7 @@ function Nebula({ color }: { color: string }) {
 
     return (
         <group ref={ref}>
-            <Cloud opacity={0.3} speed={0.4} width={10} depth={1.5} segments={20} color={color} />
+            <Cloud opacity={0.3} speed={0.4} bounds={[10, 1.5, 1]} segments={20} color={color} />
         </group>
     )
 }

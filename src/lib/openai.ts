@@ -60,7 +60,8 @@ export async function generateScriptWithOpenAI(
     strategyContext?: string,
     perfectLoop?: boolean,
     duration?: "30s" | "60s" | "long",
-    metaNarrative?: boolean
+    metaNarrative?: boolean,
+    protocol?: string // NEW PROTOCOL ID
 ): Promise<GeneratedScript | null> {
     if (!openai) {
         console.error("OpenAI API Key missing");
@@ -100,6 +101,27 @@ export async function generateScriptWithOpenAI(
     
     ${constitution}
   `;
+
+    // INJECT PROTOCOL OVERRIDE (Structure Enforcer)
+    if (protocol) {
+        // We import dynamically to avoid circular deps if needed, or just defined constants
+        const { getProtocolById } = require("./protocols");
+        const protocolData = getProtocolById(protocol);
+
+        if (protocolData) {
+            systemPrompt += `
+            
+    [ACTIVE PROTOCOL: ${protocolData.name.toUpperCase()}]
+    You MUST strictly follow this exact structural beat sheet. This overrides general structure instructions.
+    
+    ${protocolData.description}
+    ${protocolData.systemPromptAddon}
+    
+    REQUIRED BEATS (Approx Timing):
+    ${protocolData.structure.map((s: any) => `- ${s.beat} (${s.timing}): ${s.instruction}`).join("\n    ")}
+            `;
+        }
+    }
 
     // INJECT CUSTOM STRATEGY CONTEXT (From Strategy Forge)
     if (strategyContext) {
@@ -388,6 +410,11 @@ export interface WordwallItem {
 }
 
 export interface ViralAnalysisResult {
+    viralScore: number;
+    targetAudience: string;
+    hookAnalysis: string;
+    sentiments: string[];
+    actionableTakeaway: string;
     wordwall: WordwallItem[];
     optimizationPrompt: string;
     neuroScore?: PEOScore; // Reusing existing PEOScore interface
@@ -424,12 +451,22 @@ export async function analyzeViralVideoContent(
     3. **WORDWALL (Concepts)**: Extract abstract, transferable patterns (e.g. "The Open Loop", "Pattern Interrupt").
        - Explain HOW it was used here.
 
-    4. **OPTIMIZATION PROMPT**: Synthesize a powerful, instruction-based prompt that I can feed back to YOU later.
-       - This prompt should say: "Act as a Viral Strategist. Apply the [X] pattern found in this video to [New Topic]..."
-       - It must encapsulate the *essence* of this video's success structure.
+    4. **OPTIMIZATION PROMPT**: Synthesize a powerful, instruction-based prompt.
+    
+    5. **METRICS**:
+       - **Viral Score**: 0-10 estimated viral potential.
+       - **Target Audience**: Who is this specifically for?
+       - **Hook Analysis**: One sentence on why the first 30s worked (or didn't).
+       - **Sentiments**: List of 3-5 key emotions (e.g. "Curiosity", "Outrage").
+       - **Takeaway**: One concrete thing to replicate.
 
     RETURN JSON ONLY:
     {
+      "viralScore": 8.5,
+      "targetAudience": "Productivity enthusiasts",
+      "hookAnalysis": "Strong pattern interrupt with the 'False Fail'...",
+      "sentiments": ["Curiosity", "Fear of Missing Out", "Hope"],
+      "actionableTakeaway": "Start your next video with a failure story.",
       "wordwall": [
         { "keyword": "The False Fail", "explanation": "Host pretended to fail at 0:30 to build relatability...", "category": "Retention", "relevanceScore": 0.9 }
       ],

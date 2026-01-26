@@ -9,6 +9,8 @@ function CallbackContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const code = searchParams.get("code");
+    const error = searchParams.get("error");
+    const errorDescription = searchParams.get("error_description");
     const [status, setStatus] = useState<"processing" | "success" | "error">("processing");
     const processed = useRef(false);
 
@@ -53,6 +55,23 @@ function CallbackContent() {
 
         exchange();
     }, [code, router]);
+
+    if (error) {
+        return (
+            <div className="h-screen flex flex-col items-center justify-center space-y-4 text-red-500">
+                <XCircle className="w-12 h-12" />
+                <h2 className="text-xl font-bold">Connection Failed</h2>
+                <div className="bg-red-50 text-red-700 p-4 rounded-lg font-mono text-sm max-w-md text-center">
+                    <p className="font-bold">{error}</p>
+                    <p>{errorDescription}</p>
+                </div>
+                <p className="text-muted-foreground text-sm">Usually this means the user declined access or needs to be added to Test Users in Google Cloud.</p>
+                <button onClick={() => router.push("/settings")} className="text-primary hover:underline">
+                    Back to Settings
+                </button>
+            </div>
+        );
+    }
 
     if (!code) return <div className="h-screen flex items-center justify-center text-red-500">Missing Auth Code</div>;
 

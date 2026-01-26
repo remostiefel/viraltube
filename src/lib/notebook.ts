@@ -91,3 +91,64 @@ export async function saveNotebookItems(items: NotebookItem[]): Promise<void> {
     await ensureFile();
     await fs.writeFile(NOTEBOOK_FILE, JSON.stringify(items, null, 2), "utf-8");
 }
+
+export async function reorderNotebookItem(id: string, direction: "up" | "down"): Promise<NotebookItem[]> {
+    await ensureFile();
+    const items = await getNotebookItems();
+    const index = items.findIndex(i => i.id === id);
+    if (index === -1) return items;
+
+    const item = items[index];
+
+    // Find target index - nearest item with same status AND type (since UI separates them)
+    // Actually the UI filters by type (activeTab) AND status.
+    // So we must respect both.
+    // Also respect 'isArchived' view mode? 
+    // Usually reordering is done in the active list. 
+    // If we reorder archived items, we should look for archived neighbors.
+
+    let targetIndex = -1;
+
+    if (direction === "up") {
+        for (let i = index - 1; i >= 0; i--) {
+            if (
+                items[i].status === item.status &&
+                items[i].type === item.type &&
+                items[i].isArchived === item.isArchived
+            ) {
+                targetIndex = i;
+                break;
+            }
+        }
+    } else {
+        for (let i = index + 1; i < items.length; i++) {
+            if (
+                items[i].status === item.status &&
+                items[i].type === item.type &&
+                items[i].isArchived === item.isArchived
+            ) {
+                targetIndex = i;
+                break;
+            }
+        }
+    }
+
+    if (targetIndex !== -1) {
+        // Remove item
+        items.splice(index, 1);
+        // Insert at target index
+        // Note: existing logic analysis confirms usage of targetIndex for both directions works
+        // because of how indices shift when removing "index".
+        // If direction is DOWN: targetIndex > index. Removal shifts targetIndex down by 1.
+        // We want to insert AFTER target. So (targetIndex-1) + 1 = targetIndex.
+        // If direction is UP: targetIndex < index. Removal doesn't affect targetIndex.
+        // We want to insert BEFORE target. So targetIndex.
+        // Yes, splicing at `targetIndex` works for both.
+        items.splice(targetIndex, 0, item);
+
+        await fs.writeFile(NOTEBOOK_FILE, JSON.stringify(items, null, 2), "utf-8");
+        return items;
+    }
+
+    return items;
+}

@@ -38,26 +38,30 @@ export type NavItem = {
 
 // Neuro-Code OS Navigation
 export const navigation: NavItem[] = [
-    { group: "SYSTEM", name: "Dashboard", href: "/", icon: Home, subtitle: "Mission Control", color: "#FFFFFF" },
+    { group: "SYSTEM", name: "Dashboard", href: "/", icon: Home, subtitle: "Mission Control", color: "#F8FAFC" },
 
     { group: "VISIONARY", name: "Virt Vision", href: "/vision", icon: Eye, subtitle: "Future Concept", color: "#D946EF" },
     { group: "VISIONARY", name: "Brain Build", href: "/brain-story", icon: History, subtitle: "Origin Story", color: "#F472B6" },
 
-    { group: "BIO-OS", name: "The Upgrade", href: "/upgrade", icon: Zap, subtitle: "Neuro-Priming (15m)", color: "#2DD4BF" },
-    { group: "BIO-OS", name: "Neuro-Sync", href: "/sync", icon: Activity, subtitle: "Flow State Audio", color: "#A855F7" },
-    { group: "BIO-OS", name: "Micro-Protocols", href: "/protocols", icon: Workflow, subtitle: "Acute Solutions" },
+    // BIO-OS: Teals & Turquoise
+    { group: "BIO-OS", name: "The Upgrade", href: "/upgrade", icon: Zap, subtitle: "Neuro-Priming (15m)", color: "#2DD4BF" }, // Teal-400
+    { group: "BIO-OS", name: "Neuro-Sync", href: "/sync", icon: Activity, subtitle: "Flow State Audio", color: "#14B8A6" },   // Teal-500
+    { group: "BIO-OS", name: "Micro-Protocols", href: "/protocols", icon: Workflow, subtitle: "Acute Solutions", color: "#06B6D4" }, // Cyan-500
 
+    // SIGNALS: Blues & Indigos
     { group: "SIGNALS", name: "Scanner", href: "/scanner", icon: Radar, subtitle: "Trend Scout", color: "#38BDF8" },
-    { group: "SIGNALS", name: "Wisdom", href: "/wisdom?filter=LAW", icon: GraduationCap, subtitle: "Knowledge Extraction" },
+    { group: "SIGNALS", name: "Analytics", href: "/feedback", icon: Activity, subtitle: "Channel Intelligence", color: "#60A5FA" },
+    { group: "SIGNALS", name: "Wisdom", href: "/wisdom?filter=LAW", icon: GraduationCap, subtitle: "Knowledge Extraction", color: "#818CF8" },
 
-    { group: "PRODUCTION", name: "Architect", href: "/architect?tab=script", icon: PencilRuler, subtitle: "Strategy & Script", color: "#4ADE80" },
-    { group: "PRODUCTION", name: "Director", href: "/architect?tab=director", icon: Film, subtitle: "Visuals", color: "#EC4899" },
+    // PRODUCTION: Greens
+    { group: "PRODUCTION", name: "Architect", href: "/architect?tab=script", icon: PencilRuler, subtitle: "Strategy & Script", color: "#4ADE80" }, // Green-400
+    { group: "PRODUCTION", name: "Director", href: "/architect?tab=director", icon: Film, subtitle: "Visuals", color: "#22C55E" },         // Green-500
 
+    // SYSTEM: Warm tones / Neutrals
     { group: "SYSTEM", name: "Notebook", href: "/notebook", icon: Notebook, subtitle: "Pipeline & Tasks", color: "#F59E0B" },
-    { group: "SYSTEM", name: "Cortex", href: "/cortex", icon: Brain, subtitle: "Strategy Core" },
-    { group: "SYSTEM", name: "Vault", href: "/vault", icon: Database, subtitle: "Assets" },
-    { group: "SYSTEM", name: "Settings", href: "/settings", icon: Settings, subtitle: "Config" },
-
+    { group: "SYSTEM", name: "Core Identity", href: "/core-identity", icon: Brain, subtitle: "Strategy Core", color: "#94A3B8" }, // Subtle Blue-Grey
+    { group: "SYSTEM", name: "Vault", href: "/vault", icon: Database, subtitle: "Assets", color: "#E2E8F0" }, // Light Grey
+    { group: "SYSTEM", name: "Settings", href: "/settings", icon: Settings, subtitle: "Config", color: "#64748B" }, // Darker Grey
 
 ];
 
