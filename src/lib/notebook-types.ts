@@ -30,4 +30,6 @@ export interface NotebookItem {
     tags: string[];
     priority: "low" | "medium" | "high";
     isArchived: boolean;
+    completedAt?: string;
+    formatId?: string; // Links to FormatRegistry
 }

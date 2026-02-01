@@ -5,7 +5,7 @@ const TEMPLATE_FILE = path.join(process.cwd(), "src", "data", "templates.json");
 
 export interface Template {
     id: string;
-    type: "script" | "prompt" | "visual" | "audio" | "viral-wisdom";
+    type: "script" | "prompt" | "visual" | "audio" | "viral-wisdom" | "necessity";
     name: string;
     content: any; // Can be GeneratedScript, ImagePrompt[], etc.
     createdAt: string;

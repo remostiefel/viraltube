@@ -19,6 +19,7 @@ export interface ScientificPaper {
     };
     cited_by_count: number;
     doi: string;
+    abstract_text?: string; // Optional field for alternative providers (Semantic Scholar / PubMed)
 }
 
 // Helper to reconstruct abstract from inverted index (if needed) or simple snippet
@@ -39,7 +40,11 @@ export async function searchOpenAlex(query: string): Promise<ScientificPaper[]> 
         const email = "neurocode.de@gmail.com"; // Good practice: Identify yourself
         const url = `https://api.openalex.org/works?search=${encodeURIComponent(query)}&per_page=5&sort=relevance_score:desc&mailto=${email}`;
 
-        const res = await fetch(url);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout
+
+        const res = await fetch(url, { signal: controller.signal });
+        clearTimeout(timeoutId);
         if (!res.ok) {
             console.error("OpenAlex Fetch Error", res.statusText);
             return [];
@@ -47,8 +52,12 @@ export async function searchOpenAlex(query: string): Promise<ScientificPaper[]> 
 
         const data = await res.json();
         return data.results || [];
-    } catch (error) {
-        console.error("OpenAlex Service Error", error);
+    } catch (error: any) {
+        if (error.name === 'AbortError') {
+            console.error("OpenAlex Request Timed Out (5s limit)");
+        } else {
+            console.error("OpenAlex Service Error", error);
+        }
         return [];
     }
 }

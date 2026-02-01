@@ -17,7 +17,7 @@ interface TemplateManagerProps {
 }
 
 export function TemplateManager({ isOpen, onClose, templates, onLoad, onRefresh }: TemplateManagerProps) {
-    const [activeTab, setActiveTab] = useState<"drafts" | "blueprints" | "prompts">("drafts");
+    const [activeTab, setActiveTab] = useState<"drafts" | "blueprints" | "prompts" | "necessities">("drafts");
 
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editName, setEditName] = useState("");
@@ -53,13 +53,15 @@ export function TemplateManager({ isOpen, onClose, templates, onLoad, onRefresh 
     // Filter logic
     const blueprints = sortedTemplates.filter(t => t.type === "viral-wisdom" || t.name.includes("🧬"));
     const prompts = sortedTemplates.filter(t => ["prompt", "visual", "audio"].includes(t.type));
+    const necessities = sortedTemplates.filter(t => t.type === "necessity");
     // Drafts are scripts that are NOT blueprints
-    const drafts = sortedTemplates.filter(t => t.type === "script" && !t.name.includes("🧬") && !blueprints.includes(t));
+    const drafts = sortedTemplates.filter(t => t.type === "script" && !t.name.includes("🧬") && !blueprints.includes(t) && !necessities.includes(t));
 
     const getActiveList = () => {
         switch (activeTab) {
             case "blueprints": return blueprints;
             case "prompts": return prompts;
+            case "necessities": return necessities;
             default: return drafts;
         }
     };
@@ -112,6 +114,18 @@ export function TemplateManager({ isOpen, onClose, templates, onLoad, onRefresh 
                             <Clapperboard className="w-4 h-4" /> Saved Prompts
                             <span className="bg-amber-500/20 text-xs px-1.5 rounded-full">{prompts.length}</span>
                         </button>
+                        <button
+                            onClick={() => setActiveTab("necessities")}
+                            className={cn(
+                                "px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2",
+                                activeTab === "necessities"
+                                    ? "bg-emerald-500 text-white shadow-sm"
+                                    : "text-muted-foreground hover:text-emerald-500 hover:bg-emerald-500/10"
+                            )}
+                        >
+                            <Sparkles className="w-4 h-4" /> Niki Examples
+                            <span className="bg-emerald-500/20 text-xs px-1.5 rounded-full">{necessities.length}</span>
+                        </button>
                     </div>
 
                     <DialogDescription className="mt-2 text-xs">
@@ -143,7 +157,8 @@ export function TemplateManager({ isOpen, onClose, templates, onLoad, onRefresh 
                                     onLoad={onLoad}
                                     isLoading={status === "active"}
                                     isBlueprint={activeTab === "blueprints"}
-                                    isPrompt={activeTab === "prompts"} // Use generic styling or specific?
+                                    isPrompt={activeTab === "prompts"}
+                                    isNecessity={activeTab === "necessities"}
                                 />
                             ))
                         )}
@@ -154,7 +169,7 @@ export function TemplateManager({ isOpen, onClose, templates, onLoad, onRefresh 
     );
 }
 
-function TemplateRow({ template, editingId, editName, onEditStart, onEditChange, onEditSave, onEditCancel, onDelete, onLoad, isLoading, isBlueprint, isPrompt }: any) {
+function TemplateRow({ template, editingId, editName, onEditStart, onEditChange, onEditSave, onEditCancel, onDelete, onLoad, isLoading, isBlueprint, isPrompt, isNecessity }: any) {
     const isEditing = editingId === template.id;
 
     return (
@@ -165,14 +180,16 @@ function TemplateRow({ template, editingId, editName, onEditStart, onEditChange,
             className={cn("flex items-center justify-between p-3 rounded-lg border transition-all group",
                 isBlueprint ? "bg-purple-900/10 border-purple-500/20 hover:bg-purple-900/20" :
                     isPrompt ? "bg-amber-900/10 border-amber-500/20 hover:bg-amber-900/20" :
-                        "bg-card border-border/40 hover:bg-muted/50")}
+                        isNecessity ? "bg-emerald-900/10 border-emerald-500/20 hover:bg-emerald-900/20" :
+                            "bg-card border-border/40 hover:bg-muted/50")}
         >
             <div className="flex-1 flex items-center gap-3 overflow-hidden">
                 <div className={cn("w-8 h-8 rounded flex items-center justify-center shrink-0",
                     isBlueprint ? "bg-purple-500/20 text-purple-400" :
                         isPrompt ? "bg-amber-500/20 text-amber-500" :
-                            "bg-primary/20 text-primary")}>
-                    {isBlueprint ? <Sparkles className="w-4 h-4" /> : isPrompt ? <Clapperboard className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
+                            isNecessity ? "bg-emerald-500/20 text-emerald-500" :
+                                "bg-primary/20 text-primary")}>
+                    {isBlueprint ? <Sparkles className="w-4 h-4" /> : isPrompt ? <Clapperboard className="w-4 h-4" /> : isNecessity ? <Sparkles className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
                 </div>
 
                 {isEditing ? (

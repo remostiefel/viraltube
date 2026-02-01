@@ -1,12 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { BookOpen, Map, Zap, FileText, ChevronRight, HelpCircle, Bot, ArrowRight, Database, GraduationCap, GitMerge } from "lucide-react";
+import { useRef } from "react";
+import { BookOpen, Map, Zap, FileText, ChevronRight, HelpCircle, Bot, ArrowRight, Database, GraduationCap, GitMerge, History } from "lucide-react";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { motion } from "framer-motion";
+import { BRAIN_BUILD_HISTORY } from "@/components/brain-story/brainBuildData";
+import StoryNode from "@/components/brain-story/StoryNode";
+import { ContextualHelp } from "@/components/help/ContextualHelp";
 
 export default function HelpPage() {
-    const [activeTab, setActiveTab] = useState<"overview" | "quickstart" | "manual" | "workflow">("overview");
+    const [activeTab, setActiveTab] = useState<"overview" | "quickstart" | "manual" | "workflow" | "orientation">("overview");
 
     return (
         <div className="max-w-6xl mx-auto space-y-8 pb-20">
@@ -14,6 +18,10 @@ export default function HelpPage() {
                 <h2 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
                     <HelpCircle className="w-8 h-8 text-primary" />
                     Knowledge Base
+                    <ContextualHelp
+                        title="The Oracle"
+                        content="This is Knox, the system librarian. All protocols are stored here."
+                    />
                 </h2>
                 <p className="text-muted-foreground mt-2">
                     Master the Neuro-OS workflow: Documentation & Manual.
@@ -28,6 +36,13 @@ export default function HelpPage() {
                     icon={Map}
                     active={activeTab === "overview"}
                     onClick={() => setActiveTab("overview")}
+                />
+                <TabButton
+                    id="orientation"
+                    label="Orientation (History)"
+                    icon={History}
+                    active={activeTab === "orientation"}
+                    onClick={() => setActiveTab("orientation")}
                 />
                 <TabButton
                     id="workflow"
@@ -55,9 +70,33 @@ export default function HelpPage() {
             {/* Content Area */}
             <div className="min-h-[60vh]">
                 {activeTab === "overview" && <OverviewSection />}
+                {activeTab === "orientation" && <OrientationSection />}
                 {activeTab === "quickstart" && <QuickstartSection />}
                 {activeTab === "manual" && <ManualSection />}
                 {activeTab === "workflow" && <WorkflowSection />}
+            </div>
+        </div>
+    );
+}
+
+function OrientationSection() {
+    return (
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-4xl mx-auto">
+            <div className="bg-gradient-to-r from-pink-900/40 to-purple-900/40 border border-pink-500/30 rounded-xl p-8 text-center mb-12">
+                <h3 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400 mb-2">
+                    Origin Story
+                </h3>
+                <p className="text-lg text-muted-foreground">
+                    Understand the "Why" behind every module.
+                </p>
+            </div>
+
+            <div className="relative">
+                {BRAIN_BUILD_HISTORY.map((beat, index) => (
+                    <div key={index} className="scale-90 opacity-90 hover:opacity-100 hover:scale-95 transition-all">
+                        <StoryNode index={index} data={beat} />
+                    </div>
+                ))}
             </div>
         </div>
     );

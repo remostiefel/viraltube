@@ -57,6 +57,10 @@
   --neuro-amber-muted: #B45309;
   --neuro-amber-bright: #F59E0B;
 
+  /* Sun Theme Colors - Strong Light Yellow Bright */
+  --neuro-sun-muted: #EAB308;
+  --neuro-sun-bright: #FFFF00;
+
   --border: #2d3748;
   --input: #1F2833;
   --ring: var(--neuro-teal-bright);
@@ -159,6 +163,56 @@
   /* Handle specific glowing shadows if possible, otherwise they remain teal-ish but less visible */
   .shadow-\[0_0_15px_-5px_rgba\(45\,212\,191\,0\.2\)\] {
     box-shadow: 0 0 15px -5px rgba(245, 158, 11, 0.3) !important;
+  }
+}
+
+.theme-sun {
+  --primary: var(--neuro-sun-bright);
+  --primary-foreground: #000000;
+
+  --secondary: var(--neuro-sun-muted);
+  --secondary-foreground: #000000;
+
+  --ring: var(--neuro-sun-bright);
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--neuro-sun-bright);
+  }
+
+  /* AGGRESSIVE OVERRIDES FOR A/B TEST (Force Teal/Cyan -> Sun) */
+  .text-teal-400,
+  .text-teal-500,
+  .text-cyan-400,
+  .text-cyan-500,
+  .text-primary {
+    color: var(--neuro-sun-bright) !important;
+  }
+
+  .text-teal-100 {
+    color: #FEF9C3 !important;
+    /* Yellow-100 */
+  }
+
+  .bg-teal-400,
+  .bg-teal-500,
+  .bg-cyan-500 {
+    background-color: var(--neuro-sun-bright) !important;
+  }
+
+  .bg-teal-900\/20 {
+    background-color: rgba(234, 179, 8, 0.2) !important;
+    /* Sun Muted / 20 */
+  }
+
+  .border-teal-400,
+  .border-teal-500,
+  .border-cyan-500 {
+    border-color: var(--neuro-sun-muted) !important;
+  }
+
+  /* Handle specific glowing shadows if possible, otherwise they remain teal-ish but less visible */
+  .shadow-\[0_0_15px_-5px_rgba\(45\,212\,191\,0\.2\)\] {
+    box-shadow: 0 0 15px -5px rgba(255, 255, 0, 0.3) !important;
   }
 }
 

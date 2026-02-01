@@ -1,6 +1,12 @@
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, LevelFormat, convertInchesToTwip } from "docx";
 
-export const generateDocx = async (content: string, title: string): Promise<Blob> => {
+export const getDocxFilename = (type: string, title: string = "Untitled"): string => {
+    const date = new Date().toISOString().split('T')[0];
+    const cleanTitle = title.replace(/[^a-zA-Z0-9\-_]/g, '_').replace(/-+/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+    return `${type}_${cleanTitle || "Untitled"}_${date}_NC.docx`;
+};
+
+export const generateDocx = async (content: string, title: string, voiceoverStyle?: string): Promise<Blob> => {
 
     // Config for auto-numbering
     const numbering = {
@@ -51,6 +57,8 @@ export const generateDocx = async (content: string, title: string): Promise<Blob
     );
 
     // Parse Content
+    let plainTextParts: string[] = []; // Collect plain text for VoiceOver section
+
     lines.forEach(line => {
         const trimmed = line.trim();
 
@@ -92,8 +100,22 @@ export const generateDocx = async (content: string, title: string): Promise<Blob
         } else if (trimmed === "" || trimmed === "---") {
             // Empty line or separator (add small space)
             docChildren.push(new Paragraph({ spacing: { after: 100 } }));
+        } else if (trimmed.startsWith('> **Visual:**') || trimmed.startsWith('> Visual:')) {
+            // Visual cue - skip for plain text
+            docChildren.push(
+                new Paragraph({
+                    children: [
+                        new TextRun({ text: trimmed.replace('> ', ''), italics: true, color: "666666" }),
+                    ],
+                    spacing: { after: 120 },
+                })
+            );
         } else {
-            // Standard Paragraph
+            // Standard Paragraph - collect for voiceover
+            // Strip markdown formatting for plain text
+            const plainText = trimmed.replace(/\*\*(.*?)\*\*/g, '$1').replace(/\*(.*?)\*/g, '$1');
+            if (plainText.length > 5) plainTextParts.push(plainText);
+
             // Basic Bold parsing for **text**
             const parts = trimmed.split(/(\*\*.*?\*\*)/g);
             const children = parts.map(part => {
@@ -116,6 +138,51 @@ export const generateDocx = async (content: string, title: string): Promise<Blob
                 })
             );
         }
+    });
+
+    // === VOICEOVER SECTION ===
+    docChildren.push(new Paragraph({ spacing: { after: 400 } })); // Spacer
+    docChildren.push(
+        new Paragraph({
+            text: "────────────────────────────────",
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 200 },
+        })
+    );
+    docChildren.push(
+        new Paragraph({
+            text: "VOICEOVER (Plain Text)",
+            heading: HeadingLevel.HEADING_1,
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 300 },
+        })
+    );
+
+    // Voiceover Style Instruction (Dynamic from AI or fallback)
+    const styleInstruction = voiceoverStyle || "Read aloud in an intense, captivating tone – like a mad scientist revealing forbidden knowledge:";
+    docChildren.push(
+        new Paragraph({
+            children: [
+                new TextRun({
+                    text: styleInstruction,
+                    italics: true,
+                    bold: true,
+                    color: "8B0000"
+                }),
+            ],
+            spacing: { after: 300 },
+            alignment: AlignmentType.CENTER,
+        })
+    );
+
+    // Add all plain text as one flowing section
+    plainTextParts.forEach(text => {
+        docChildren.push(
+            new Paragraph({
+                text: text,
+                spacing: { after: 150 },
+            })
+        );
     });
 
 

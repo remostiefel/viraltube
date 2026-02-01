@@ -1,15 +1,13 @@
 "use client";
 
-import { StatCard } from "@/components/dashboard/StatCard";
-import { HealthDashboard } from "@/components/dashboard/HealthDashboard";
-import { Users, Eye, Sparkles, AlertCircle, RefreshCw, ArrowRight, Brain, Zap, Link as LinkIcon, Lock, Film, CheckCircle, Save, X, Activity, Stethoscope } from "lucide-react";
-import { fetchAnalyticsAction, fetchChannelInsights, fetchChannelVideosAction, analyzeViralVideoAction, generateChannelAuditAction, saveTemplateAction, analyzeHookRetentionAction } from "@/app/actions";
+import { Users, Eye, Sparkles, AlertCircle, RefreshCw, ArrowRight, Brain, Zap, Link as LinkIcon, Lock, Film, CheckCircle, Save, X, Activity, Stethoscope, HeartPulse as HeartPulseIcon, ChevronRight, Target, Lightbulb } from "lucide-react";
+import { fetchAnalyticsAction, fetchChannelInsights, fetchChannelVideosAction, analyzeViralVideoAction, generateChannelAuditAction, saveTemplateAction, analyzeHookRetentionAction, generateMetricOptimizationAction } from "@/app/actions";
 import { getAuthUrl } from "@/lib/google-oauth";
 import { useEffect, useState, useMemo } from "react";
 import { ChannelData, OutlierVideo } from "@/lib/youtube";
 import { ViralAnalysisResult } from "@/lib/openai";
 import { AnalyticsData, calculateSatisfactionScore, calculateQCR, calculateZombieScore } from "@/lib/youtube-analytics";
-import { ChannelAuditResult, InsightItem, RetentionAnalysis } from "@/lib/gemini";
+import { ChannelAuditResult, InsightItem, RetentionAnalysis, MetricOptimizationResult } from "@/lib/gemini";
 import { cn } from "@/lib/utils";
 
 import { useRouter } from "next/navigation";
@@ -32,6 +30,36 @@ export default function ReflectionRoom() {
   // audit State
   const [audit, setAudit] = useState<ChannelAuditResult | null>(null);
   const [auditing, setAuditing] = useState(false);
+  const [auditMode, setAuditMode] = useState<'medical' | 'professional'>('medical');
+
+  // METRIC DRILL DOWN STATE
+  const [selectedMetric, setSelectedMetric] = useState<{ name: string, value: string, color: string, icon: any } | null>(null);
+  const [optimizingMetric, setOptimizingMetric] = useState(false);
+  const [metricStrategy, setMetricStrategy] = useState<MetricOptimizationResult | null>(null);
+
+  const openMetricModal = (name: string, value: string, color: string, icon: any) => {
+    setSelectedMetric({ name, value, color, icon });
+    setMetricStrategy(null); // Reset previous strategy
+  };
+
+  const closeMetricModal = () => {
+    setSelectedMetric(null);
+    setOptimizingMetric(false);
+  };
+
+  const handleOptimizeMetric = async () => {
+    if (!selectedMetric) return;
+    setOptimizingMetric(true);
+    try {
+      const result = await generateMetricOptimizationAction(selectedMetric.name, selectedMetric.value, stats?.id);
+      setMetricStrategy(result);
+    } catch (e) {
+      console.error(e);
+      setNotification({ message: "Optimization Failed", type: 'error' });
+    } finally {
+      setOptimizingMetric(false);
+    }
+  };
 
   // Wisdom Loopback State
   const [savingInsight, setSavingInsight] = useState<InsightItem | null>(null);
@@ -220,7 +248,7 @@ export default function ReflectionRoom() {
         } as AnalyticsData;
       }
 
-      const result = await generateChannelAuditAction(safeAnalytics!, recentVideos);
+      const result = await generateChannelAuditAction(safeAnalytics!, recentVideos, auditMode);
 
       if (result) {
         setAudit(result);
@@ -371,9 +399,9 @@ export default function ReflectionRoom() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
-            <Activity className="w-8 h-8 text-primary" /> Analytics
+            <Activity className="w-8 h-8 text-primary" /> Vital Signs
           </h2>
-          <p className="text-muted-foreground mt-2">Satisfaction Engine & Surgeon.</p>
+          <p className="text-muted-foreground mt-2">Neuro-Code Biometric Monitor.</p>
         </div>
         <div className="flex gap-4 items-center">
           <div className="bg-black/20 p-1 rounded-lg flex gap-1">
@@ -451,124 +479,212 @@ export default function ReflectionRoom() {
       {/* OVERVIEW TAB (Show only if active) */}
       <div className={cn("space-y-8", activeTab === "reports" && "hidden")}>
 
-        {/* DASHBOARD GRID */}
-        <div className="grid md:grid-cols-3 gap-6">
-          {!isConnected && <div className="md:col-span-3 p-4 bg-muted/30 border rounded-xl font-bold text-sm">Connect for Real CORTEX Metrics. (Currently Simulated)</div>}
+        {/* DASHBOARD GRID (CHANNEL PULSE) - UNIFIED 5 TILES */}
+        <div className="space-y-6">
+          {!isConnected && <div className="p-4 bg-muted/30 border rounded-xl font-bold text-sm text-center">Connect for Real CORTEX Metrics. (Currently Simulated)</div>}
 
-          {/* Main Health Dashboard (2/3 width) */}
-          <div className="md:col-span-2 bg-card border border-border/50 shadow-xl rounded-2xl p-6">
-            {cortexMetrics ? (
-              <HealthDashboard
-                satisfactionScore={cortexMetrics.satisfaction.score}
-                grade={cortexMetrics.satisfaction.grade}
-                qcrStatus={cortexMetrics.qcr.qcr}
-                zombieRatio={cortexMetrics.activeRatio}
-              />
-            ) : (
-              <div className="flex flex-col items-center justify-center h-full min-h-[200px] opacity-50">
-                <Activity className="w-12 h-12 mb-4" />
-                <p>Waiting for Channel Data...</p>
-              </div>
-            )}
-          </div>
-
-          {/* Subscriber Card (1/3 width) */}
-          <div className="h-full">
-            <StatCard
-              title="Subscribers"
-              value={subscriberCount}
-              change=""
-              icon={Users}
-              description="Total Audience"
-            />
-          </div>
-        </div>
-
-        <div className="lg:col-span-2 space-y-6">
-          {/* NEW COMPACT HEADER */}
           <div className="flex items-center justify-between border-b border-border/40 pb-4">
             <h3 className="font-bold text-lg uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-              <Brain className="w-5 h-5" /> THE GENERAL
+              <Activity className="w-5 h-5" /> Neuro-Code Vital Signs
             </h3>
-            {!audit && !auditing && (
-              <button
-                onClick={handleRunAudit}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-4 py-2 rounded-lg flex gap-2 items-center text-xs shadow-lg shadow-primary/20 hover:scale-105 transition-transform"
-              >
-                <Sparkles className="w-4 h-4" /> INSPECTION
-              </button>
-            )}
+            <div className="flex items-center gap-3">
+              {/* Audit Mode Toggle */}
+              {!audit && !auditing && (
+                <div className="flex bg-muted/30 p-1 rounded-lg border border-border/50">
+                  <button
+                    onClick={() => setAuditMode('medical')}
+                    className={cn("px-3 py-1 text-xs font-bold rounded-md transition-all flex gap-1 items-center", auditMode === 'medical' ? "bg-primary/20 text-primary border border-primary/30" : "text-muted-foreground hover:bg-white/5")}
+                  >
+                    <Stethoscope className="w-3 h-3" /> Medical
+                  </button>
+                  <button
+                    onClick={() => setAuditMode('professional')}
+                    className={cn("px-3 py-1 text-xs font-bold rounded-md transition-all flex gap-1 items-center", auditMode === 'professional' ? "bg-amber-500/20 text-amber-500 border border-amber-500/30" : "text-muted-foreground hover:bg-white/5")}
+                  >
+                    <Activity className="w-3 h-3" /> Growth
+                  </button>
+                </div>
+              )}
+
+              <div className="text-xs font-bold px-3 py-1 rounded-full bg-green-500/10 text-green-500 border border-green-500/20 animate-pulse">
+                System Active
+              </div>
+              {!audit && !auditing && (
+                <button
+                  onClick={handleRunAudit}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-4 py-2 rounded-lg flex gap-2 items-center text-xs shadow-lg shadow-primary/20 hover:scale-105 transition-transform"
+                >
+                  <Sparkles className="w-4 h-4" /> {auditMode === 'medical' ? "DIAGNOSTIC SCAN" : "GROWTH AUDIT"}
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="bg-card border border-border/40 rounded-2xl p-6 min-h-[150px] shadow-2xl relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
 
             {!audit && !auditing && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 opacity-100 z-10 relative">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 opacity-100 z-10 relative">
 
-                {/* 1. TOTAL VIEWS */}
-                <div className="p-4 bg-background/60 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-background/80 transition-colors group">
-                  <div className="text-xs font-bold text-cyan-200/70 uppercase mb-1 tracking-wider group-hover:text-cyan-200">Total Views</div>
+                {/* 1. OXYGEN (Traffic/Views) */}
+                <div
+                  onClick={() => openMetricModal("Oxygen (Views)", analytics ? analytics.views.toLocaleString() : "---", "text-blue-500", Activity)}
+                  className="p-4 bg-background/60 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-blue-500/10 hover:border-blue-500/30 transition-all group cursor-pointer hover:scale-[1.02]"
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="text-[10px] font-bold text-blue-300 uppercase tracking-widest">Oxygen (Traffic)</div>
+                    <Activity className="w-4 h-4 text-blue-400 opacity-50" />
+                  </div>
                   <div className="flex flex-col">
-                    <div className="text-2xl font-mono font-black text-white drop-shadow-sm">
-                      {analytics ? analytics.views.toLocaleString() : (recentVideos.length > 0) ? recentVideos.reduce((acc, v) => acc + v.viewCount, 0).toLocaleString() : "---"}
+                    <div className="flex items-baseline gap-2">
+                      <div className="text-2xl font-mono font-black text-white drop-shadow-sm">
+                        {analytics ? analytics.views.toLocaleString() : (recentVideos.length > 0) ? recentVideos.reduce((acc, v) => acc + v.viewCount, 0).toLocaleString() : "---"}
+                      </div>
+                      {(analytics || recentVideos.length > 0) && (
+                        <div className="text-[10px] font-bold text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded">
+                          {analytics
+                            ? `+${Math.round(analytics.views / 4.3).toLocaleString()}`
+                            : `+${recentVideos.filter(v => new Date(v.publishedAt) > new Date(Date.now() - 7 * 86400000)).reduce((acc, v) => acc + v.viewCount, 0).toLocaleString()}`}
+                          /wk
+                        </div>
+                      )}
                     </div>
-                    {(analytics || recentVideos.length > 0) && (
-                      <div className="text-xs font-bold text-emerald-400 animate-in slide-in-from-left-1 mt-1">
+                    <div className="text-xs font-bold text-blue-400 mt-1 flex items-center gap-1 opacity-80">
+                      {(analytics || recentVideos.length > 0) ? "Flow Rate Stable" : "Hypoxia Risk"}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. HEARTRATE (Consistency) */}
+                <div
+                  onClick={() => openMetricModal("Pulse (Consistency)", (stats?.statistics?.videoCount || "---") + " Vids", "text-red-500", HeartPulseIcon)}
+                  className="p-4 bg-background/60 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-red-500/10 hover:border-red-500/30 transition-all group cursor-pointer hover:scale-[1.02]"
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="text-[10px] font-bold text-red-300 uppercase tracking-widest">Pulse (Consistency)</div>
+                    <HeartPulseIcon className="w-4 h-4 text-red-400 opacity-50" />
+                  </div>
+                  <div className="flex flex-col">
+                    <div className="flex items-baseline gap-2">
+                      <div className="text-2xl font-mono font-black text-white drop-shadow-sm">{stats?.statistics?.videoCount || recentVideos.length || "---"} Vids</div>
+                      <div className="text-[10px] font-bold text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded">
+                        {recentVideos.filter(v => new Date(v.publishedAt) > new Date(Date.now() - 30 * 86400000)).length} / 30d
+                      </div>
+                    </div>
+                    <div className="text-xs font-bold text-red-400 mt-1 opacity-80">
+                      Rhythm Check: {recentVideos.filter(v => new Date(v.publishedAt) > new Date(Date.now() - 7 * 86400000)).length > 0 ? "Regular" : "Arrhythmia"}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. BRAINWAVES (Retention) */}
+                <div
+                  onClick={() => openMetricModal("Alpha Waves (Retention)", analytics ? Math.round(analytics.averageViewDuration) + "s" : "---", "text-purple-500", Brain)}
+                  className="p-4 bg-background/60 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-purple-500/10 hover:border-purple-500/30 transition-all group cursor-pointer hover:scale-[1.02]"
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="text-[10px] font-bold text-purple-300 uppercase tracking-widest">Alpha Waves (AVD)</div>
+                    <Brain className="w-4 h-4 text-purple-400 opacity-50" />
+                  </div>
+                  <div className="flex flex-col">
+                    <div className="flex items-baseline gap-2">
+                      <div className="text-2xl font-mono font-black text-white drop-shadow-sm">
+                        {analytics ? Math.round(analytics.averageViewDuration) + "s" :
+                          (recentVideos.length > 0) ? (recentVideos.reduce((acc, v) => acc + v.viewCount, 0) / recentVideos.length > 10000 ? "120s" : "45s") : "---"}
+                      </div>
+                      <div className="text-[10px] font-bold text-purple-400 bg-purple-500/10 px-1.5 py-0.5 rounded">
                         {analytics
-                          ? `+${Math.round(analytics.views / 4.3).toLocaleString()}/wk`
-                          : `+${recentVideos.filter(v => new Date(v.publishedAt) > new Date(Date.now() - 7 * 86400000)).reduce((acc, v) => acc + v.viewCount, 0).toLocaleString()}/wk`
-                        }
+                          ? Math.min(100, Math.round((analytics.averageViewDuration / 600) * 100))
+                          : Math.round((45 / 120) * 100)}% (Est. 10m)
                       </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* 2. LIBRARY SIZE */}
-                <div className="p-4 bg-background/60 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-background/80 transition-colors group">
-                  <div className="text-xs font-bold text-purple-200/70 uppercase mb-1 tracking-wider group-hover:text-purple-200">Library Size</div>
-                  <div className="flex flex-col">
-                    <div className="text-2xl font-mono font-black text-white drop-shadow-sm">{stats?.statistics?.videoCount || recentVideos.length || "---"}</div>
-                    <div className="text-xs font-bold text-purple-400 mt-1">
-                      {/* Count videos published in last 7 days */}
-                      +{recentVideos.filter(v => new Date(v.publishedAt) > new Date(Date.now() - 7 * 86400000)).length} new / wk
+                    </div>
+                    <div className="text-xs font-bold text-purple-400 mt-1 opacity-80">
+                      Attention Span: {analytics ? "Measured" : "Est. Short"}
                     </div>
                   </div>
                 </div>
 
-                {/* 3. AVG DURATION */}
-                <div className="p-4 bg-background/60 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-background/80 transition-colors group">
-                  <div className="text-xs font-bold text-green-200/70 uppercase mb-1 tracking-wider group-hover:text-green-200">Avg Duration</div>
+                {/* 4. DOPAMINE (Quality) */}
+                <div
+                  onClick={() => openMetricModal("Dopamine (Quality)", cortexMetrics?.satisfaction.score ? String(cortexMetrics.satisfaction.score) : "---", "text-green-500", Zap)}
+                  className="p-4 bg-background/60 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-green-500/10 hover:border-green-500/30 transition-all group cursor-pointer hover:scale-[1.02]"
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="text-[10px] font-bold text-green-300 uppercase tracking-widest">Dopamine (QCR)</div>
+                    <Zap className="w-4 h-4 text-green-400 opacity-50" />
+                  </div>
                   <div className="flex flex-col">
-                    <div className="text-2xl font-mono font-black text-white drop-shadow-sm">
-                      {analytics ? Math.round(analytics.averageViewDuration) + "s" :
-                        (recentVideos.length > 0) ? (recentVideos.reduce((acc, v) => acc + v.viewCount, 0) / recentVideos.length > 10000 ? "120s" : "45s") : "---"}
-                    </div>
-                    {(analytics || recentVideos.length > 0) && (
-                      <div className="text-xs font-bold text-green-400 mt-1">
-                        ({analytics
-                          ? Math.round((analytics.averageViewDuration / (analytics.estimatedMinutesWatched * 60 / analytics.views)) * 100) || 40
-                          : "42"}%) Retention
+                    <div className="flex flex-col">
+                      <div className="flex items-baseline gap-2">
+                        <div className="text-2xl font-mono font-black text-white drop-shadow-sm">
+                          {cortexMetrics?.satisfaction.score || "---"}
+                        </div>
+                        <div className="text-[10px] font-bold text-green-400 bg-green-500/10 px-1.5 py-0.5 rounded">
+                          Grade: {cortexMetrics?.satisfaction.grade || "-"}
+                        </div>
                       </div>
-                    )}
+                      <div className="text-xs font-bold text-green-400 mt-1 opacity-80 flex gap-2">
+                        <span>Sentiment: {cortexMetrics?.satisfaction.sentiment || "Neutral"}</span>
+                        <span className="text-white/20">|</span>
+                        <span>Avg IQ: {recentVideos.length > 0 ? (recentVideos.reduce((acc, v) => acc + v.outlierScore, 0) / recentVideos.length).toFixed(1) : "-"}x</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                {/* 4. WATCH TIME */}
-                <div className="p-4 bg-background/60 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-background/80 transition-colors group">
-                  <div className="text-xs font-bold text-amber-200/70 uppercase mb-1 tracking-wider group-hover:text-amber-200">Est. Watch Time</div>
+                {/* 5. CELLS (Sudience/Subs) */}
+                <div
+                  onClick={() => openMetricModal("Cells (Community)", stats?.statistics?.subscriberCount ? Number(stats.statistics.subscriberCount).toLocaleString() : "---", "text-yellow-500", Users)}
+                  className="p-4 bg-background/60 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-yellow-500/10 hover:border-yellow-500/30 transition-all group cursor-pointer hover:scale-[1.02]"
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="text-[10px] font-bold text-yellow-300 uppercase tracking-widest">Cells (Audience)</div>
+                    <Users className="w-4 h-4 text-yellow-400 opacity-50" />
+                  </div>
                   <div className="flex flex-col">
-                    <div className="text-2xl font-mono font-black text-white drop-shadow-sm">
-                      {analytics ? Math.round(analytics.estimatedMinutesWatched / 60) + "h" :
-                        (recentVideos.length > 0) ? Math.round((recentVideos.reduce((acc, v) => acc + v.viewCount, 0) * 0.8) / 60) + "h" : "---"}
-                    </div>
-                    <div className="text-xs font-bold text-amber-400 mt-1">
-                      {analytics
-                        ? `+${Math.round((analytics.estimatedMinutesWatched / 60) / 4.3)}h/wk`
-                        : "---"}
+                    <div className="flex flex-col">
+                      <div className="flex items-baseline gap-2">
+                        <div className="text-2xl font-mono font-black text-white drop-shadow-sm">
+                          {stats?.statistics?.subscriberCount ? Number(stats.statistics.subscriberCount).toLocaleString() : "---"}
+                        </div>
+                      </div>
+                      <div className="text-xs font-bold text-yellow-400 mt-1 opacity-80">
+                        Zombie Ratio: {cortexMetrics ? (cortexMetrics.activeRatio * 100).toFixed(1) + "% Active" : "---"}
+                      </div>
                     </div>
                   </div>
                 </div>
+
+                {/* 6. METABOLISM (Watch Time) - NEW */}
+                <div
+                  onClick={() => openMetricModal("Metabolism (Energy)", analytics ? Math.round(analytics.estimatedMinutesWatched / 60) + "h" : "---", "text-orange-500", Activity)}
+                  className="p-4 bg-background/60 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-orange-500/10 hover:border-orange-500/30 transition-all group cursor-pointer hover:scale-[1.02]"
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="text-[10px] font-bold text-orange-300 uppercase tracking-widest">Metabolism (Energy)</div>
+                    <Activity className="w-4 h-4 text-orange-400 opacity-50" />
+                  </div>
+                  <div className="flex flex-col">
+                    <div className="flex flex-col">
+                      <div className="flex items-baseline gap-2">
+                        <div className="text-2xl font-mono font-black text-white drop-shadow-sm">
+                          {analytics ? Math.round(analytics.estimatedMinutesWatched / 60).toLocaleString() + "h" : "---"}
+                        </div>
+                        {(analytics || recentVideos.length > 0) && (
+                          <div className="text-[10px] font-bold text-orange-400 bg-orange-500/10 px-1.5 py-0.5 rounded">
+                            {analytics
+                              ? `+${Math.round((analytics.estimatedMinutesWatched / 60) / 4.3).toLocaleString()}h`
+                              : "---"}/wk
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-xs font-bold text-orange-400 mt-1 opacity-80">
+                        Total Energy Burned
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
               </div>
             )}
 
@@ -577,8 +693,17 @@ export default function ReflectionRoom() {
             {audit && (
               <div className="space-y-6 animate-in fade-in pt-4">
                 <div className="flex justify-between items-start">
-                  <div><h4 className="font-bold uppercase text-primary">Summary</h4><p className="text-lg font-medium">{audit.executiveSummary}</p></div>
-                  <div className="px-3 py-1 bg-primary/10 rounded-lg">{audit.overallSentiment}</div>
+                  <div>
+                    <h4 className="font-bold uppercase text-primary mb-2">Diagnostic Result</h4>
+                    <p className={cn("text-lg font-medium p-4 rounded-lg border",
+                      audit.executiveSummary.toLowerCase().includes("failed")
+                        ? "bg-red-500/10 border-red-500/30 text-red-200"
+                        : "bg-background/40 border-white/10"
+                    )}>
+                      {audit.executiveSummary}
+                    </p>
+                  </div>
+                  <div className="px-3 py-1 bg-primary/10 rounded-lg whitespace-nowrap">{audit.overallSentiment}</div>
                 </div>
                 <div className="space-y-3">
                   {audit.wins.map((item, i) => <InsightCard key={i} type="win" item={item} onSave={() => openSaveDialog(item)} />)}
@@ -739,6 +864,82 @@ export default function ReflectionRoom() {
           </div>
         )
       }
+
+      {/* METRIC OPTIMIZATION MODAL - RESTORED TO CORRECT SCOPE */}
+      {selectedMetric && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200" onClick={closeMetricModal}>
+          <div className="bg-card border border-border/60 shadow-2xl rounded-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+            <div className="p-6 border-b border-border/40 flex justify-between items-start bg-muted/20">
+              <div className="flex gap-4 items-center">
+                <div className={cn("p-3 rounded-xl bg-background border border-white/10 shadow-inner", selectedMetric.color.replace('text-', 'bg-').replace('500', '500/20'))}>
+                  <selectedMetric.icon className={cn("w-8 h-8", selectedMetric.color)} />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold">{selectedMetric.name}</h3>
+                  <div className="text-sm text-muted-foreground font-mono">Current Level: <span className="text-foreground font-bold">{selectedMetric.value}</span></div>
+                </div>
+              </div>
+              <button onClick={closeMetricModal} className="p-2 hover:bg-white/10 rounded-full transition-colors"><X className="w-5 h-5 opacity-70" /></button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {!metricStrategy ? (
+                <div className="space-y-6">
+                  <div className="p-6 rounded-xl bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 flex flex-col items-center text-center gap-4">
+                    <Target className="w-12 h-12 text-primary opacity-80" />
+                    <div>
+                      <h4 className="font-bold text-lg">Neuro-Optimization Protocol</h4>
+                      <p className="text-sm text-muted-foreground max-w-md">Generate a specialized strategic plan to boost your <span className="font-semibold text-primary">{selectedMetric.name.split(' ')[0]}</span>.</p>
+                    </div>
+                    <button
+                      onClick={handleOptimizeMetric}
+                      disabled={optimizingMetric}
+                      className={cn("px-8 py-3 rounded-lg font-bold flex items-center gap-2 shadow-lg transition-all",
+                        optimizingMetric ? "bg-muted text-muted-foreground cursor-wait" : "bg-primary hover:bg-primary/90 text-primary-foreground hover:scale-105")}
+                    >
+                      {optimizingMetric ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                      {optimizingMetric ? "Analyzing Vital Signs..." : "GENERATE GROWTH STRATEGY"}
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 text-xs text-muted-foreground">
+                    <div className="p-3 bg-muted/30 rounded-lg">🔎 Analyzes historical performance</div>
+                    <div className="p-3 bg-muted/30 rounded-lg">🧠 Uses Neuro-Marketing Psychology</div>
+                    <div className="p-3 bg-muted/30 rounded-lg">🎯 Provides 3 concrete tactics</div>
+                    <div className="p-3 bg-muted/30 rounded-lg">🇩🇪 Returns localized German strategy</div>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4 animate-in slide-in-from-bottom-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-bold text-lg flex items-center gap-2"><Lightbulb className="w-5 h-5 text-amber-500" /> Strategic Treatment Plan</h4>
+                    <span className="text-xs font-mono text-muted-foreground">AI-Generated • {new Date().toLocaleTimeString()}</span>
+                  </div>
+
+                  <div className="grid gap-3">
+                    {metricStrategy.tactics.map((tactic, i) => (
+                      <div key={i} className="p-4 rounded-xl bg-card border border-border/60 hover:border-primary/30 transition-all">
+                        <div className="flex justify-between mb-2">
+                          <div className="font-bold text-primary">{tactic.title}</div>
+                          <div className={cn("text-[10px] font-bold px-2 py-0.5 rounded border uppercase",
+                            tactic.difficulty === 'Easy' ? "bg-green-500/10 text-green-500 border-green-500/20" :
+                              tactic.difficulty === 'Medium' ? "bg-yellow-500/10 text-yellow-500 border-yellow-500/20" : "bg-red-500/10 text-red-500 border-red-500/20")}>
+                            {tactic.difficulty}
+                          </div>
+                        </div>
+                        <p className="text-sm text-foreground/80">{tactic.description}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="p-3 rounded-lg bg-blue-500/5 border border-blue-500/10 text-xs text-blue-400 mt-4">
+                    <span className="font-bold">Predicted Impact:</span> {metricStrategy.impactPrediction}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div >
   );
 }
@@ -763,6 +964,8 @@ function InsightCard({ type, item, onSave }: { type: 'win' | 'loss' | 'opportuni
         <h4 className="font-bold text-xl text-white">{item.title}</h4>
         <p className="text-base opacity-90 leading-relaxed font-medium">{item.description}</p>
       </div>
+
+
     </div>
   );
 }

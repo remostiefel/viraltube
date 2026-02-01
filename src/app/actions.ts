@@ -10,7 +10,19 @@ export async function fetchChannelInsights(): Promise<ChannelData | null> {
     return await getChannelData(apiKey);
 }
 
-import { generateIdeasFromGemini, VideoIdea, sendChatMessage, ChatMessage, optimizeTitleWithGemini, OptimizationResult } from "@/lib/gemini";
+export async function fetchRecentChannelVideosAction(): Promise<OutlierVideo[]> {
+    const apiKey = process.env.YOUTUBE_API_KEY;
+    if (!apiKey) return [];
+
+    // Lazy import
+    const { getChannelRecentVideos, NEURO_CODE_CHANNEL_ID } = await import("@/lib/youtube");
+
+    // We fetch for our specific channel
+    return await getChannelRecentVideos(NEURO_CODE_CHANNEL_ID, apiKey);
+}
+
+
+import { generateIdeasFromGemini, VideoIdea, sendChatMessage, ChatMessage, optimizeTitleWithGemini, OptimizationResult, generateVoiceoverStyle } from "@/lib/gemini";
 import { searchOpenAlex, ScientificPaper } from "@/lib/openalex";
 import { generateScriptWithOpenAI, GeneratedScript, generateImagePrompts, ImagePrompt, generateAudioPrompts, AudioPrompt, analyzeViralVideoContent, ViralAnalysisResult, generateImageWithOpenAI, consolidateWisdom, standardizeWisdom } from "@/lib/openai";
 import { getVideoMetadata, getVideoTranscript } from "@/lib/youtube";
@@ -61,12 +73,92 @@ export async function generateVideoIdeas(topic: string): Promise<VideoIdea[]> {
     return await generateIdeasFromGemini(topic, constitution);
 }
 
-import { generateChannelAudit, ChannelAuditResult, ChannelAuditData } from "@/lib/gemini";
+import { CONTENT_FORMATS, FormatProfile } from "@/lib/formats";
+
+export async function getFormatsAction(): Promise<FormatProfile[]> {
+    return CONTENT_FORMATS;
+}
+
+export async function researchViralIdeasAction(): Promise<VideoIdea[]> {
+    try {
+        const apiKey = process.env.YOUTUBE_API_KEY;
+        if (!apiKey) throw new Error("API Key Missing");
+
+        // 1. Defined Search Queries for the Niche
+        const queries = [
+            "Neuroscience Hacks",
+            "Dopamine Detox",
+            "Andrew Huberman Summary",
+            "Subconscious Mind Tricks",
+            "Psychology Tricks to control"
+        ];
+
+        // 2. Randomly select 2 queries to keep it fresh but fast
+        const selectedQueries = queries.sort(() => 0.5 - Math.random()).slice(0, 2);
+
+        let allOutliers: OutlierVideo[] = [];
+
+        // 3. Search for Outliers
+        // Lazy import to avoid circular dep issues if any (though safe here)
+        const { searchOutliers } = await import("@/lib/youtube");
+
+        for (const q of selectedQueries) {
+            try {
+                // Gap Mode ON to find high demand stuff
+                const results = await searchOutliers(q, apiKey, undefined, undefined, true);
+                allOutliers = [...allOutliers, ...results];
+            } catch (e) {
+                console.error(`Search failed for ${q}`, e);
+            }
+        }
+
+        // 4. Extract Titles
+        // Take top 10 unique titles
+        const uniqueTitles = Array.from(new Set(allOutliers.map(v => v.title))).slice(0, 10);
+
+        if (uniqueTitles.length === 0) return [];
+
+        // 5. Generate Ideas
+        const { generateTrendBasedIdeas } = await import("@/lib/gemini");
+        return await generateTrendBasedIdeas(uniqueTitles);
+
+    } catch (e) {
+        console.error("Research Action Failed", e);
+        return [];
+    }
+}
+
+import { generateChannelAudit, ChannelAuditResult, ChannelAuditData, generateMetricOptimization, MetricOptimizationResult } from "@/lib/gemini";
 
 export async function generateChannelAuditAction(
     analyticsData: AnalyticsData,
-    recentVideos: OutlierVideo[]
+    recentVideos: OutlierVideo[],
+    mode: 'medical' | 'professional' = 'medical'
 ): Promise<ChannelAuditResult | null> {
+
+    // Helper to calculate age
+    const apiKey = process.env.YOUTUBE_API_KEY;
+    let channelAge = "Unknown";
+
+    if (apiKey) {
+        // We need to fetch channel data to get publishedAt if not available in analytics
+        // But actions usually don't want extra API calls. 
+        // Optimally, we should have passed ChannelData here, but to avoid breaking signature too much,
+        // we fetch it quickly or assume "New" if unknown.
+        // Let's do a quick fetch since this is high value.
+        const { getChannelData } = await import("@/lib/youtube");
+        const cData = await getChannelData(apiKey);
+        if (cData && cData.publishedAt) {
+            const pubDate = new Date(cData.publishedAt);
+            const now = new Date();
+            const diffTime = Math.abs(now.getTime() - pubDate.getTime());
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays < 30) channelAge = `${diffDays} Days Old`;
+            else if (diffDays < 365) channelAge = `${Math.floor(diffDays / 30)} Months Old`;
+            else channelAge = `${Math.floor(diffDays / 365)} Years Old`;
+        }
+    }
 
     // Format Videos for Context
     const topVideosContext = recentVideos.slice(0, 3).map(v =>
@@ -78,14 +170,66 @@ export async function generateChannelAuditAction(
         subsGained: analyticsData.subscribersGained,
         avd: (analyticsData.averageViewDuration / 60).toFixed(1) + " min",
         minutesWatched: analyticsData.estimatedMinutesWatched,
-        topVideos: topVideosContext || "No recent outlier data available."
+        topVideos: topVideosContext || "No recent outlier data available.",
+        channelAge
     };
 
-    return await generateChannelAudit(auditData);
+    return await generateChannelAudit(auditData, mode);
 }
 
-export async function generateScriptAction(topic: string, language: "DE" | "EN" = "DE", strategyContext?: string, perfectLoop?: boolean, duration?: "30s" | "60s" | "long", metaNarrative?: boolean, protocol?: string): Promise<GeneratedScript | null> {
-    return await generateScriptWithOpenAI(topic, "High-Performance Authority", language, strategyContext, perfectLoop, duration, metaNarrative, protocol);
+export async function generateMetricOptimizationAction(
+    metricName: string,
+    currentValue: string,
+    channelId?: string
+): Promise<MetricOptimizationResult | null> {
+    const apiKey = process.env.YOUTUBE_API_KEY;
+    if (!apiKey) return null;
+
+    let channelAge = "Unknown";
+    let niche = "General / Unknown";
+
+    // Attempt to fetch context
+    if (channelId) {
+        // Here we could fetch detailed niche analysis, but for speed we'll estimate age
+        const { getChannelData } = await import("@/lib/youtube");
+        const cData = await getChannelData(apiKey); // This fetches user's own channel if no ID passed, but optimization might be generally on self
+        // Re-using the age logic from audit action would be better as a helper, but for now duplicate
+        if (cData && cData.publishedAt) {
+            const pubDate = new Date(cData.publishedAt);
+            const now = new Date();
+            const diffTime = Math.abs(now.getTime() - pubDate.getTime());
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            if (diffDays < 365) channelAge = "New Channel (< 1 Year)";
+            else channelAge = "Established Channel (> 1 Year)";
+        }
+    }
+
+    return await generateMetricOptimization(metricName, currentValue, { channelAge, niche });
+}
+
+import { LearningService } from "@/app/cortex/learning/LearningService";
+import { analyzeScript } from "@/lib/script-optimizer";
+
+export async function generateScriptAction(topic: string, language: "DE" | "EN" = "DE", strategyContext?: string, perfectLoop?: boolean, duration?: "30s" | "60s" | "long", metaNarrative?: boolean, protocol?: string, formatId?: string): Promise<GeneratedScript | null> {
+
+    // Inject Learned Patterns
+    const learnedContext = await LearningService.getOptimizationContext();
+    const effectiveContext = strategyContext ? `${strategyContext}\n\n${learnedContext}` : learnedContext;
+
+    const script = await generateScriptWithOpenAI(topic, "High-Performance Authority", language, effectiveContext, perfectLoop, formatId, metaNarrative, protocol);
+
+    if (script) {
+        try {
+            const fullText = script.sections.map(s => s.content).join(" ");
+            const analysis = await analyzeScript(fullText);
+            script.analysis = analysis;
+        } catch (e) {
+            console.error("Post-Generation Analysis Failed", e);
+            // We return the script anyway, analysis is optional
+        }
+    }
+
+    return script;
 }
 
 export async function generateImagePromptsAction(scene: string): Promise<ImagePrompt[]> {
@@ -258,11 +402,19 @@ export async function unlinkTemplateFromProjectAction(templateId: string): Promi
     return await updateTemplate(templateId, { projectId: undefined });
 }
 
-export async function fetchScientificPapers(topic: string): Promise<ScientificPaper[]> {
+export async function fetchScientificPapers(topic: string, source: "openalex" | "semantic" | "pubmed" = "semantic"): Promise<ScientificPaper[]> {
+    if (source === "semantic") {
+        const { searchSemanticScholar } = await import("@/lib/semanticscholar");
+        return await searchSemanticScholar(topic);
+    } else if (source === "pubmed") {
+        const { searchPubMed } = await import("@/lib/pubmed");
+        return await searchPubMed(topic);
+    }
+    // Default / Fallback
     return await searchOpenAlex(topic);
 }
 
-import { generateVideoPrompts, VideoPrompt, refineScriptWithOpenAI, extendScriptWithOpenAI, generateScriptImagePrompts, ScriptImagePrompt, extractWisdomFromTranscript, WisdomNugget } from "@/lib/openai";
+import { generateVideoPrompts, VideoPrompt, refineScriptWithOpenAI, extendScriptWithOpenAI, condenseScriptWithOpenAI, generateScriptImagePrompts, ScriptImagePrompt, extractWisdomFromTranscript, WisdomNugget } from "@/lib/openai";
 
 export async function refineScriptAction(currentScript: string, strategyContext: string, language: "DE" | "EN" = "DE"): Promise<GeneratedScript | null> {
     return await refineScriptWithOpenAI(currentScript, strategyContext, language);
@@ -270,6 +422,14 @@ export async function refineScriptAction(currentScript: string, strategyContext:
 
 export async function extendScriptAction(currentScript: string, language: "DE" | "EN" = "DE"): Promise<GeneratedScript | null> {
     return await extendScriptWithOpenAI(currentScript, language);
+}
+
+export async function condenseScriptAction(currentScript: string, language: "DE" | "EN" = "DE"): Promise<GeneratedScript | null> {
+    return await condenseScriptWithOpenAI(currentScript, language);
+}
+
+export async function generateVoiceoverStyleAction(scriptContent: string): Promise<string> {
+    return await generateVoiceoverStyle(scriptContent);
 }
 
 export async function generateVideoPromptsAction(scriptContent: string, targetCount: number = 8): Promise<VideoPrompt[]> {
@@ -517,7 +677,7 @@ import { searchOutliers, OutlierVideo, getChannelRecentVideos } from "@/lib/yout
 import { synthesizeStrategy } from "@/lib/gemini";
 
 export async function searchOutliersAction(query: string, publishedAfter?: string, maxSubs?: number, gapMode?: boolean): Promise<OutlierVideo[]> {
-    const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY || "";
+    const apiKey = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY || process.env.YOUTUBE_API_KEY || "";
     if (!apiKey) throw new Error("API Key configuration missing");
     return await searchOutliers(query, apiKey, publishedAfter, maxSubs, gapMode);
 }
@@ -656,6 +816,9 @@ export async function exchangeGoogleTokenAction(code: string, clientId: string, 
                 grant_type: "authorization_code"
             })
         });
+
+
+
 
         if (!res.ok) {
             const err = await res.json();
@@ -812,7 +975,8 @@ import {
     createNotebookItem,
     updateNotebookItem,
     deleteNotebookItem,
-    reorderNotebookItem
+    reorderNotebookItem,
+    saveNotebookItems
 } from "@/lib/notebook";
 import {
     NotebookItem,
@@ -828,9 +992,10 @@ export async function createNotebookItemAction(
     title: string,
     description?: string,
     priority?: "low" | "medium" | "high",
-    tags?: string[]
+    tags?: string[],
+    formatId?: string
 ): Promise<NotebookItem> {
-    return await createNotebookItem(type, title, description, priority, tags);
+    return await createNotebookItem(type, title, description, priority, tags, formatId);
 }
 
 
@@ -855,6 +1020,12 @@ export async function reorderNotebookItemAction(id: string, direction: "up" | "d
     revalidatePath("/notebook");
 }
 
+export async function saveNotebookOrderAction(items: NotebookItem[]): Promise<{ success: true }> {
+    await saveNotebookItems(items);
+    revalidatePath("/notebook");
+    return { success: true };
+}
+
 // Notebook Config Actions
 import {
     getNotebookConfig,
@@ -862,7 +1033,7 @@ import {
     saveNotebookConfig
 } from "@/lib/notebook-config";
 import { NotebookConfig } from "@/lib/notebook-config-types";
-import { saveNotebookItems } from "@/lib/notebook";
+
 
 export async function getNotebookConfigAction(): Promise<NotebookConfig> {
     return await getNotebookConfig();
@@ -1008,3 +1179,16 @@ ${loopAssets.musicPrompts.map(m => `- [${m.style}] ${m.bpm} BPM: \`${m.prompt}\`
         return { success: false, error: e.message };
     }
 }
+
+// YouTube SEO Optimizer Action
+import { generateOptimization, YoutubeOptimizerResult } from "@/lib/agents/youtube-optimizer";
+
+export async function optimizeVideoMetadataAction(
+    script: string,
+    type: 'all' | 'filename' | 'title' | 'description' | 'tags'
+): Promise<YoutubeOptimizerResult | null> {
+    return await generateOptimization(script, type);
+}
+
+
+

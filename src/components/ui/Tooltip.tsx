@@ -40,10 +40,10 @@ export function Tooltip({ content, children, side = "top" }: TooltipProps) {
                             ...style,
                             zIndex: 60
                         }}
-                        className="bg-popover text-popover-foreground text-xs px-3 py-1.5 rounded-lg shadow-xl border border-primary/20 whitespace-nowrap pointer-events-none"
+                        className="bg-black/90 text-cyan-100 text-[10px] uppercase font-bold tracking-widest px-3 py-2 rounded shadow-2xl border border-cyan-500/40 whitespace-nowrap pointer-events-none font-sans z-[9999]"
                     >
                         {content}
-                        <div className={`absolute w-2 h-2 bg-popover border-primary/20 transform rotate-45 
+                        <div className={`absolute w-1.5 h-1.5 bg-black/90 border-cyan-500/30 transform rotate-45 
                             ${side === "top" ? "bottom-[-5px] left-1/2 -translate-x-1/2 border-b border-r" : ""}
                             ${side === "bottom" ? "top-[-5px] left-1/2 -translate-x-1/2 border-t border-l" : ""}
                             ${side === "left" ? "right-[-5px] top-1/2 -translate-y-1/2 border-t border-r" : ""}

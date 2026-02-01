@@ -32,7 +32,7 @@ export function Sidebar({ isMobile = false }: { isMobile?: boolean }) {
                 </button>
             )}
 
-            <div className={cn("transition-all", showCompact ? "p-3" : "p-6")}>
+            <div className={cn("transition-all", showCompact ? "p-3" : "p-4")}>
                 <h1 className={cn("text-2xl font-bold tracking-tighter bg-gradient-to-br from-yellow-300 via-yellow-400 to-yellow-500 bg-clip-text text-transparent flex items-center gap-2", showCompact && "justify-center")}>
                     <Brain className={cn("text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)] transition-all", showCompact ? "w-6 h-6" : "w-8 h-8")} />
                     {!showCompact && (
@@ -46,7 +46,7 @@ export function Sidebar({ isMobile = false }: { isMobile?: boolean }) {
                 </h1>
             </div>
 
-            <nav className="flex-1 px-2 space-y-2 overflow-y-auto py-1 scrollbar-thin scrollbar-thumb-primary/20">
+            <nav className="flex-1 px-2 space-y-1 overflow-y-auto py-1 scrollbar-thin scrollbar-thumb-primary/20">
                 {Object.entries(groups).map(([groupName, items], idx) => {
                     const groupColor = GROUP_COLORS[groupName] || "var(--foreground)";
 
@@ -54,13 +54,13 @@ export function Sidebar({ isMobile = false }: { isMobile?: boolean }) {
                         <div key={groupName} className={cn("pt-2", idx > 0 && "border-t border-border/30")}>
                             {!showCompact && (
                                 <h3
-                                    className="text-[11px] uppercase font-bold tracking-wider mb-1.5 px-2 py-1 rounded border border-current/30 bg-current/10"
+                                    className="text-[11px] uppercase font-bold tracking-wider mb-1 px-2 py-1 rounded border border-current/30 bg-current/10"
                                     style={{ color: groupColor }}
                                 >
                                     {groupName}
                                 </h3>
                             )}
-                            <div className="space-y-1">
+                            <div className="space-y-0.5">
                                 {items.map((item) => {
                                     const isActive = pathname === item.href;
                                     const activeColor = item.color || groupColor;
@@ -72,7 +72,7 @@ export function Sidebar({ isMobile = false }: { isMobile?: boolean }) {
                                                 href={item.href}
                                                 className={cn(
                                                     "flex items-center gap-2 text-sm font-medium transition-all duration-200 rounded-lg group relative overflow-hidden flex-1",
-                                                    showCompact ? "px-0 py-2 justify-center" : "px-3 py-1.5",
+                                                    showCompact ? "px-0 py-2 justify-center" : "px-3 py-1",
                                                     isActive
                                                         ? "bg-[rgba(255,255,255,0.1)] shadow-[inset_3px_0_0_0_currentColor]"
                                                         : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
@@ -109,7 +109,7 @@ export function Sidebar({ isMobile = false }: { isMobile?: boolean }) {
                 })}
             </nav>
 
-            <div className={cn("border-t border-border/30 bg-muted/10", showCompact ? "p-2" : "p-4")}>
+            <div className={cn("border-t border-border/30 bg-muted/10", showCompact ? "p-2" : "p-2")}>
                 <div className="flex items-center gap-2 px-1">
                     <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
                     {!showCompact && <span className="text-xs font-mono text-muted-foreground">SYSTEM ONLINE</span>}

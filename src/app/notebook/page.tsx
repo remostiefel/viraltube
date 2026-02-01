@@ -22,7 +22,8 @@ import {
     Copy,
     Check,
     ChevronUp,
-    ChevronDown
+    ChevronDown,
+    BrainCircuit
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -40,10 +41,25 @@ import {
     getNotebookConfigAction,
     updateTagColorAction,
     startGenesisAction,
+
     renameTagAction,
-    reorderNotebookItemAction
+    reorderNotebookItemAction,
+    saveNotebookOrderAction
 } from "@/app/actions";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { IdeaSearchModule } from "@/components/notebook/IdeaSearchModule";
+
+// Helper to Sort Column
+const sortItemsByPriority = (items: NotebookItem[]) => {
+    return [...items].sort((a, b) => {
+        const priorityWeight = { high: 3, medium: 2, low: 1 };
+        const weightA = priorityWeight[a.priority] || 1;
+        const weightB = priorityWeight[b.priority] || 1;
+
+        if (weightA !== weightB) return weightB - weightA; // Higher priority first
+        return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(); // Newest first
+    });
+};
 
 export default function NotebookPage() {
     const [items, setItems] = useState<NotebookItem[]>([]);
@@ -72,6 +88,7 @@ export default function NotebookPage() {
     const [deleteId, setDeleteId] = useState<string | null>(null);
     const [itemToDelete, setItemToDelete] = useState<NotebookItem | null>(null);
     const [showTagManager, setShowTagManager] = useState(false);
+    const [showTrendRadar, setShowTrendRadar] = useState(false);
 
 
     useEffect(() => {
@@ -113,7 +130,7 @@ export default function NotebookPage() {
         e.preventDefault();
         if (!newItemTitle.trim()) return;
 
-        await createNotebookItemAction(
+        const newItem = await createNotebookItemAction(
             activeTab,
             newItemTitle,
             newItemDescription,
@@ -121,12 +138,25 @@ export default function NotebookPage() {
             newItemTags
         );
 
+        // Auto-Sort the new column (usually first status)
+        const temp = [newItem, ...items];
+        // Identify target column (first status)
+        const firstStatus = activeTab === 'topic' ? TOPIC_STATUSES[0] : STEP_STATUSES[0];
+        const colItems = temp.filter(i => i.status === firstStatus && i.type === activeTab);
+        const otherItems = temp.filter(i => !(i.status === firstStatus && i.type === activeTab));
+        const sortedCol = sortItemsByPriority(colItems);
+        const final = [...sortedCol, ...otherItems];
+
+        // Set state
+        setItems(final);
+        // Save the new order
+        saveNotebookOrderAction(final);
+
         setNewItemTitle("");
         setNewItemDescription("");
         setNewItemPriority("medium");
         setNewItemTags([]);
         setIsCreating(false);
-        await loadItems();
     };
 
     const handleAddTag = (e: React.KeyboardEvent, isEdit = false) => {
@@ -191,7 +221,6 @@ export default function NotebookPage() {
             e.stopPropagation();
         }
 
-        // Optimistic Update
         const index = items.findIndex(i => i.id === item.id);
         if (index === -1) return;
 
@@ -227,8 +256,8 @@ export default function NotebookPage() {
             newItems.splice(targetIndex, 0, item);
             setItems(newItems); // This changes order. React key ensures focus stays on the element.
 
-            // Server Action
-            await reorderNotebookItemAction(item.id, direction);
+            // Save Exact Order
+            await saveNotebookOrderAction(newItems);
         }
     };
 
@@ -244,9 +273,40 @@ export default function NotebookPage() {
 
         if (newIndex !== currentIndex) {
             const newStatus = statuses[newIndex];
-            await updateNotebookItemAction(item.id, { status: newStatus });
-            // Optimistic update
-            setItems(prev => prev.map(i => i.id === item.id ? { ...i, status: newStatus } : i));
+
+            // Optimistic Update with Timestamp update for sorting
+            const now = new Date().toISOString();
+
+            // Set completedAt if moving to final state
+            let completedAt = item.completedAt;
+            if (newStatus === "Done" || newStatus === "Ready") {
+                completedAt = now;
+            }
+
+            // 1. Create updated item
+            const updatedItem = { ...item, status: newStatus, updatedAt: now, completedAt };
+
+            // 2. Re-assemble list with New Column Sorted
+            // We use functional update to be safe, but we MUST move side effect out.
+            // Actually, let's just use the current 'items' state for calculation since this is user interaction (not high frequency).
+
+            const temp = items.map(i => i.id === item.id ? updatedItem : i);
+            const colItems = temp.filter(i => i.status === newStatus && i.type === item.type);
+            const otherItems = temp.filter(i => !(i.status === newStatus && i.type === item.type));
+            const sortedCol = sortItemsByPriority(colItems);
+            const final = [...sortedCol, ...otherItems];
+
+            setItems(final);
+            saveNotebookOrderAction(final);
+
+
+            // Server Action
+            try {
+                await updateNotebookItemAction(item.id, { status: newStatus, completedAt });
+            } catch (e) {
+                console.error("Status update failed", e);
+                loadItems(); // Revert on failure
+            }
 
             // GENESIS TRIGGER (Only for Topics)
             if (
@@ -433,6 +493,15 @@ export default function NotebookPage() {
                     <Settings className="w-5 h-5" />
                 </button>
 
+                {/* Trend Radar Button */}
+                <button
+                    onClick={() => setShowTrendRadar(true)}
+                    className="mr-2 bg-gradient-to-r from-cyan-950 to-blue-950 text-cyan-400 border border-cyan-500/30 px-3 py-2 rounded-lg font-bold flex items-center gap-2 hover:brightness-125 transition-all shadow-lg shadow-cyan-900/20"
+                >
+                    <BrainCircuit className="w-5 h-5" />
+                    <span className="hidden md:inline">Trend Radar</span>
+                </button>
+
                 <button
                     onClick={() => setIsCreating(true)}
                     className="bg-primary text-primary-foreground px-4 py-2 rounded-lg font-bold flex items-center gap-2 hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
@@ -440,6 +509,17 @@ export default function NotebookPage() {
                     <Plus className="w-5 h-5" /> New {activeTab === "topic" ? "Topic" : "Step"}
                 </button>
             </div>
+
+            {/* Modules */}
+            {showTrendRadar && (
+                <IdeaSearchModule
+                    onClose={() => setShowTrendRadar(false)}
+                    onAddIdea={() => {
+                        loadItems(); // Refresh board
+                        // Don't close immediately so user can add more
+                    }}
+                />
+            )}
 
             {/* Creating Interface */}
             {isCreating && (
@@ -524,12 +604,31 @@ export default function NotebookPage() {
                 </div>
             )}
 
-            {/* Kanban Board */}
             <div className="flex-1 overflow-x-auto overflow-y-hidden">
                 <div className="flex gap-3 h-full min-w-max pb-4">
                     {statuses.map((status) => {
-                        const columnItems = filteredItems.filter(i => i.status === status);
+                        // 1. FILTER
+                        let columnItems = filteredItems.filter(i => i.status === status);
+
+                        // 2. FILTER & SORT
+
+                        if (status === "Done" || status === "Ready") {
+                            // Special Sort for Completed Items: Newest Completed First
+                            columnItems.sort((a, b) => {
+                                const timeA = new Date(a.completedAt || a.updatedAt).getTime();
+                                const timeB = new Date(b.completedAt || b.updatedAt).getTime();
+                                return timeB - timeA;
+                            });
+                        } else {
+                            // Standard Priority Sort for Active Items
+                            // columnItems.sort(...) <- Removed to allow manual reordering persistence
+                        }
+
                         const statusStyle = getStatusColor(status);
+
+
+                        const isCompactColumn = status === "Done"; // Compact view for "Done"
+
                         return (
                             <div key={status} className="w-64 min-w-[16rem] flex flex-col bg-muted/20 border border-border/50 rounded-xl h-full">
                                 {/* Column Header */}
@@ -547,10 +646,12 @@ export default function NotebookPage() {
                                             key={item.id}
                                             tabIndex={0}
                                             onKeyDown={(e) => {
-                                                if (e.key === 'ArrowUp') handleReorder(item, 'up', e);
-                                                if (e.key === 'ArrowDown') handleReorder(item, 'down', e);
+                                                // Reorder disabled
                                             }}
-                                            className="bg-card border border-border/50 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow group relative focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                                            className={cn(
+                                                "bg-card border border-border/50 rounded-lg shadow-sm hover:shadow-md transition-shadow group relative focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary",
+                                                isCompactColumn ? "p-2 pl-3" : "p-4"
+                                            )}
                                         >
                                             {/* Priority Stripe */}
                                             <div className={cn("absolute left-0 top-0 bottom-0 w-1 rounded-l-lg",
@@ -559,17 +660,78 @@ export default function NotebookPage() {
                                                         "bg-blue-500"
                                             )} />
 
-                                            <div className="ml-2">
+                                            <div className={cn("ml-2", isCompactColumn && "flex items-center justify-between")}>
                                                 <div className="flex justify-between items-start mb-2">
-                                                    <h4 className="font-bold text-sm leading-tight flex-1 mr-2">{item.title}</h4>
-                                                    <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <button
-                                                            onClick={(e) => handleReorder(item, "up", e)}
-                                                            className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-foreground transition-all"
-                                                            title="Move Up"
-                                                        >
-                                                            <ChevronUp className="w-3.5 h-3.5" />
-                                                        </button>
+                                                    <h4 className={cn("font-bold text-sm leading-tight flex-1 mr-2", isCompactColumn && "mb-0")}>{item.title}</h4>
+                                                    {!isCompactColumn && (
+                                                        <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            {/* Reorder Buttons */}
+                                                            <div className="flex flex-col -space-y-1 mb-1">
+                                                                <button
+                                                                    onClick={(e) => handleReorder(item, "up", e)}
+                                                                    className="text-muted-foreground hover:text-foreground p-0.5 hover:bg-muted/50 rounded"
+                                                                >
+                                                                    <ChevronUp className="w-3 h-3" />
+                                                                </button>
+                                                                <button
+                                                                    onClick={(e) => handleReorder(item, "down", e)}
+                                                                    className="text-muted-foreground hover:text-foreground p-0.5 hover:bg-muted/50 rounded"
+                                                                >
+                                                                    <ChevronDown className="w-3 h-3" />
+                                                                </button>
+                                                            </div>
+
+                                                            {/* Edit Button */}
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setEditingItem(item);
+                                                                }}
+                                                                className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-foreground transition-all"
+                                                                title="Edit"
+                                                            >
+                                                                <Pencil className="w-3.5 h-3.5" />
+                                                            </button>
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleCopy(item);
+                                                                }}
+                                                                className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-foreground transition-all"
+                                                                title="Copy to Clipboard"
+                                                            >
+                                                                <Copy className="w-3.5 h-3.5" />
+                                                            </button>
+
+                                                            {item.status === "Idea" && item.type === "topic" && (
+                                                                <button
+                                                                    onClick={async (e) => {
+                                                                        e.stopPropagation();
+                                                                        // 1. Move to Researching (Optimistic)
+                                                                        setItems(prev => prev.map(i => i.id === item.id ? { ...i, status: "Researching" } : i));
+                                                                        // 2. Server Update
+                                                                        updateNotebookItemAction(item.id, { status: "Researching" });
+                                                                        // 3. Redirect to Scanner
+                                                                        const params = new URLSearchParams({
+                                                                            mode: "research",
+                                                                            q: item.title,
+                                                                            desc: item.description
+                                                                        });
+                                                                        window.location.href = `/scanner?${params.toString()}`;
+                                                                    }}
+                                                                    className="p-1 hover:bg-emerald-500/10 hover:text-emerald-500 rounded text-muted-foreground transition-all"
+                                                                    title="Start Research Protocol"
+                                                                >
+                                                                    <BrainCircuit className="w-3.5 h-3.5" />
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* Compact Column Actions Overlay (Only Edit/Copy) */}
+                                                {isCompactColumn && (
+                                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                         <button
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
@@ -578,30 +740,25 @@ export default function NotebookPage() {
                                                             className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-foreground transition-all"
                                                             title="Edit"
                                                         >
-                                                            <Pencil className="w-3.5 h-3.5" />
+                                                            <Pencil className="w-3 h-3" />
                                                         </button>
+                                                        {/* Archive Action for Done items */}
                                                         <button
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
-                                                                handleCopy(item);
+                                                                handleArchive(item);
                                                             }}
                                                             className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-foreground transition-all"
-                                                            title="Copy to Clipboard"
+                                                            title="Archive"
                                                         >
-                                                            <Copy className="w-3.5 h-3.5" />
-                                                        </button>
-                                                        <button
-                                                            onClick={(e) => handleReorder(item, "down", e)}
-                                                            className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-foreground transition-all"
-                                                            title="Move Down"
-                                                        >
-                                                            <ChevronDown className="w-3.5 h-3.5" />
+                                                            <Archive className="w-3 h-3" />
                                                         </button>
                                                     </div>
-                                                </div>
+                                                )}
 
-                                                {/* Tags Display */}
-                                                {item.tags && item.tags.length > 0 && (
+
+                                                {/* Tags Display (Hidden in Compact) */}
+                                                {!isCompactColumn && item.tags && item.tags.length > 0 && (
                                                     <div className="flex flex-wrap gap-1 mb-2">
                                                         {item.tags.map(tag => (
                                                             <span
@@ -615,45 +772,49 @@ export default function NotebookPage() {
                                                     </div>
                                                 )}
 
-                                                {item.description && (
+                                                {/* Description (Hidden in Compact) */}
+                                                {!isCompactColumn && item.description && (
                                                     <p className="text-xs text-muted-foreground line-clamp-3 mb-3">
                                                         {item.description}
                                                     </p>
                                                 )}
 
-                                                <div className="flex items-center justify-between pt-2 border-t border-border/30">
-                                                    <div className="flex items-center gap-2">
-                                                        {   /* Move Left */
-                                                            item.status !== statuses[0] && (
-                                                                <button
-                                                                    onClick={() => handleUpdateStatus(item, "prev")}
-                                                                    className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-foreground"
-                                                                    title="Move Back"
-                                                                >
-                                                                    <ChevronLeft className="w-4 h-4" />
-                                                                </button>
-                                                            )
-                                                        }
-                                                    </div>
+                                                {/* Footer (Hidden in Compact) */}
+                                                {!isCompactColumn && (
+                                                    <div className="flex items-center justify-between pt-2 border-t border-border/30">
+                                                        <div className="flex items-center gap-2">
+                                                            {   /* Move Left */
+                                                                item.status !== statuses[0] && (
+                                                                    <button
+                                                                        onClick={() => handleUpdateStatus(item, "prev")}
+                                                                        className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-foreground"
+                                                                        title="Move Back"
+                                                                    >
+                                                                        <ChevronLeft className="w-4 h-4" />
+                                                                    </button>
+                                                                )
+                                                            }
+                                                        </div>
 
-                                                    <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
-                                                        {new Date(item.updatedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                                                    </span>
+                                                        <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
+                                                            {new Date(item.updatedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                                        </span>
 
-                                                    <div className="flex items-center gap-2">
-                                                        {   /* Move Right */
-                                                            item.status !== statuses[statuses.length - 1] && (
-                                                                <button
-                                                                    onClick={() => handleUpdateStatus(item, "next")}
-                                                                    className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-foreground"
-                                                                    title="Advance"
-                                                                >
-                                                                    <ChevronRight className="w-4 h-4" />
-                                                                </button>
-                                                            )
-                                                        }
+                                                        <div className="flex items-center gap-2">
+                                                            {   /* Move Right */
+                                                                item.status !== statuses[statuses.length - 1] && (
+                                                                    <button
+                                                                        onClick={() => handleUpdateStatus(item, "next")}
+                                                                        className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-foreground"
+                                                                        title="Advance"
+                                                                    >
+                                                                        <ChevronRight className="w-4 h-4" />
+                                                                    </button>
+                                                                )
+                                                            }
+                                                        </div>
                                                     </div>
-                                                </div>
+                                                )}
                                             </div>
                                         </div>
                                     ))}

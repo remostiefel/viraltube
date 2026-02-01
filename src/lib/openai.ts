@@ -5,6 +5,8 @@ const apiKey = process.env.OPENAI_API_KEY;
 
 const openai = apiKey ? new OpenAI({ apiKey }) : null;
 
+import { ScriptAnalysisResult } from "@/lib/script-optimizer";
+
 export interface ScriptSection {
     heading: string;
     content: string;
@@ -15,6 +17,7 @@ export interface ScriptSection {
 export interface GeneratedScript {
     title: string;
     sections: ScriptSection[];
+    analysis?: ScriptAnalysisResult;
 }
 
 
@@ -59,14 +62,18 @@ export async function generateScriptWithOpenAI(
     language: "DE" | "EN" = "DE",
     strategyContext?: string,
     perfectLoop?: boolean,
-    duration?: "30s" | "60s" | "long",
+    formatId?: string, // NEW: Granular Format ID replacing specific "duration" enums
     metaNarrative?: boolean,
-    protocol?: string // NEW PROTOCOL ID
+    protocol?: string
 ): Promise<GeneratedScript | null> {
     if (!openai) {
         console.error("OpenAI API Key missing");
         return null;
     }
+
+    // LOAD FORMAT
+    const { getFormatById } = require("./formats"); // Lazy load
+    const activeFormat = formatId ? getFormatById(formatId) : null;
 
     const langInstruction = language === "DE"
         ? "LANGUAGE: STRICTLY GERMAN (Deutsch). Use 'Sie' for professional distance or 'Du' if context implies community, but be consistent. Tone: Scientific Excellence."
@@ -102,9 +109,39 @@ export async function generateScriptWithOpenAI(
     ${constitution}
   `;
 
+    // INJECT FORMAT PHYSICS (The "Physics Engine")
+    if (activeFormat) {
+        systemPrompt += `
+        
+        [FORMAT CONTROLLER: ${activeFormat.label.toUpperCase()}]
+        STRICT PHYSICS CONSTRAINTS:
+        1. TARGET WORD COUNT: ${activeFormat.targetWordCount} Words (+/- 10%). 
+           (CRITICAL: Do NOT exceed this. The system will truncate content if too long.)
+        2. TARGET DURATION: ~${activeFormat.targetDurationSeconds} Seconds.
+        3. PACING: High-Velocity Cuts (Visual change every ~${activeFormat.visualPacingSeconds}s).
+        
+        STRUCTURE SKELETON:
+        ${activeFormat.structure.map((s: string, i: number) => `${i + 1}. ${s}`).join("\n        ")}
+        `;
+
+        if (activeFormat.isLoop) {
+            systemPrompt += `
+             [INFINITE RECURSION MODE ACTIVE]
+             The script MUST loop seamlessly.
+             Mandatory Ending Phrase: ${language === "DE" ? '"...und deshalb:"' : '"...and that is why:"'}
+             `;
+        }
+    } else if (perfectLoop) {
+        // Legacy Backup
+        systemPrompt += `
+        [INFINITE RECURSION MODE ACTIVE]
+        Mandatory Ending Phrase: ${language === "DE" ? '"...und deshalb:"' : '"...and that is why:"'}
+        `;
+    }
+
     // INJECT PROTOCOL OVERRIDE (Structure Enforcer)
     if (protocol) {
-        // We import dynamically to avoid circular deps if needed, or just defined constants
+        // ... (existing protocol logic)
         const { getProtocolById } = require("./protocols");
         const protocolData = getProtocolById(protocol);
 
@@ -121,58 +158,6 @@ export async function generateScriptWithOpenAI(
     ${protocolData.structure.map((s: any) => `- ${s.beat} (${s.timing}): ${s.instruction}`).join("\n    ")}
             `;
         }
-    }
-
-    // INJECT CUSTOM STRATEGY CONTEXT (From Strategy Forge)
-    if (strategyContext) {
-        systemPrompt += `
-        
-    [MASTER STRATEGY OVERRIDE]
-    You MUST adhere to the following specific strategic guidelines for this script. 
-    This strategy takes precedence over general viral patterns:
-    ${strategyContext}
-    `;
-    }
-
-    // INJECT PERFECT LOOP INSTRUCTION
-    if (perfectLoop) {
-        systemPrompt += `
-        
-        [INFINITE RECURSION MODE ACTIVE]
-        CRITICAL STRUCTURAL REQUIREMENT:
-        You are creating a "Looping Short" (Infinite Loop).
-        The LAST sentence of the script MUST grammatically and logically lead seamlessly into the FIRST sentence of the script.
-        
-        Mandatory Ending Phrase: ${language === "DE" ? '"...und deshalb:"' : '"...and that is why:"'}
-        
-        Example Structure:
-        Start: "Your focus is destroyed by this one habit..."
-        ... [Content] ...
-        End: "This overstimulation kills your attention span, ...and that is why:"
-        (Loop back to Start)
-        `;
-    }
-
-    // INJECT DURATION CONSTRAINTS
-    if (duration === "30s") {
-        systemPrompt += `
-        
-        [FORMAT: 30-SECOND SHORT]
-        STRICT CONSTRAINT: Maximum 70-80 Words Total.
-        Rule: One single core idea. No fluff.
-        Structure: 
-        1. Visual Hook (0-3s): Immediate visual interrupt.
-        2. The Problem (3-15s): Relatable pain point.
-        3. The Solution (15-25s): The "Secret" / Turning point.
-        4. Loop/CTA (25-30s): Connect back to start.
-        `;
-    } else if (duration === "60s") {
-        systemPrompt += `
-        
-        [FORMAT: 60-SECOND SHORT]
-        STRICT CONSTRAINT: Maximum 140-150 Words.
-        Structure: Hook -> Agitation -> Solution -> Evidence -> Call to Action.
-        `;
     }
 
     // INJECT META-NARRATIVE ENGINE
@@ -804,6 +789,72 @@ export async function extendScriptWithOpenAI(
     }
 }
 
+export async function condenseScriptWithOpenAI(
+    currentScript: string,
+    language: "DE" | "EN" = "DE"
+): Promise<GeneratedScript | null> {
+    if (!openai) {
+        console.error("OpenAI API Key missing");
+        return null;
+    }
+
+    const langInstruction = language === "DE"
+        ? "OUTPUT LANGUAGE: GERMAN (Deutsch)."
+        : "OUTPUT LANGUAGE: ENGLISH.";
+
+    const systemPrompt = `
+    You are the "Master Script Editor" specializing in CONCISE, HIGH-IMPACT content.
+    
+    TASK: CONDENSE and SHORTEN the provided script by approximately 30-40%.
+    
+    ${langInstruction}
+    
+    INSTRUCTIONS:
+    1. Keep the CORE MESSAGE and key facts intact.
+    2. Remove redundancy, filler words, and unnecessary repetition.
+    3. Combine similar points where possible.
+    4. Maintain the hook and payoff - these are sacred.
+    5. Prioritize: High-impact sentences over explanatory padding.
+    6. Result should feel PUNCHY and FAST-PACED.
+    
+    INPUT SCRIPT:
+    (See User Message)
+    
+    OUTPUT FORMAT (JSON):
+    Same as generation schema:
+    {
+      "title": "Condensed Title...",
+      "sections": [
+        {
+          "heading": "...",
+          "content": "Condensed content...",
+          "visualCue": "...",
+          "estimatedDuration": "..."
+        }
+      ]
+    }
+    `;
+
+    try {
+        const completion = await openai.chat.completions.create({
+            messages: [
+                { role: "system", content: systemPrompt },
+                { role: "user", content: `Condense this script:\n\n${currentScript}` },
+            ],
+            model: "gpt-4o",
+            response_format: { type: "json_object" },
+        });
+
+        const content = completion.choices[0].message.content;
+        if (!content) return null;
+
+        return JSON.parse(content) as GeneratedScript;
+    } catch (error) {
+        console.error("OpenAI Condense Error:", error);
+        return null;
+    }
+}
+
 
 export interface WisdomNugget {
     type: "LAW" | "FACT" | "GROWTH"; // SEPARATION OF POWERS: 3 Pillars
@@ -963,7 +1014,18 @@ export async function consolidateWisdom(nuggets: WisdomNugget[], language: "DE" 
     
     ${langInstruction}
     
-    Output JSON Array of WisdomNugget.
+    Output JSON Object with a "nuggets" array:
+    {
+      "nuggets": [
+        {
+          "type": "LAW",
+          "principle": "...",
+          "explanation": "...",
+          "actionableTip": "...",
+          "category": "..."
+        }
+      ]
+    }
     `;
 
     try {
@@ -1003,7 +1065,10 @@ export async function standardizeWisdom(nuggets: WisdomNugget[]): Promise<Wisdom
     3. Keep the original 'principle', 'explanation', 'actionableTip', 'type' EXACTLY as is.
     4. ONLY add the 'universalLaw' field to LAW types.
     
-    Output JSON Array of WisdomNugget.
+    Output JSON Object with a "nuggets" array:
+    {
+      "nuggets": [ ... ]
+    }
     `;
 
     try {

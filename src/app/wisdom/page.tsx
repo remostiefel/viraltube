@@ -10,6 +10,7 @@ import { useSearchParams } from "next/navigation";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/Toast";
+import { HelpTrigger, InsightModeToggle } from "@/components/ui/HelpSystem";
 
 export const dynamic = "force-dynamic";
 
@@ -224,13 +225,14 @@ function WisdomHubContent() {
         if (selectedIds.length === 0) return;
         setExportingDocx(true);
         try {
-            const { generateWisdomDocx } = await import("@/lib/docx-exporter");
+            const { generateWisdomDocx, getDocxFilename } = await import("@/lib/docx-exporter");
             const { saveAs } = await import("file-saver");
 
             const selectedTemplates = wisdoms.filter(w => selectedIds.includes(w.id));
             const blob = await generateWisdomDocx(selectedTemplates, "Wisdom Collection Export");
-            const date = new Date().toISOString().slice(0, 10);
-            saveAs(blob, `NeuroCode_Wisdom_${date}.docx`);
+
+            const filename = getDocxFilename("Wisdom", "Collection");
+            saveAs(blob, filename);
             toast({ title: "Export Complete", description: "DOCX file downloaded.", variant: "success" });
         } catch (e) {
             console.error("Export failed", e);
@@ -283,7 +285,9 @@ function WisdomHubContent() {
             principle: "",
             explanation: "",
             universalLaw: "",
-            actionableTip: ""
+            actionableTip: "",
+            type: "LAW",
+            category: "hook"
         });
         setDraftTitle("");
         setEditingId(null);
@@ -306,12 +310,13 @@ function WisdomHubContent() {
                                     "text-purple-500"
                     )}>
                         <GraduationCap className="w-6 h-6" />
-                        WISDOM HUB
+                        <HelpTrigger helpId="wisdom.hub">WISDOM HUB</HelpTrigger>
                     </h1>
                     <p className="text-sm text-muted-foreground">The Alchemist's Lab for Viral Knowledge.</p>
                 </div>
                 {/* Action Bar */}
-                <div className="flex gap-2">
+                <div className="flex gap-2 items-center">
+                    <InsightModeToggle />
                     <button
                         onClick={handleCreateNew}
                         className="bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 text-white font-bold px-3 py-2 rounded-lg shadow-lg animate-in fade-in flex items-center gap-2 text-xs mr-2"
@@ -440,6 +445,12 @@ function WisdomHubContent() {
                                 const type = w.wisdomCategory || "LAW";
                                 return type === filterMode;
                             })
+                            .sort((a, b) => {
+                                // Sort by createdAt descending (newest first)
+                                const dateA = new Date(a.createdAt || 0).getTime();
+                                const dateB = new Date(b.createdAt || 0).getTime();
+                                return dateB - dateA;
+                            })
                             .map((w) => {
                                 const isSelected = selectedIds.includes(w.id);
                                 return (
@@ -524,12 +535,22 @@ function WisdomHubContent() {
                                     <Sparkles className="w-5 h-5" />
                                     Create New Axion
                                 </button>
+
+                                {selectedIds.length > 0 && (
+                                    <button
+                                        onClick={() => setSelectedIds([])}
+                                        className="mt-4 text-xs text-muted-foreground hover:text-white underline"
+                                    >
+                                        Clear Selection ({selectedIds.length})
+                                    </button>
+                                )}
                             </div>
                         ) : (
                             <div className="animate-in slide-in-from-bottom-5 fade-in space-y-6">
                                 <div className="flex justify-between items-center mb-6">
                                     <h2 className="text-xl font-bold text-yellow-500 flex items-center gap-2">
-                                        <Sparkles className="w-5 h-5" /> Synthesis Draft
+                                        <Sparkles className="w-5 h-5" />
+                                        <HelpTrigger helpId="wisdom.synthesis">Synthesis Draft</HelpTrigger>
                                     </h2>
                                     <button onClick={() => { setDraftPrinciple(null); setEditingId(null); }} className="text-muted-foreground hover:text-white text-xs">Discard</button>
                                 </div>

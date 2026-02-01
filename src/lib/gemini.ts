@@ -97,6 +97,51 @@ export async function generateIdeasFromGemini(topic: string, constitution: strin
     }
 }
 
+export async function generateTrendBasedIdeas(viralContext: string[]): Promise<VideoIdea[]> {
+    if (!apiKey) throw new Error("Gemini API Key is missing");
+
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+    const contextList = viralContext.map(t => `- ${t}`).join("\n");
+
+    const prompt = `
+    You are the "DARWIN" Agent for NEURO-CODE.
+    Your goal: Identify the next viral wave based on current outliers.
+    
+    NICHE: Psychology, Neuroscience, Biohacking, Self-Improvement (Huberman/Peterson style but modernized).
+
+    CURRENT VIRAL OUTLIERS (What is working NOW):
+    ${contextList}
+
+    TASK:
+    Analyze these outliers and generate 5 NEW Video Concepts that bridge these trends with our Niche.
+    Do NOT just copy the outliers. EVOLVE them.
+    
+    Example: 
+    Outlier: "I quit sugar for 30 days" -> Evolution: "What Sugar Withdrawal Actually Does To Your Amygdala (Neuro-Evidence)"
+    
+    Return JSON Array:
+    [
+        {
+            "title": "The Clickable Title",
+            "hook": "First 5s Hook Line",
+            "angle": "Why this works (The Psychological Angle)",
+            "thumbnailIdea": "Description of the visual"
+        }
+    ]
+    `;
+
+    try {
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text().replace(/```json/g, "").replace(/```/g, "").trim();
+        return JSON.parse(text) as VideoIdea[];
+    } catch (error) {
+        console.error("Trend Idea Generation Error:", error);
+        return [];
+    }
+}
+
 export interface OptimizationResult {
     original: string;
     score: number;
@@ -328,6 +373,7 @@ export interface ChannelAuditData {
     avd: string;
     minutesWatched: number;
     topVideos: string;
+    channelAge?: string;
 }
 
 export interface InsightItem {
@@ -343,18 +389,28 @@ export interface ChannelAuditResult {
     executiveSummary: string;
 }
 
-export async function generateChannelAudit(data: ChannelAuditData, promptOverrides?: Record<string, string>): Promise<ChannelAuditResult> {
+export interface MetricOptimizationResult {
+    tactics: { title: string; description: string; difficulty: "Easy" | "Medium" | "Hard" }[];
+    impactPrediction: string;
+}
+
+export async function generateChannelAudit(data: ChannelAuditData, mode: 'medical' | 'professional' = 'medical'): Promise<ChannelAuditResult> {
     if (!apiKey) throw new Error("Gemini API Key is missing");
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-    const template = promptOverrides?.["audit"] || SYSTEM_PROMPTS.audit.template;
+    // Select template based on mode
+    const template = mode === 'professional'
+        ? (SYSTEM_PROMPTS.audit as any).template_professional
+        : SYSTEM_PROMPTS.audit.template;
 
     const prompt = fillTemplate(template, {
         views: data.views,
         subsGained: data.subsGained,
         avd: data.avd,
+
         minutesWatched: data.minutesWatched,
-        topVideos: data.topVideos
+        topVideos: data.topVideos,
+        channelAge: data.channelAge || "Unknown"
     });
 
     try {
@@ -369,7 +425,33 @@ export async function generateChannelAudit(data: ChannelAuditData, promptOverrid
             losses: [],
             opportunities: [],
             overallSentiment: "Neutral",
-            executiveSummary: "Audit failed due to AI service disruption."
+            executiveSummary: `Audit failed: ${error instanceof Error ? error.message : String(error)}`
+        };
+    }
+}
+
+export async function generateMetricOptimization(metricName: string, currentValue: string, context: { channelAge: string, niche: string }): Promise<MetricOptimizationResult> {
+    if (!apiKey) throw new Error("Gemini API Key is missing");
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+    const template = SYSTEM_PROMPTS.optimize_metric.template;
+    const prompt = fillTemplate(template, {
+        metricName,
+        currentValue,
+        channelAge: context.channelAge,
+        niche: context.niche
+    });
+
+    try {
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text().replace(/```json/g, "").replace(/```/g, "").trim();
+        return JSON.parse(text) as MetricOptimizationResult;
+    } catch (error) {
+        console.error("Metric Optimization Error", error);
+        return {
+            tactics: [],
+            impactPrediction: "Analysis Failed"
         };
     }
 }
@@ -592,5 +674,47 @@ export async function generateSpeechWithGemini(
     } catch (error) {
         console.error("Voice Generation Error:", error);
         return null;
+    }
+}
+
+export async function generateVoiceoverStyle(scriptContent: string): Promise<string> {
+    if (!apiKey) {
+        // Fallback if no API key
+        return "Read aloud in an intense, captivating tone – like a mad scientist revealing forbidden knowledge:";
+    }
+
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+    const prompt = `
+    You are a Voice Director for high-end YouTube content.
+    
+    Analyze the following script and generate a ONE-SENTENCE voiceover style instruction in English.
+    The instruction should be specific to this content's mood, topic, and emotional arc.
+    
+    FORMAT: "Read aloud in a [adjective], [adjective] tone – like a [creative metaphor]:"
+    
+    EXAMPLES:
+    - "Read aloud in a warm, conspiratorial tone – like a wise friend revealing a secret:"
+    - "Read aloud in an intense, urgent tone – like a war correspondent reporting from the frontlines:"
+    - "Read aloud in a calm, authoritative tone – like a neurosurgeon explaining a breakthrough:"
+    - "Read aloud in a mysterious, hypnotic tone – like a late-night radio host telling ghost stories:"
+    - "Read aloud in a fast-paced, electric tone – like an auctioneer at a high-stakes bidding war:"
+    
+    SCRIPT SNIPPET:
+    "${scriptContent.slice(0, 2000)}"
+    
+    Return ONLY the instruction sentence, nothing else. No quotes around it.
+    `;
+
+    try {
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text().trim();
+
+        // Ensure it ends with a colon
+        return text.endsWith(":") ? text : text + ":";
+    } catch (error) {
+        console.error("Voiceover Style Generation Error:", error);
+        return "Read aloud in an intense, captivating tone – like a mad scientist revealing forbidden knowledge:";
     }
 }

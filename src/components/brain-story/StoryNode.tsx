@@ -3,7 +3,8 @@
 import { motion } from "framer-motion";
 import {
     Code, Terminal, Calendar, Activity,
-    Zap, Scan, Layout, Lock, Video, Image, Eye, Book, Star
+    Zap, Scan, Layout, Lock, Video, Image, Eye, Book, Star,
+    MessageCircle, Trello, Sun, Share2, FileText, UploadCloud, Heart, RefreshCw, GraduationCap, Workflow
 } from "lucide-react";
 
 const IconMap: Record<string, any> = {
@@ -16,6 +17,17 @@ const IconMap: Record<string, any> = {
     eye: Eye,
     book: Book,
     code: Code,
+    activity: Activity,
+    "message-circle": MessageCircle,
+    trello: Trello,
+    sun: Sun,
+    workflow: Workflow,
+    "share-2": Share2,
+    "file-text": FileText,
+    "upload-cloud": UploadCloud,
+    heart: Heart,
+    "refresh-cw": RefreshCw,
+    "graduation-cap": GraduationCap,
     default: Star
 };
 

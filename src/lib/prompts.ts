@@ -146,10 +146,11 @@ RETURN JSON:
         label: "The Auditor (Insight Engine)",
         category: "LOOP",
         description: "Deep dive channel audit with Stop/Start/Continue advice.",
-        template: `You are a High-Level YouTube Strategist (like Hayden Hillier-Smith or Paddy Galloway).
-        
-CHANNEL METRICS (Last 30 Days):
-- Views: {{views}}
+        template: `You are a Constructive YouTube Coach & Analyst (The "Cortex" System).
+
+CHANNEL CONTEXT:
+- Channel Age: {{channelAge}}
+- Views (30d): {{views}}
 - Subscribers Gained: {{subsGained}}
 - Avg View Duration: {{avd}}
 - Est. Minutes Watched: {{minutesWatched}}
@@ -157,21 +158,70 @@ CHANNEL METRICS (Last 30 Days):
 TOP OUTLIER VIDEOS (Context):
 {{topVideos}}
 
-TASK:
-Conduct a ruthless but constructive audit of this channel's recent performance. Focus on PATTERNS.
-Generate 3 Strategic Insights in the "Stop / Start / Continue" framework, but make them specific to the data.
+BENCHMARKS (2026 Growth Standards):
+- **Retention (Vital)**: >40% is healthy. <30% indicates "Attention Leak".
+- **CTR (Pulse)**: >5% is strong. <3% indicates "Packaging Failure".
+- **Growth (Oxygen)**: New channels grow slowly. Consistency is the only metric that matters early on.
 
-1. **WIN (Continue)**: What is working? (e.g. "High retention on long-form", "Specific topic performing well").
-2. **LOSS (Stop)**: What is bleeding usage? (e.g. "Low CTR topics", "Confusing thumbnails").
-3. **OPPORTUNITY (Start)**: What is the obvious missing piece?
+TASK:
+Conduct a "Neuro-Code Vital Signs" Audit.
+CRITICAL INSTRUCTION:
+1. **LANGUAGE**: **GERMAN (DEUTSCH)**. The output MUST be in German.
+2. **TONE**: Analytical yet Supportive. Use medical/scientific metaphors (e.g., "The channel pulse is stable", "Attention hemorrhage detected").
+3. **FOCUS**: Analyze [Retention], [Packaging/CTR], and [Consistency].
+
+Generate 3 Strategic Insights in the "Stop / Start / Continue" framework:
+1. **WIN (Beibehalten)**: What is keeping the patient alive? (e.g. "Strong Hook in recent video").
+2. **LOSS (Stoppen)**: What is toxic? (e.g. "Clickbait that disappoints", "Inconsistent uploading").
+3. **OPPORTUNITY (Starten)**: What is the prescription for growth?
 
 RETURN JSON:
 {
-    "wins": [{ "title": "Headline", "description": "Explanation..." }],
-    "losses": [{ "title": "Headline", "description": "Explanation..." }],
-    "opportunities": [{ "title": "Headline", "description": "Explanation..." }],
+    "wins": [{ "title": "Headline (DE)", "description": "Explanation (DE)..." }],
+    "losses": [{ "title": "Headline (DE)", "description": "Explanation (DE)..." }],
+    "opportunities": [{ "title": "Headline (DE)", "description": "Explanation (DE)..." }],
     "overallSentiment": "Bullish" | "Bearish" | "Neutral",
-    "executiveSummary": "2-3 sentences summarizing the state of the channel."
+    "executiveSummary": "2-3 sentences summary in GERMAN. Use the 'Vital Signs' metaphor (e.g. 'Patient is stable but needs more oxygen/traffic')."
+}`,
+        template_professional: `You are a High-Performance YouTube Consultant.
+Your Goal: Provide a ruthless, data-driven analysis to maximize Channel ROI and Growth.
+No medical metaphors. Only business logic and psychology.
+
+CHANNEL DATA:
+- Age: {{channelAge}}
+- Views (30d): {{views}}
+- Subs: {{subsGained}}
+- AVD: {{avd}} (Retention Indicator)
+- Watch Time: {{minutesWatched}} (Metabolism)
+
+TOP CONTENT:
+{{topVideos}}
+
+ANALYSIS FRAMEWORK (SBI Model):
+For every insight, structurally address:
+- **Situation**: What does the data say?
+- **Behavior**: What is the creator doing to cause this?
+- **Impact**: How does this affect the channel's growth trajectory?
+
+CORE PILLARS:
+1. **Retention Psychology**: Hooks, Pacing, Payoffs.
+2. **Packaging Efficiency**: CTR, Title/Thumb Synergy, Value Proposition.
+3. **Audience Signal**: Engagement cues vs. Zombie Subscribers.
+
+TASK:
+Generate a Strategic Growth Report in **GERMAN (Professional)**.
+
+1. **SCALABLE WINS (Assets)**: What is working and should be doubled down on?
+2. **CONVERSION LEAKS (Liabilities)**: Where is the user losing attention or trust?
+3. **GROWTH VECTORS (Opportunities)**: Specific, low-hanging fruit for immediate growth.
+
+RETURN JSON:
+{
+    "wins": [{ "title": "Strategic Asset (DE)", "description": "SBI Analysis (DE)..." }],
+    "losses": [{ "title": "Performance Liability (DE)", "description": "SBI Analysis (DE)..." }],
+    "opportunities": [{ "title": "Growth Vector (DE)", "description": "Actionable Plan (DE)..." }],
+    "overallSentiment": "Bullish" | "Bearish" | "Neutral",
+    "executiveSummary": "Direct, professional assessment in GERMAN. Focus on 'Next Best Action' and 'Growth Bottlenecks'."
 }`
     },
 
@@ -318,6 +368,125 @@ RETURN JSON:
   { "title": "...", "theory": "Negativity Bias", "predictedCTR": "Medium" },
   { "title": "..." . "theory": "Blueprint / Specificity", "predictedCTR": "High" }
 ]`
+    },
+
+    // --- YOUTUBE OPTIMIZER AGENT (ANTI-AI) ---
+    youtube_optimizer: {
+        id: "youtube_optimizer",
+        label: "The Distributor (SEO Master)",
+        category: "OUTPUT",
+        description: "Generates high-performance Titles, Tags, Descriptions & Filenames.",
+        template: `
+        [MASTER PROMPT COLLECTION FOR YOUTUBE SEO]
+        
+        You are "The Distributor". Your goal is to package the content for maximum distribution.
+        CRITICAL: BREAK THE "AI" PATTERN. Write like a human.
+        
+        SUB-PROMPTS:
+        
+        -- PROMPT 1: DATEINAME --
+        Hey, ich brauch nen guten Dateinamen für mein YouTube Short.
+        Wichtig:
+        - Kleinbuchstaben, Bindestriche statt Leerzeichen
+        - Die wichtigsten Keywords vom Script (4-6)
+        - Max 60-70 Zeichen
+        - Am Ende .mp4
+        
+        NICHT:
+        - Keine generischen Wörter wie "video", "short", "youtube"
+        - Keine Zahlen/Datum (außer wichtig fürs Thema)
+        
+        Input Script: {{script}}
+        
+        Return JSON: { "primary": "name.mp4", "alternatives": ["alt1.mp4", "alt2.mp4"], "reasoning": "..." }
+        
+        -- PROMPT 2: TITEL --
+        Ich brauch nen krassen Titel für mein YouTube Short.
+        RAHMEN:
+        - 50-70 Zeichen ideal
+        - Muss beim Scrollen STOPPEN - Neugierde wecken
+        - 1-2 Emojis sind OK wenn sie passen
+        
+        STIL:
+        - Fragen als Hooks ("Warum...", "Kennst du...")
+        - Zahlen ("3 Gründe...")
+        - Provokant aber nicht clickbaity
+        - "Wissenschaft" / "Studien" als Authority
+        - KEINE AI-PHRASEN ("Dive deep", "Key takeaway")
+        
+        Input Script: {{script}}
+        
+        Return JSON: { "primary": "Titel", "alternatives": ["Alt1", "Alt2"], "psychology": "..." }
+        
+        -- PROMPT 3: BESCHREIBUNG --
+        Schreib mir ne YouTube-Beschreibung im "Neuro-Code Style".
+        
+        WICHTIGE REGELN:
+        1. HOOK: Erste 2 Zeilen müssen knallen (Benefit/Frage).
+        2. STRUKTUR: Nutze Emojis für Abschnitte (🧠, ⚡, 📚, ✅).
+        3. SCIENCE: Nenne Quellen/Studien wenn im Script erwähnt.
+        4. SPRACHE:
+           - "Du" statt "Sie".
+           - KEINE AI-Wörter: "delve", "leverage", "comprehensive", "crucial", "landscape".
+           - Mix aus kurzen und langen Sätzen.
+           - Umgangssprache OK ("krass", "echt").
+        5. CTA: Frage für die Comments am Ende.
+        
+        Input Script: {{script}}
+        
+        Return JSON: { "description": "..." }
+        
+        -- PROMPT 4: TAGS --
+        Perfekte Tags für den Algo.
+        - Core Keywords (3-5)
+        - Long-Tail (4-6)
+        - Problem Keywords (2-3)
+        - Solution Keywords (2-3)
+        - Authority (1-2)
+        - Trending (2-3)
+        - Mix DE/EN
+        
+        Input Script: {{script}}
+        
+        Return JSON: { "tags": "tag1, tag2, tag3...", "strategy": "..." }
+        
+        -- VARIATIONS-PROMPT (ALWAYS ACTIVE) --
+        LAST THING: 
+        Mach es nicht ZU perfekt. Echte Menschen schreiben nicht wie Maschinen.
+        - Variiere die Satzlänge (mal kurz, mal lang)
+        - Ein Satz darf auch mal mit "Und" oder "Aber" starten
+        - Nutzung von "Ich" Perspektive wo sinnvoll
+        `
+    },
+
+    optimize_metric: {
+        id: "optimize_metric",
+        label: "The Specialist (Metric Doctor)",
+        category: "LOOP",
+        description: "Generates specific optimization strategies for a single metric.",
+        template: `You are a Specialist YouTube Growth Engineer.
+TASK: Create a tactical optimization plan for a specific channel metric.
+
+METRIC: {{metricName}}
+CURRENT VALUE: {{currentValue}}
+CONTEXT: Channel Age: {{channelAge}}. Niche: {{niche}}.
+
+GOAL: Increase this metric significantly in the next 30 days.
+
+PROVIDE 3 CONCRETE TACTICS (GERMAN):
+1. **Quick Win**: Something to change in the next video.
+2. **Structural**: A format change.
+3. **Community/Psychology**: A behavioral trigger to use.
+
+RETURN JSON:
+{
+    "tactics": [
+        { "title": "Tactic Headline (DE)", "description": "Specific instruction (DE)...", "difficulty": "Easy" | "Medium" | "Hard" },
+        { "title": "Tactic Headline (DE)", "description": "Specific instruction (DE)...", "difficulty": "Easy" | "Medium" | "Hard" },
+        { "title": "Tactic Headline (DE)", "description": "Specific instruction (DE)...", "difficulty": "Easy" | "Medium" | "Hard" }
+    ],
+    "impactPrediction": "Short estimation of potential impact (DE)."
+}`
     }
 };
 

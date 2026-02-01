@@ -24,7 +24,8 @@ import {
     Film,            // Director
     Eye,             // Virt Vision
     History,          // Brain Build
-    Notebook         // Noteobok
+    Notebook,         // Noteobok
+    Map              // Canvas
 } from "lucide-react";
 
 export type NavItem = {
@@ -52,16 +53,18 @@ export const navigation: NavItem[] = [
     { group: "SIGNALS", name: "Scanner", href: "/scanner", icon: Radar, subtitle: "Trend Scout", color: "#38BDF8" },
     { group: "SIGNALS", name: "Analytics", href: "/feedback", icon: Activity, subtitle: "Channel Intelligence", color: "#60A5FA" },
     { group: "SIGNALS", name: "Wisdom", href: "/wisdom?filter=LAW", icon: GraduationCap, subtitle: "Knowledge Extraction", color: "#818CF8" },
+    { group: "SIGNALS", name: "Canvas", href: "/cortex", icon: Map, subtitle: "Knowledge Graph", color: "#A855F7" }, // Purple
 
     // PRODUCTION: Greens
     { group: "PRODUCTION", name: "Architect", href: "/architect?tab=script", icon: PencilRuler, subtitle: "Strategy & Script", color: "#4ADE80" }, // Green-400
     { group: "PRODUCTION", name: "Director", href: "/architect?tab=director", icon: Film, subtitle: "Visuals", color: "#22C55E" },         // Green-500
 
-    // SYSTEM: Warm tones / Neutrals
+    { group: "PRODUCTION", name: "Distribution", href: "/packaging", icon: Package, subtitle: "SEO & Packaging", color: "#16A34A" }, // Green-600
+
     { group: "SYSTEM", name: "Notebook", href: "/notebook", icon: Notebook, subtitle: "Pipeline & Tasks", color: "#F59E0B" },
-    { group: "SYSTEM", name: "Core Identity", href: "/core-identity", icon: Brain, subtitle: "Strategy Core", color: "#94A3B8" }, // Subtle Blue-Grey
-    { group: "SYSTEM", name: "Vault", href: "/vault", icon: Database, subtitle: "Assets", color: "#E2E8F0" }, // Light Grey
-    { group: "SYSTEM", name: "Settings", href: "/settings", icon: Settings, subtitle: "Config", color: "#64748B" }, // Darker Grey
+    { group: "SYSTEM", name: "Core Identity", href: "/core-identity", icon: Brain, subtitle: "Strategy Core", color: "#64748B" }, // Slate-500
+    { group: "SYSTEM", name: "Vault", href: "/vault", icon: Database, subtitle: "Assets", color: "#94A3B8" }, // Slate-400
+    { group: "SYSTEM", name: "Settings", href: "/settings", icon: Settings, subtitle: "Config", color: "#CBD5E1" }, // Slate-300
 
 ];
 

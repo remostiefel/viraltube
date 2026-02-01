@@ -1,5 +1,139 @@
 [
   {
+    "id": "03436170-5a6b-4cf2-b700-06727396e0af",
+    "title": "Combo: \"Your Brain is A...\" + \"This Habit Sile...\" + \"\"Does Stress Re...\"",
+    "createdAt": "2026-01-26T18:12:09.971Z",
+    "status": "production",
+    "format": "# ⚔️ Master Strategy: Cognitive Impact Unveiled\n\n## 1. The Hook Formula\n- **Immediate Threat & Direct Address:** Opens with an urgent, direct-to-viewer statement about a common habit, emotion, or overlooked environmental factor directly harming \"Your Brain\" or a core cognitive function (e.g., \"This daily habit is silently *eroding* your focus,\" \"Are you *unwittingly* shrinking your memory?\").\n- **Shocking Fact/Claim:** Follows with a bold, often counter-intuitive or alarmist claim about the severity or hidden nature of the impact (e.g., \"...and it's *scientifically proven* to cause brain damage.\", \"The truth will *shock* you.\").\n- **Promise of Revelation/Urgency:** Implies an immediate, data-backed exposé of the problem and its implications (e.g., \"We reveal the 5 crucial facts you *must* know now before it's too late.\").\n\n## 2. Pacing & Structure\n- **Hyper-Paced Problem Introduction (0-5s):** Rapidly establishes the core threat/question with a bold statement, minimal intro, leveraging fast cuts for immediate impact (especially for short-form).\n- **Iterative \"Impact Reveal\" Segments:** Presents multiple distinct examples or aspects of the impact, each following a micro-narrative within a consistent, repetitive segment format:\n    -   **Identify Trigger:** Clearly names/shows the habit, emotion, or factor (e.g., \"Overthinking,\" \"Chronic Stress,\" \"Poor Sleep\").\n    -   **Dynamic Consequence Visualization:** Immediately shows its specific negative effect on a cognitive metric (e.g., memory, focus, brain volume) using a central, animated visual aid.\n    -   **Concise \"Why\":** Briefly explains the scientific mechanism, statistic, or shocking fact behind *this specific impact*.\n    -   **Relatable Scenario/Warning:** Connects the impact to a common daily experience or offers a direct, urgent warning.\n- **Escalating Insight & Actionable Summary:** Builds towards a cumulative understanding of the overall threat, contrasting different impacts, and concludes with clear, empowering preventative or mitigating actions.\n- **Urgent Call to Awareness:** Ends with a reinforcing statement about the importance of understanding and acting on this information, often with a subtle call to action for further knowledge.\n\n## 3. Visual Identity\n- **Centralized \"Brain Health\" Monitor:** A prominent, consistent, and clear animated graphic (e.g., a stylized brain showing areas of decline, a deteriorating memory meter, a shrinking cortical representation) that dynamically reacts and visibly changes as each new impact is revealed.\n- **Bold, High-Contrast Text Overlays:** Key facts, statistics, and impact statements are prominently displayed using urgent, legible fonts and high-contrast color schemes (e.g., stark white on dark backgrounds, accents of red/orange for warnings).\n- **Concise, High-Impact Imagery/B-roll:** Quick, evocative cuts of relevant, often slightly anxiety-inducing visuals (e.g., clocks ticking, blurred faces, stressed individuals, abstract brain scans showing decline) paired with each impact.\n- **Warning Emblems & Emojis:** Strategic, consistent use of warning signs (⚠️, 🛑) and relevant emojis in text overlays for heightened urgency and visual impact, particularly crucial for short-form content.\n- **Structured \"Fact Card\" Overlays:** Each new fact or impact is introduced with a clean, branded visual card displaying the trigger and its specific effect, maintaining visual consistency across segments.\n\n## 4. Psychology (Neuro-Code)\n- **Loss Aversion & Fear of Impairment:** Directly taps into the primal fear of losing cognitive abilities, memory, or overall brain health, which is a powerful motivator for engagement, sustained attention, and retention.\n- **Curiosity Gap (Problem-Focused):** Creates a continuous \"what else am I doing wrong?\" and \"how bad is this really?\" loop, compelling viewers to watch through multiple reveals, satisfying the brain's need for information closure.\n- **Relatability & Self-Identification:** Addresses common daily struggles (stress, overthinking, bad habits, memory lapses), making the content highly personally relevant and fostering a sense of shared vulnerability and experience.\n- **Empowerment Through Awareness:** While presenting alarming information, the format implicitly offers control by revealing hidden truths and the \"why,\" allowing viewers to feel empowered to make informed changes and avoid further harm, triggering self-efficacy.\n- **Visual & Auditory Urgency:** The combination of alarmist visuals, rapid pacing, direct address, and impactful sound design triggers the brain's alert system, enhancing attention, memorability, and the perceived importance of the information.",
+    "scriptContent": "## Achtung: Bedrohung für Ihre Gehirngesundheit!\n\nWussten Sie, dass eine alltägliche Gewohnheit unbemerkt Ihre geistige Klarheit zerstören könnte? Sie lässt Hirnregionen schrumpfen – ein übersehener, aber gefährlicher Einfluss.\n\n## Grübeln: Die versteckte Gefahr\n\nDenken Sie oft zu viel nach? Dieses ständige Grübeln kann Ihren präfrontalen Cortex massiv belasten und Ihre Entscheidungsfähigkeit stark einschränken.\n\n## Schlafmangel: Die unbemerkte Falle\n\nSchlafen Sie zu wenig? Das kann zu einer Schrumpfung Ihres Hippocampus führen, wodurch Sie Schwierigkeiten haben, Informationen effektiv zu speichern.\n\n## Stress und die zerstörerische Wirkung auf Neuronen\n\nChronischer Stress und erhöhtes Cortisol verursachen Neuronenschäden, was Ihre Kreativität und Ihr geistiges Wohlbefinden massiv beeinträchtigt.\n\n## Strategien zur Gehirnstärkung\n\nEs ist Zeit, aktiv zu werden: Nehmen Sie ungesunde Gewohnheiten in Angriff und stärken Sie Ihr Gehirn mit einfachen, aber effektiven Änderungen im Alltag.\n\n## Der entscheidende erste Schritt\n\nSchützen Sie Ihre Gehirngesundheit und bleiben Sie informiert. Abonnieren Sie jetzt für tiefergehende Erkenntnisse und Tipps.",
+    "scriptData": {
+      "title": "Schleichende Gefahren: Wie Ihre Gewohnheiten das Gehirn zerstören",
+      "sections": [
+        {
+          "heading": "Achtung: Bedrohung für Ihre Gehirngesundheit!",
+          "content": "Wussten Sie, dass eine alltägliche Gewohnheit unbemerkt Ihre geistige Klarheit zerstören könnte? Sie lässt Hirnregionen schrumpfen – ein übersehener, aber gefährlicher Einfluss.",
+          "visualCue": "Handystarren; animiertes, schrumpfendes Gehirn",
+          "estimatedDuration": "5"
+        },
+        {
+          "heading": "Grübeln: Die versteckte Gefahr",
+          "content": "Denken Sie oft zu viel nach? Dieses ständige Grübeln kann Ihren präfrontalen Cortex massiv belasten und Ihre Entscheidungsfähigkeit stark einschränken.",
+          "visualCue": "3D-Präfront-Cortex, der unter Stress schrumpft",
+          "estimatedDuration": "5"
+        },
+        {
+          "heading": "Schlafmangel: Die unbemerkte Falle",
+          "content": "Schlafen Sie zu wenig? Das kann zu einer Schrumpfung Ihres Hippocampus führen, wodurch Sie Schwierigkeiten haben, Informationen effektiv zu speichern.",
+          "visualCue": "Schwindender Hippocampus; frustrierter Lernender",
+          "estimatedDuration": "5"
+        },
+        {
+          "heading": "Stress und die zerstörerische Wirkung auf Neuronen",
+          "content": "Chronischer Stress und erhöhtes Cortisol verursachen Neuronenschäden, was Ihre Kreativität und Ihr geistiges Wohlbefinden massiv beeinträchtigt.",
+          "visualCue": "Entwurzelter Neuronenbaum unter Cortisol-Stress",
+          "estimatedDuration": "5"
+        },
+        {
+          "heading": "Strategien zur Gehirnstärkung",
+          "content": "Es ist Zeit, aktiv zu werden: Nehmen Sie ungesunde Gewohnheiten in Angriff und stärken Sie Ihr Gehirn mit einfachen, aber effektiven Änderungen im Alltag.",
+          "visualCue": "Motivierendes B-Roll: Lesen, Meditieren, Sport",
+          "estimatedDuration": "5"
+        },
+        {
+          "heading": "Der entscheidende erste Schritt",
+          "content": "Schützen Sie Ihre Gehirngesundheit und bleiben Sie informiert. Abonnieren Sie jetzt für tiefergehende Erkenntnisse und Tipps.",
+          "visualCue": "Regenerierendes Gehirn; prägnante Tipps",
+          "estimatedDuration": "5"
+        }
+      ]
+    }
+  },
+  {
+    "id": "d46d0c36-4401-4e18-ae74-1c87dc9f3924",
+    "title": "Combo: \"Can You REALLY ...\" + \"How to hack you...\" + \"The Hidden Swit...\"",
+    "createdAt": "2026-01-26T16:36:42.114Z",
+    "status": "production",
+    "format": "# ⚔️ Master Strategy: The Empowered Bio-Hack\n\n## 1. The Hook Formula\n- **Trigger Question & Intrigue:** Start with a skeptical, challenge-oriented question (\"Can you REALLY...?\") followed immediately by the promise of uncovering a hidden, powerful mechanism or shortcut (\"...Uncover the Hidden Switch to Hack Your Happy Hormones?\").\n- **Benefit-Driven Keywords:** Integrate high-value emotional/biological terms like \"happy hormones,\" \"boost,\" \"unlock,\" \"control,\" \"secret,\" \"hack\" directly into the opening line.\n\n## 2. Pacing & Structure\n- **Immediate Engagement (0-15s):** Rapid-fire opening presenting the core question and hinting at the \"hidden switch\" or \"hack.\" Use quick cuts and energetic music to capture attention instantly.\n- **Curiosity & Myth Busting (15-45s):** Quickly validate viewer skepticism by acknowledging common misconceptions or ineffective methods. Then, introduce the \"revelation\" – the scientific principle or method that acts as the \"hidden switch\" – building anticipation.\n- **Actionable Revelation & Explanation (45s-2min):** Systematically break down *how* to activate the \"switch\" or implement the \"hack\" into 2-3 concise, science-backed steps. Maintain a dynamic pace with clear transitions, but allow enough time for each step to be understood.\n- **Empowerment & Reinforcement (Final 30s):** Conclude by summarizing the immediate benefits and reinforcing the viewer's newfound ability to control their well-being. End with a clear, encouraging call to action.\n\n## 3. Visual Identity\n- **Sleek, Scientific, & Energetic:** Utilize a clean, modern aesthetic with a focus on animated graphics (e.g., brain schematics, hormone pathways, metaphorical \"switches\" activating).\n- **Dynamic Text Overlays & Emojis:** Bold, kinetic text highlighting key concepts, stats, and actionable steps. Strategically use relevant emojis (🧠✨💡) for visual emphasis, emotional connection, and approachability.\n- **Concept-Driven B-roll:** Interweave quick cuts of aspirational, relevant imagery (e.g., nature, healthy activities, abstract representations of focus/joy) to illustrate concepts without distracting from the core message.\n- **Consistent Brand Palette:** Employ a curated color palette that evokes both credibility (e.g., blues, whites) and positive energy/insight (e.g., yellows, bright greens).\n\n## 4. Psychology (Neuro-Code)\n- **Curiosity Gap & Revelation:** The \"Can you REALLY...?\" question, combined with \"hidden switch\" and \"hack\" language, creates an irresistible curiosity gap, promising a novel, exclusive insight and triggering a dopamine rush upon its \"reveal.\"\n- **Empowerment & Self-Efficacy:** Offering \"hacks\" and \"switches\" directly appeals to the human desire for control and agency over one's own body and mind, fostering a sense of capability and hope.\n- **Problem-Solution & Immediate Gratification:** Directly addresses a universal desire (happiness/well-being) with clear, actionable steps, satisfying the brain's craving for efficient solutions and potential quick wins.\n- **Credibility & Authority (Subtle):** Leveraging terms like \"hormones,\" \"psychology,\" and scientific visuals provides an underlying layer of trustworthiness, satisfying the brain's need for reliable, evidence-based information.\n- **Simplification of Complexity:** Breaking down complex biological or psychological processes into digestible \"hacks\" or \"switches\" makes daunting topics feel achievable and less intimidating, encouraging engagement and retention.",
+    "scriptContent": ""
+  },
+  {
+    "id": "fd1d1e9c-bf1b-4c1c-a65a-c68077c0f506",
+    "title": "Short: Dein Gehirn steuert dein Glück...",
+    "createdAt": "2026-01-26T16:33:49.311Z",
+    "status": "production",
+    "format": "🔬 SCIENCE SHORT:\nHOOK: STOPP! Dein Job killt deine Energie?\nFACT: Dein Gehirn steuert dein Glück aktiv durch Hormone, die du gezielt aktivieren kannst.\nEXPLANATION: Dopamin, Serotonin, Oxytocin – diese Botenstoffe sind der Schlüssel. Du kannst sie gezielt aktivieren. Neueste Studien zeigen: Ein hormonell balanciertes Gehirn steigert Fokus um fünfundzwanzig Prozent und Kreativität um fünfzehn Prozent.\nVISUAL: Schnelle Schnitte: Müde, gestresste Person am Schreibtisch -> Überlagerung von Gehirn mit leuchtenden Botenstoffen, die durch Aktionen freigesetzt werden -> Person lächelt, ist fokussiert, aktiv. Timer-Animationen für jede Aktion, kurze, dynamische Übergänge.\nCITATION: Neuroscience Research (last 5 years)\n\n📜 FORMATTED SCRIPT:\n#Biohacking #ArbeitsplatzGlück #Hormone #Produktivität \n\n**HOOK (0-3s)**\n🛑 STOPP! Dein Job killt deine Energie?\n\n**PROBLEM (3-8s)**\nDu denkst, Glück im Job ist reiner Zufall? FALSCH! Das ist ein brutal alter Mythos.\n\n**SCIENCE (8-25s)**\n🤯 Neueste Neuroforschung der letzten 5 Jahre beweist: Dein Gehirn steuert dein Glück aktiv. Durch Hormone! Dopamin, Serotonin, Oxytocin – diese Botenstoffe sind der Schlüssel. Du kannst sie gezielt aktivieren! Studien zeigen: Ein hormonell balanciertes Gehirn steigert Fokus um **25%** und Kreativität um **15%**.\n\n**SOLUTION (25-55s)**\n🚀 Hier ist dein **3-Stufen-Hack**, um sie zu fluten:\n\n1.  **Dopamin-Kick (10:00 Uhr):** Setze dir eine klitzekleine Aufgabe. Erledige sie in **10 Minuten**. Hake ab. SOFORTIGER Belohnungs-Push!\n2.  **Serotonin-Boost (13:00 Uhr):** Geh **5 Minuten** ans Tageslicht. Oder notiere 3 Dinge, für die du dankbar bist. Das erhellt instant deine Stimmung.\n3.  **Oxytocin-Flow (16:00 Uhr):** Sprich **2 Minuten** bewusst mit einem Kollegen. Oder dehne dich **60 Sekunden** lang. Fördert Bindung und inneren Frieden.\n\n**EMOTIONAL APPEAL (55-70s)**\n✨ Stell dir vor: Du gehst jeden Tag voller Motivation zur Arbeit. Fühlst dich fokussiert, erfüllt und bist brutal produktiv. Kein Burnout mehr. Das ist machbar!\n\n**CLOSER (70-90s)**\n💪 Starte diesen 3-Stufen-Hack MORGEN. Dein Gehirn wird es lieben. Teile diesen Biohack mit deinem Team! Und folge für mehr geniale Insights!\n\n🎙️ VOICEOVER (PLAIN TEXT):\nSTOPP! Dein Job killt deine Energie? (Pause) Du denkst, Glück im Job ist reiner Zufall? FALSCH! Das ist ein brutal alter Mythos. (Pause) Neueste Neuroforschung der letzten fünf Jahre beweist: Dein Gehirn steuert dein Glück aktiv. Durch Hormone! (Pause) Dopamin, Serotonin, Oxytocin – diese Botenstoffe sind der Schlüssel. Du kannst sie gezielt aktivieren! (Pause) Studien zeigen: Ein hormonell balanciertes Gehirn steigert Fokus um fünfundzwanzig Prozent und Kreativität um fünfzehn Prozent. (Pause) Hier ist dein Drei-Stufen-Hack, um sie zu fluten: (Pause) Erstens, Dopamin-Kick um zehn Uhr: Setze dir eine klitzekleine Aufgabe. Erledige sie in zehn Minuten. Hake ab. Sofortiger Belohnungs-Push! (Pause) Zweitens, Serotonin-Boost um dreizehn Uhr: Geh fünf Minuten ans Tageslicht. Oder notiere drei Dinge, für die du dankbar bist. Das erhellt instant deine Stimmung. (Pause) Drittens, Oxytocin-Flow um sechzehn Uhr: Sprich zwei Minuten bewusst mit einem Kollegen. Oder dehne dich sechzig Sekunden lang. Fördert Bindung und inneren Frieden. (Pause) Stell dir vor: Du gehst jeden Tag voller Motivation zur Arbeit. Fühlst dich fokussiert, erfüllt und bist brutal produktiv. Kein Burnout mehr. Das ist machbar! (Pause) Starte diesen Drei-Stufen-Hack MORGEN. Dein Gehirn wird es lieben. Teile diesen Biohack mit deinem Team! Und folge für mehr geniale Insights!"
+  },
+  {
+    "id": "8564e229-25fc-4ee7-81e1-c6bbe1687b59",
+    "title": "Emulation: How Different Foods Affect Blo...",
+    "createdAt": "2026-01-26T15:38:34.207Z",
+    "status": "production",
+    "format": "# ⚔️ Master Strategy: The Bio-Impact Reveal Loop\n\n## 1. The Hook Formula\n- **Universal Problem/Curiosity Setup:** Immediately poses a broadly relatable question or assumption about a common biological process or daily habit (e.g., \"How does X really affect Y?\").\n- **Promise of Direct Visual Evidence:** Guarantees an immediate, data-driven, and dynamic demonstration of cause-and-effect, often challenging preconceived notions from the outset.\n- **Intrigue by Comparison:** Hints at surprising variations or dramatic differences between seemingly similar inputs.\n\n## 2. Pacing & Structure\n- **Rapid Intro & Premise:** Quickly establishes the core question/experiment and its significance (e.g., \"We tested X foods... here's what happened\").\n- **Iterative \"Reveal Loop\" Structure:** Presents multiple individual examples (foods/variables) in a consistent, repetitive segment format:\n    -   **Introduce Variable:** Clearly name/show the item being tested.\n    -   **Dynamic Impact Visualization:** Immediately show its effect over time using the central visual metric.\n    -   **Concise Explanation:** Briefly explain the underlying mechanism or key takeaway for *this specific item*.\n    -   **Subtle Comparison/Implication:** Connect this item's impact to overall health or previous examples.\n- **Climax of Insights:** Builds up to a collection of actionable conclusions, contrasting the best/worst, and offering general principles.\n- **Empowering Outro:** Summarizes key takeaways and provides viewers with practical advice for informed decision-making.\n\n## 3. Visual Identity\n- **Central Dynamic Data Visualization:** A prominent, consistent, and clear visual representation of the key metric (e.g., a rising/falling line graph, a changing meter, an animated bio-indicator) that updates in real-time as each variable is introduced.\n- **Clean & Uncluttered Interface:** Focuses primarily on the visual data, minimizing extraneous graphics to ensure maximum clarity and impact.\n- **Iconic & Recognizable Representations:** Simple, easy-to-digest visual cues (e.g., food icons, distinct color coding) for each variable to aid quick identification and recall.\n- **Consistent Visual Template:** Each \"reveal\" segment follows the same visual layout and animation style, reinforcing the structure and aiding comparison.\n\n## 4. Psychology (Neuro-Code)\n- **Curiosity Gap Satisfaction:** Continuously opens and closes curiosity gaps with each new item, making viewers eager to see \"what happens next\" and \"how *this* one performs.\"\n- **Problem-Solution & Empowerment:** Addresses widespread health concerns, offering clear, actionable knowledge that gives viewers a sense of control and ability to make better choices. This triggers self-efficacy and dopamine.\n- **Novelty & Surprise:** Often reveals unexpected or counter-intuitive results for common items, creating \"aha!\" moments that are highly memorable and shareable.\n- **Pattern Recognition & Cognitive Ease:** The predictable, iterative structure reduces cognitive load, allowing viewers to easily process complex information and compare various data points without effort.\n- **Visual Learning Dominance:** Leverages the brain's strong visual processing capabilities to make abstract biological processes concrete, memorable, and impactful, enhancing retention.",
+    "scriptContent": "## Einleitung: Der Energieunterschied\n\nWarum fühlen Sie sich nach einigen Mahlzeiten energisch, nach anderen müde? Die Antwort liegt im Blutzuckerspiegel.\n\n## Reis: Der verborgene Effekt\n\nReis, oft auf Tellern, zeigt große Unterschiede im glykämischen Einfluss, besonders zwischen weißem und braunem Reis.\n\n## Äpfel: Die Zuckerbremse\n\nÄpfel stabilisieren dank Fasern und Polyphenolen den Blutzucker.\n\n## Brot: Überraschende Unterschiede\n\nVollkornbrot bietet eine sanftere Blutzuckerreaktion als Weißbrot.\n\n## Nüsse: Die stabilisierende Kraft\n\nNüsse helfen effektiv, den Blutzucker stabil zu halten.\n\n## Fazit und Tipps\n\nNutzen Sie mehr Vollkorn und Nüsse, um Energie zu halten. Bevorzugen Sie ballaststoffreiche Lebensmittel.",
+    "scriptData": {
+      "title": "Das Geheimnis des Blutzuckerspiegels",
+      "sections": [
+        {
+          "heading": "Einleitung: Der Energieunterschied",
+          "content": "Warum fühlen Sie sich nach einigen Mahlzeiten energisch, nach anderen müde? Die Antwort liegt im Blutzuckerspiegel.",
+          "visualCue": "Zeitraffer-Animation von Blutzuckerdiagrammen.",
+          "estimatedDuration": "25s"
+        },
+        {
+          "heading": "Reis: Der verborgene Effekt",
+          "content": "Reis, oft auf Tellern, zeigt große Unterschiede im glykämischen Einfluss, besonders zwischen weißem und braunem Reis.",
+          "visualCue": "Animation mit Reiskurvenvergleich.",
+          "estimatedDuration": "20s"
+        },
+        {
+          "heading": "Äpfel: Die Zuckerbremse",
+          "content": "Äpfel stabilisieren dank Fasern und Polyphenolen den Blutzucker.",
+          "visualCue": "Apfelanimation mit stabiler Kurve.",
+          "estimatedDuration": "20s"
+        },
+        {
+          "heading": "Brot: Überraschende Unterschiede",
+          "content": "Vollkornbrot bietet eine sanftere Blutzuckerreaktion als Weißbrot.",
+          "visualCue": "Animation mit Brotkurvenvergleich.",
+          "estimatedDuration": "20s"
+        },
+        {
+          "heading": "Nüsse: Die stabilisierende Kraft",
+          "content": "Nüsse helfen effektiv, den Blutzucker stabil zu halten.",
+          "visualCue": "Nussanimation mit flacher Kurvenreaktion.",
+          "estimatedDuration": "20s"
+        },
+        {
+          "heading": "Fazit und Tipps",
+          "content": "Nutzen Sie mehr Vollkorn und Nüsse, um Energie zu halten. Bevorzugen Sie ballaststoffreiche Lebensmittel.",
+          "visualCue": "Diagramm mit Blutzuckertipps.",
+          "estimatedDuration": "25s"
+        }
+      ]
+    }
+  },
+  {
+    "id": "4402abdf-ad86-4503-84ee-252af8cc9a1e",
+    "title": "Emulation: How Different Foods Affect Blo...",
+    "createdAt": "2026-01-26T15:32:34.486Z",
+    "status": "production",
+    "format": "Emulated Format: How Different Foods Affect Blood Sugar Over Time | Blood Sugar Control"
+  },
+  {
+    "id": "853603f4-003b-47f6-b28b-e1aedd0ba02c",
+    "title": "Emulation: How Different Foods Affect Blo...",
+    "createdAt": "2026-01-26T15:30:49.513Z",
+    "status": "production",
+    "format": "Emulated Format: How Different Foods Affect Blood Sugar Over Time | Blood Sugar Control"
+  },
+  {
+    "id": "984aa954-db19-4d9e-8c5e-0536abbe25b5",
+    "title": "Short: Über dreißig Prozent aller Erw...",
+    "createdAt": "2026-01-26T15:22:31.470Z",
+    "status": "production",
+    "format": "🔬 SCIENCE SHORT:\nHOOK: STOPP! Dein Körper ist metabolisch kaputt – und du weißt es nicht!\nFACT: Über dreißig Prozent aller Erwachsenen weltweit leiden am metabolischem Syndrom. Viele sind schlank und unwissend.\nEXPLANATION: Das bedeutet: Dein Stoffwechsel verarbeitet Zucker und Fett nicht mehr effizient. Insulinresistenz, hoher Blutdruck, Übergewicht am Bauch – stille Killer, die deine Lebensqualität rauben.\nVISUAL: HOOK: Person scrollt, plötzlich Text 'STOPP!' und rotes X über dem Handy. Person schaut schockiert auf. PROBLEM: Schnelle Schnitte von 'gesund' aussehenden Menschen, die gähnen, Kopf halten, dann überblendet mit Begriffen wie 'Herzinfarkt', 'Diabetes'. Eine tickende Uhr. SCIENCE: Animierte Infografik mit '30%+ GLOBAL' auf einer Weltkarte, dann eine Zelle, die sich schwer tut, Zucker aufzunehmen, während 'Insulinresistenz' aufblinkt. SOLUTION: Klare, stylische Grafiken für jeden Schritt: Ein minimalistischer Timer für Fasten, Hanteln für Krafttraining, ein Teller mit frischen Lebensmitteln. EMOTIONAL APPEAL: Strahlende Person, die morgens mit Energie aufsteht, klar denkt, Sport macht. CLOSER: Text-Overlay 'Challenge angenommen?' und das YouTube-Follow-Symbol.\nCITATION: The Lancet, 2023 (or similar major medical journal/WHO estimates)\n\n📜 FORMATTED SCRIPT:\n# MetaboHack 🚀\n\n**HOOK:**\n🚨 STOPP! Dein Körper ist metabolisch kaputt – und du weißt es nicht! 😱\n\n**PROBLEM:**\nFühlst du dich oft müde, unkonzentriert, nimmst leicht zu? 🤯 Auch schlanke Menschen sind betroffen! Dein Stoffwechsel tickt wie eine Zeitbombe.\n\n**SCIENCE:**\nAktuelle Studien zeigen: Über 30% der Erwachsenen weltweit leiden am metabolischem Syndrom. 🌍 Dein Körper kann Zucker und Fett nicht mehr effizient verarbeiten. Insulinresistenz ist der stille Killer. Das führt zu Herzinfarkt, Typ-2-Diabetes, sogar Demenz. Brutale Realität, oder? 💔\n\n**SOLUTION: Dein 3-Stufen-Hack für einen Top-Stoffwechsel! 💪**\n\n1.  **Intermittierendes Fasten:** Iss nur in einem 8-10 Stunden-Fenster. Ziel: 14-16 Stunden Fasten täglich. ⏰\n2.  **Krafttraining:** Baue Muskeln auf! 2-3 Mal pro Woche, je 30 Minuten. Sofort! 🏋️\n3.  **Essen wie ein Biohacker:** Fokus auf unverarbeitetes Protein und Ballaststoffe. Zucker und stark verarbeitete Lebensmittel STOPP! 🚫🥦\n\n**EMOTIONAL APPEAL:**\nStell dir vor: Du wachst auf, voller Energie, dein Geist scharf, dein Körper stark. ✨ Kein Nachmittagstief mehr. Klarheit und Vitalität – jeden Tag! ☀️\n\n**CLOSER:**\nWarte nicht, bis es zu spät ist. Dein Stoffwechsel ist die Basis für alles. Starte HEUTE diesen 3-Stufen-Hack. Für ein längeres, gesünderes Leben. Folge mir für mehr Biohacks! ✅\n\n🎙️ VOICEOVER (PLAIN TEXT):\nSTOPP! Dein Körper ist metabolisch kaputt – und du weißt es nicht! // Fühlst du dich oft müde, unkonzentriert, nimmst leicht zu? // Auch schlanke Menschen sind betroffen! // Dein Stoffwechsel tickt wie eine Zeitbombe. // Aktuelle Studien zeigen: Über dreißig Prozent der Erwachsenen weltweit leiden am metabolischem Syndrom. // Dein Körper kann Zucker und Fett nicht mehr effizient verarbeiten. // Insulinresistenz ist der stille Killer. // Das führt zu Herzinfarkt, Ty-p-Zwei-Diabetes, sogar Demenz. // Brutale Realität, oder? // Aber du hast die Kontrolle! // Hier ist dein Drei-Stufen-Hack für einen Top-Stoffwechsel: // Erstens, Intermittierendes Fasten. // Iss nur in einem acht bis zehn Stunden-Fenster. // Ziel: Vierzehn bis sechzehn Stunden Fasten täglich. // Zweitens, Krafttraining. // Baue Muskeln auf! // Zwei bis drei Mal pro Woche, je dreißig Minuten. // Sofort! // Drittens, Essen wie ein Biohacker. // Fokus auf unverarbeitetes Protein und Ballaststoffe. // Zucker und stark verarbeitete Lebensmittel STOPP! // Stell dir vor: Du wachst auf, voller Energie, dein Geist scharf, dein Körper stark. // Kein Nachmittagstief mehr. // Klarheit und Vitalität – jeden Tag! // Warte nicht, bis es zu spät ist. // Dein Stoffwechsel ist die Basis für alles. // Starte HEUTE diesen Drei-Stufen-Hack. // Für ein längeres, gesünderes Leben. // Folge mir für mehr Biohacks!"
+  },
+  {
     "id": "f5a70230-399d-47c6-b1fe-c904ed056c90",
     "title": "Short-12",
     "createdAt": "2026-01-25T11:24:41.623Z",

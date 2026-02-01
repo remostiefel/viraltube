@@ -4,6 +4,7 @@ import "./globals.css";
 import { Shell } from "@/components/layout/Shell";
 import { ActionHistoryProvider } from "@/components/context/ActionHistoryContext";
 import { ToastProvider } from "@/components/ui/Toast";
+import { HelpProvider } from "@/components/ui/HelpSystem";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,11 +32,13 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground h-screen flex overflow-hidden`}
       >
-        <ActionHistoryProvider>
-          <ToastProvider>
-            <Shell>{children}</Shell>
-          </ToastProvider>
-        </ActionHistoryProvider>
+        <HelpProvider>
+          <ActionHistoryProvider>
+            <ToastProvider>
+              <Shell>{children}</Shell>
+            </ToastProvider>
+          </ActionHistoryProvider>
+        </HelpProvider>
       </body>
     </html>
   );

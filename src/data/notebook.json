@@ -1,13 +1,318 @@
 [
   {
-    "id": "4e4cda17-db34-452e-b757-c8d89c996210",
+    "id": "f00bc693-2247-4211-b193-720dc650c87b",
     "type": "step",
-    "title": "notebook Spalten schmaler + Farben in headern",
-    "description": "so dass vier Spalten neben einander sichtbar (ohne scrollen)",
-    "status": "Done",
-    "createdAt": "2026-01-26T11:28:56.738Z",
-    "updatedAt": "2026-01-26T11:41:47.928Z",
+    "title": "Konkurrenz studieren",
+    "description": "outliers finden (Themen und Formate)",
+    "status": "Next",
+    "createdAt": "2026-01-25T11:04:04.774Z",
+    "updatedAt": "2026-01-31T17:55:05.105Z",
     "tags": [],
+    "priority": "high",
+    "isArchived": false
+  },
+  {
+    "id": "b00e40b0-c248-4403-bdec-d9c29300a01e",
+    "type": "step",
+    "title": "inside NC Ep. 01 und 02",
+    "description": "Workflow Whisk, Grok, Meta...",
+    "status": "Next",
+    "createdAt": "2026-01-31T11:38:11.484Z",
+    "updatedAt": "2026-01-31T11:38:15.999Z",
+    "tags": [],
+    "priority": "high",
+    "isArchived": false
+  },
+  {
+    "id": "ddb66f09-8fb7-47ce-b615-d7f47d5c86bd",
+    "type": "step",
+    "title": "deploy to Github",
+    "description": "am 1.Feb 2026",
+    "status": "Next",
+    "createdAt": "2026-02-01T06:37:15.422Z",
+    "updatedAt": "2026-02-01T06:37:20.860Z",
+    "tags": [],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "a0a80d10-49b9-428b-abbe-522c48f81993",
+    "type": "step",
+    "title": "VEO3 testen",
+    "description": "see here: https://youtu.be/RKb7wQX-G9c?si=jByoIqodpsZeA15d\n",
+    "status": "Backlog",
+    "createdAt": "2026-01-28T05:54:54.650Z",
+    "updatedAt": "2026-02-01T06:16:19.952Z",
+    "tags": [],
+    "priority": "high",
+    "isArchived": false
+  },
+  {
+    "id": "d7609607-615c-499d-9216-587de1ff2fb0",
+    "type": "step",
+    "title": "Code aufräumen",
+    "description": "neu organisieren, strukturieren, cleaner Code, schneller",
+    "status": "Backlog",
+    "createdAt": "2026-01-28T15:49:16.289Z",
+    "updatedAt": "2026-02-01T06:16:01.164Z",
+    "tags": [],
+    "priority": "high",
+    "isArchived": false
+  },
+  {
+    "id": "8279722a-db21-4fcf-a44e-1c59f092ecd6",
+    "type": "step",
+    "title": "Video Archiv",
+    "description": "Videos sammeln, verfügbar machen (evtl. Suchfunktion)",
+    "status": "Backlog",
+    "createdAt": "2026-01-28T14:19:01.636Z",
+    "updatedAt": "2026-01-28T14:19:01.636Z",
+    "tags": [],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "7ac9f1f9-ef4d-4933-aeee-d7a8f563732d",
+    "type": "step",
+    "title": "Sound Archiv",
+    "description": "Musik sammeln, kennzeichnen, verfügbar machen",
+    "status": "Backlog",
+    "createdAt": "2026-01-28T14:18:32.015Z",
+    "updatedAt": "2026-01-28T14:18:32.016Z",
+    "tags": [],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "ccacce96-6495-4262-8b77-46e1cec8bafd",
+    "type": "step",
+    "title": "BRAIN BUILD",
+    "description": "",
+    "status": "Backlog",
+    "createdAt": "2026-01-25T11:02:39.036Z",
+    "updatedAt": "2026-01-28T11:07:39.012Z",
+    "tags": [
+      "Cortex"
+    ],
+    "priority": "low",
+    "isArchived": false
+  },
+  {
+    "id": "76d380e0-ce65-4801-ab08-96a79549d87f",
+    "type": "step",
+    "title": "VIRT VISION",
+    "description": "mockup Daten, Screen captures für Shorts und longform",
+    "status": "Backlog",
+    "createdAt": "2026-01-25T11:02:22.570Z",
+    "updatedAt": "2026-01-26T11:53:35.103Z",
+    "tags": [
+      "Cortex",
+      "longform",
+      "shorts"
+    ],
+    "priority": "low",
+    "isArchived": false
+  },
+  {
+    "id": "33ef687b-52ba-4db2-8eb2-fc1c7cf75754",
+    "type": "step",
+    "title": "next Video Prozess dokumentieren",
+    "description": "next Video Prozess dokumentieren, präzisieren, building",
+    "status": "Backlog",
+    "createdAt": "2026-01-24T15:47:17.960Z",
+    "updatedAt": "2026-01-26T07:39:23.849Z",
+    "tags": [
+      "Cortex"
+    ],
+    "priority": "low",
+    "isArchived": false
+  },
+  {
+    "id": "1fe6f0a8-674d-4020-bbee-b9c77b69f426",
+    "type": "step",
+    "title": "App Architecture & Education Strategy",
+    "description": "",
+    "status": "Done",
+    "createdAt": "2026-02-01T06:35:32.896Z",
+    "updatedAt": "2026-02-01T06:35:41.951Z",
+    "tags": [],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "3ea730a7-847e-4672-8e83-d9906c32db9c",
+    "type": "step",
+    "title": "Niki: CORTEX menschlicher machen",
+    "description": "so dass Youtube nicht merkt, dass es KI ist",
+    "status": "Done",
+    "createdAt": "2026-01-28T05:44:49.214Z",
+    "updatedAt": "2026-02-01T06:15:29.430Z",
+    "tags": [
+      "Cortex"
+    ],
+    "priority": "high",
+    "isArchived": false
+  },
+  {
+    "id": "fe395cb9-f146-43a1-af16-ce629c2b7fde",
+    "type": "step",
+    "title": "Canvas: HUB = Übersicht",
+    "description": "erstellte Videos, gestreifte Themen, neue Ideen\nWissen übersichtlich aufbereiten, vernetzen, darstellen\nProdukt PDF?, App?",
+    "status": "Done",
+    "createdAt": "2026-01-25T11:07:12.866Z",
+    "updatedAt": "2026-02-01T06:15:36.829Z",
+    "tags": [],
+    "priority": "medium",
+    "isArchived": false,
+    "completedAt": "2026-02-01T06:15:36.829Z"
+  },
+  {
+    "id": "0ea33b5a-4533-4b29-876b-9a2b358455b3",
+    "type": "step",
+    "title": "Optimierung allg mit Claude",
+    "description": "",
+    "status": "Done",
+    "createdAt": "2026-02-01T06:15:07.606Z",
+    "updatedAt": "2026-02-01T06:15:17.617Z",
+    "tags": [],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "e9602c7b-9352-4dec-859f-ce6fcb49eb14",
+    "type": "step",
+    "title": "Shorts 18, 19, 20",
+    "description": "produktionsreif bis Montag",
+    "status": "Done",
+    "createdAt": "2026-01-31T12:03:12.895Z",
+    "updatedAt": "2026-02-01T04:46:15.053Z",
+    "tags": [],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "ad2ec8d3-52f2-47ab-ab79-4c665c920176",
+    "type": "step",
+    "title": "WHISK und Whisk AI studieren",
+    "description": "",
+    "status": "Done",
+    "createdAt": "2026-01-28T05:53:08.006Z",
+    "updatedAt": "2026-02-01T04:46:10.813Z",
+    "tags": [],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "18797ff9-d2b8-4638-9180-dc971df72bc0",
+    "type": "step",
+    "title": "sun Mode Farbe",
+    "description": "",
+    "status": "Done",
+    "createdAt": "2026-01-28T15:54:25.233Z",
+    "updatedAt": "2026-01-28T15:59:32.316Z",
+    "tags": [],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "5deaa636-509f-43d4-847c-76012a52ff42",
+    "type": "step",
+    "title": "Analytics: STATS der Videos",
+    "description": "Übersicht in App, Chat aus NotebookLM zur Optimierung\nKRITISCH: falsche Einschätzungen am 26.1. report made, vieles falsch oder fehlt\nerstellte Videos, gestreifte Themen, neue Ideen\nWissen übersichtlich aufbereiten, vernetzen, darstellen\nProdukt PDF?, App?",
+    "status": "Done",
+    "createdAt": "2026-01-25T11:05:51.661Z",
+    "updatedAt": "2026-01-28T15:19:17.018Z",
+    "tags": [],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "ba74e6b9-518f-46fc-8cbb-a6314db681eb",
+    "type": "step",
+    "title": "Screenshots vidIQ",
+    "description": "für Erweiterungen",
+    "status": "Done",
+    "createdAt": "2026-01-25T11:05:01.901Z",
+    "updatedAt": "2026-01-28T15:19:13.213Z",
+    "tags": [
+      "Cortex"
+    ],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "6a70ca2a-db2f-425e-97cf-92d2af9e2f26",
+    "type": "step",
+    "title": "Hover over Hilfen",
+    "description": "in allen Module gesamte App mit sinnvollen Tipps und Erklärungen ergänzen",
+    "status": "Done",
+    "createdAt": "2026-01-26T11:22:27.673Z",
+    "updatedAt": "2026-01-28T15:18:58.213Z",
+    "tags": [],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "ffdd3754-087d-43b4-8d2c-4c5009231c93",
+    "type": "step",
+    "title": "Analytics div.: Beliebteste Inhalte",
+    "description": "Beliebteste Inhalte\nLetzte 48 Stunden · Aufrufe\nKeine Motivation morgens? Das fehlt deinem Gehirn!\t\n80\nVon PLEITE zu 7 Nullen auf dem Konto - mit 60 Sekunden täglich (Harvard)\t\n10\nMultitasking macht DÜMMER als Kiffen (Stanford-Studie) 🧠\t\n5\n",
+    "status": "Done",
+    "createdAt": "2026-01-28T11:10:29.270Z",
+    "updatedAt": "2026-01-28T15:16:27.231Z",
+    "tags": [],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "6d44900d-aa13-424a-a057-63f3e101b9df",
+    "type": "step",
+    "title": "VoiceOver Script als plain text ",
+    "description": "DOCX download optimieren",
+    "status": "Done",
+    "createdAt": "2026-01-25T12:44:11.533Z",
+    "updatedAt": "2026-01-28T11:07:33.527Z",
+    "tags": [],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "cf057900-5b55-4c5d-bbba-4d85ad7ced45",
+    "type": "step",
+    "title": "Tools für Videoproduktion finden",
+    "description": "Maus MX4 optimieren, CapCut 7 Tage testen",
+    "status": "Done",
+    "createdAt": "2026-01-25T11:07:57.830Z",
+    "updatedAt": "2026-01-26T11:53:10.313Z",
+    "tags": [],
+    "priority": "medium",
+    "isArchived": false
+  },
+  {
+    "id": "3c57926c-4aee-4f04-801f-f43436f7dc51",
+    "type": "step",
+    "title": "DOCX-Namen bei downloads",
+    "description": "benenne alle DOCX-Downloads sinnvoll und strukturiert",
+    "status": "Done",
+    "createdAt": "2026-01-26T07:00:50.002Z",
+    "updatedAt": "2026-02-01T04:54:12.654Z",
+    "tags": [
+      "Cortex"
+    ],
+    "priority": "low",
+    "isArchived": false
+  },
+  {
+    "id": "c57269a4-8fa0-47cf-a2ed-9446ce3ebd29",
+    "type": "step",
+    "title": "Kanban Notebook optimieren",
+    "description": "DONE tasks nur klein anzeigen, schmal mit Titel\nautomatisch sortieren nach Wichtigkeit",
+    "status": "Done",
+    "createdAt": "2026-01-28T05:43:03.622Z",
+    "updatedAt": "2026-01-28T10:02:53.077Z",
+    "tags": [
+      "Notebook"
+    ],
     "priority": "low",
     "isArchived": false
   },
@@ -36,18 +341,6 @@
     "isArchived": false
   },
   {
-    "id": "7091cbf6-97e8-4e0e-927b-39ea89f0ff09",
-    "type": "step",
-    "title": "full User Journey",
-    "description": "user journey (Idea -> Strategy -> Script -> Test)",
-    "status": "Backlog",
-    "createdAt": "2026-01-26T11:25:01.360Z",
-    "updatedAt": "2026-01-26T11:25:01.360Z",
-    "tags": [],
-    "priority": "medium",
-    "isArchived": false
-  },
-  {
     "id": "33ef8003-d7ad-4ca7-a25e-049244f1ee40",
     "type": "step",
     "title": "in Notebook: Steps/Topics selbst vertikal ordnen",
@@ -60,201 +353,66 @@
     "isArchived": false
   },
   {
-    "id": "6a70ca2a-db2f-425e-97cf-92d2af9e2f26",
+    "id": "4e4cda17-db34-452e-b757-c8d89c996210",
     "type": "step",
-    "title": "Hover over Hilfen",
-    "description": "in allen Module gesamte App mit sinnvollen Tipps und Erklärungen ergänzen",
-    "status": "Backlog",
-    "createdAt": "2026-01-26T11:22:27.673Z",
-    "updatedAt": "2026-01-26T11:22:27.674Z",
+    "title": "notebook Spalten schmaler + Farben in headern",
+    "description": "so dass vier Spalten neben einander sichtbar (ohne scrollen)",
+    "status": "Done",
+    "createdAt": "2026-01-26T11:28:56.738Z",
+    "updatedAt": "2026-01-26T11:41:47.928Z",
     "tags": [],
     "priority": "low",
     "isArchived": false
   },
   {
-    "id": "3c57926c-4aee-4f04-801f-f43436f7dc51",
+    "id": "7091cbf6-97e8-4e0e-927b-39ea89f0ff09",
     "type": "step",
-    "title": "DOCX-Namen bei downloads",
-    "description": "benenne alle DOCX-Downloads sinnvoll und strukturiert",
-    "status": "Backlog",
-    "createdAt": "2026-01-26T07:00:50.002Z",
-    "updatedAt": "2026-01-26T07:00:57.824Z",
-    "tags": [
-      "Cortex"
-    ],
-    "priority": "low",
-    "isArchived": false
-  },
-  {
-    "id": "6d44900d-aa13-424a-a057-63f3e101b9df",
-    "type": "step",
-    "title": "VoiceOver Script als plain text ",
-    "description": "DOCX download optimieren",
-    "status": "Next",
-    "createdAt": "2026-01-25T12:44:11.533Z",
-    "updatedAt": "2026-01-26T12:49:27.934Z",
+    "title": "full User Journey",
+    "description": "user journey (Idea -> Strategy -> Script -> Test)",
+    "status": "In Progress",
+    "createdAt": "2026-01-26T11:25:01.360Z",
+    "updatedAt": "2026-02-01T04:56:29.247Z",
     "tags": [],
     "priority": "medium",
     "isArchived": false
   },
   {
-    "id": "4f705b9d-4731-4b12-8483-bba3c39162eb",
+    "id": "39bdf949-ffd3-45df-a1af-056334e20609",
     "type": "topic",
-    "title": "Glücks-Hormon",
-    "description": "Glücks-Forschung, Huberman was?, Buch über Glück",
+    "title": "18 podcasts",
+    "description": "Wort zum Tag (siehe Lesezeichen)",
     "status": "Idea",
-    "createdAt": "2026-01-24T15:46:29.246Z",
-    "updatedAt": "2026-01-26T09:22:17.839Z",
+    "createdAt": "2026-01-28T14:48:30.650Z",
+    "updatedAt": "2026-01-28T14:48:30.650Z",
     "tags": [],
-    "priority": "high",
+    "priority": "medium",
     "isArchived": false
   },
   {
-    "id": "621302d8-baed-49e4-84bd-4d078bfff5ff",
+    "id": "3fb6d51b-07b1-4135-8bf4-f5f96daa7f5f",
     "type": "topic",
-    "title": "Protein-Lüge",
-    "description": "",
+    "title": "Reziprozität",
+    "description": "podcast Wort zum Tag 28.1.26:\n\nJa — hier ist der **aus dem Podcast „28. Januar 2026: Wechselseitig“ (SWR Kultur *Wort zum Tag* – Kirche im SWR)** extrahierte **Text (Wort-für-Wort-Inhalt)**. Dies ist der geschriebene Beitrag des Podcasts, wie er auf der Website veröffentlicht ist: ([Kirche im SWR][1])\n\n---\n\n📄 **„Wechselseitig“ – Dr. Martin Denger, Freiburg, Katholische Kirche**\nSind die reichsten Menschen der Welt glücklich? Fühlen sie sich sicher und können ihren Reichtum genießen? Nein, sagt der amerikanische Autor Douglas Rushkoff. Er hat einige getroffen und interviewt, und er war erstaunt. Rushkoff sagt: „Merkwürdigerweise fühlen sie sich machtlos, obwohl sie zu den mächtigsten Menschen gehören, die ich je getroffen habe.“ In seinem Buch *Survival of the Richest* beschreibt er, dass reiche Menschen nach außen hin frei wirken, denn sie reisen im Privatjet und können sich alles leisten. Doch die Sorge vor Chaos und Katastrophen treibt bei ihnen seltsame Blüten. Manche kaufen sich Inseln und errichten riesige Bunkeranlagen. Sie horten Gold und Edelsteine. Aber sind sie glücklicher? Offenbar nicht. Sie fragen sich den ganzen Tag, wem sie eigentlich vertrauen können. ([Kirche im SWR][1])\n\nVielleicht liegt das daran, dass wir Menschen etwas anderes benötigen. Wir sind darauf angelegt, in Beziehungen zu leben. Das Fachwort dafür lautet Reziprozität – Wechselseitigkeit. Es bedeutet: Ich gebe, und ich nehme. Jeder braucht den anderen, und das macht uns zufrieden. ([Kirche im SWR][1])\n\nDie Archäologie kann das bestätigen: Unsere Vorfahren wussten genau, dass niemand allein überleben kann. Selbst der beste Jäger konnte sich verletzen und war darauf angewiesen, dass ihn andere pflegen. Ohne die Gruppe hätte niemand den nächsten harten Winter überstanden. Privatbesitz hat kaum eine Rolle gespielt; man hat geteilt, hat Beziehungen aufgebaut und einander unterstützt – nicht nur aus Nächstenliebe, sondern um zu überleben. Die Formel war simpel: Nur wenn wir zusammenhalten, leben wir gut. Das hat uns über Jahrtausende geprägt. ([Kirche im SWR][1])\n\nDiese einfache Erkenntnis vermisse ich in unserer heutigen Gesellschaft. Das Credo lautet eher: „Jeder ist sich selbst der Nächste.“ Jeder schließt seine eigene Versicherung ab, jeder soll privat für die Rente sparen. Aber worauf verlasse ich mich dann am Ende wirklich? Die Superreichen besitzen viele Milliarden, doch vertrauen nicht einmal ihren eigenen Leibwächtern. ([Kirche im SWR][1])\n\nWahre Sicherheit – und auch Lebensfreude – entsteht durch das Gefühl der Verbundenheit. Wenn ich weiß: Da sind Menschen, die es gut mit mir meinen, und mit denen ich es gut meine. In meinem Dorf, meiner Nachbarschaft oder in der Verwandtschaft. Wo bin ich bereit, zu helfen und Hilfe anzunehmen? Keiner lebt für sich allein – nur gemeinsam gelingt gutes Leben. ([Kirche im SWR][1])\n\n---\n\n[1]: https://www.kirche-im-swr.de/?m=43732&utm_source=chatgpt.com \"Wechselseitig (28.01.2026) • SWR2 / SWR Kultur Wort zum Tag\"\n",
     "status": "Idea",
-    "createdAt": "2026-01-24T15:45:59.719Z",
-    "updatedAt": "2026-01-26T09:22:35.530Z",
-    "tags": [
-      "research needed"
-    ],
-    "priority": "high",
+    "createdAt": "2026-01-28T14:21:04.705Z",
+    "updatedAt": "2026-01-28T14:21:04.705Z",
+    "tags": [],
+    "priority": "medium",
     "isArchived": false
   },
   {
     "id": "3d47202c-de57-4d80-9f23-2fdfdf015ce5",
     "type": "topic",
-    "title": "Zucker: Hirnscans",
-    "description": "Gehirn auf Zucker vs normales Hirn",
+    "title": "Hirnscans",
+    "description": "Gehirn auf Zucker vs normales Hirn\noder andere Beispiele",
     "status": "Idea",
     "createdAt": "2026-01-25T10:21:36.302Z",
-    "updatedAt": "2026-01-26T09:21:48.858Z",
+    "updatedAt": "2026-01-26T16:32:13.482Z",
     "tags": [
-      "Brain"
-    ],
-    "priority": "high",
-    "isArchived": false
-  },
-  {
-    "id": "a4cc4e2e-9817-4a7d-8e47-a9dd99a0b9d0",
-    "type": "topic",
-    "title": "Stress killt Gedächtnis",
-    "description": "1-Minuten-Trick",
-    "status": "Idea",
-    "createdAt": "2026-01-25T10:20:03.833Z",
-    "updatedAt": "2026-01-26T09:22:01.089Z",
-    "tags": [
+      "Brain",
       "research needed"
     ],
-    "priority": "high",
-    "isArchived": false
-  },
-  {
-    "id": "57c7c72e-b506-46f5-8a6b-66f6c11af175",
-    "type": "topic",
-    "title": "inside the engine (planned Short 21)",
-    "description": "loop Prozess",
-    "status": "Idea",
-    "createdAt": "2026-01-25T12:19:06.779Z",
-    "updatedAt": "2026-01-26T09:21:29.592Z",
-    "tags": [
-      "Cortex"
-    ],
-    "priority": "low",
-    "isArchived": false
-  },
-  {
-    "id": "cf057900-5b55-4c5d-bbba-4d85ad7ced45",
-    "type": "step",
-    "title": "Tools für Videoproduktion finden",
-    "description": "Maus MX4 optimieren, CapCut 7 Tage testen",
-    "status": "Done",
-    "createdAt": "2026-01-25T11:07:57.830Z",
-    "updatedAt": "2026-01-26T11:53:10.313Z",
-    "tags": [],
     "priority": "medium",
-    "isArchived": false
-  },
-  {
-    "id": "fe395cb9-f146-43a1-af16-ce629c2b7fde",
-    "type": "step",
-    "title": "HUB = Übersicht",
-    "description": "erstellte Videos, gestreifte Themen, neue Ideen\nWissen übersichtlich aufbereiten, vernetzen, darstellen\nProdukt PDF?, App?",
-    "status": "Review",
-    "createdAt": "2026-01-25T11:07:12.866Z",
-    "updatedAt": "2026-01-26T12:49:17.148Z",
-    "tags": [],
-    "priority": "medium",
-    "isArchived": false
-  },
-  {
-    "id": "5deaa636-509f-43d4-847c-76012a52ff42",
-    "type": "step",
-    "title": "STATS der Videos",
-    "description": "Übersicht in App, Chat aus NotebookLM zur Optimierung",
-    "status": "Review",
-    "createdAt": "2026-01-25T11:05:51.661Z",
-    "updatedAt": "2026-01-26T12:49:05.132Z",
-    "tags": [],
-    "priority": "medium",
-    "isArchived": false
-  },
-  {
-    "id": "ccacce96-6495-4262-8b77-46e1cec8bafd",
-    "type": "step",
-    "title": "BRAIN BUILD",
-    "description": "",
-    "status": "Next",
-    "createdAt": "2026-01-25T11:02:39.036Z",
-    "updatedAt": "2026-01-26T11:53:43.394Z",
-    "tags": [
-      "Cortex"
-    ],
-    "priority": "low",
-    "isArchived": false
-  },
-  {
-    "id": "ba74e6b9-518f-46fc-8cbb-a6314db681eb",
-    "type": "step",
-    "title": "Screenshots vidIQ",
-    "description": "für Erweiterungen",
-    "status": "Backlog",
-    "createdAt": "2026-01-25T11:05:01.901Z",
-    "updatedAt": "2026-01-25T11:05:01.901Z",
-    "tags": [
-      "Cortex"
-    ],
-    "priority": "medium",
-    "isArchived": false
-  },
-  {
-    "id": "f00bc693-2247-4211-b193-720dc650c87b",
-    "type": "step",
-    "title": "Konkurrenz studieren",
-    "description": "outliers finden (Themen und Formate)",
-    "status": "Backlog",
-    "createdAt": "2026-01-25T11:04:04.774Z",
-    "updatedAt": "2026-01-26T07:38:03.678Z",
-    "tags": [],
-    "priority": "high",
-    "isArchived": false
-  },
-  {
-    "id": "76d380e0-ce65-4801-ab08-96a79549d87f",
-    "type": "step",
-    "title": "VIRT VISION",
-    "description": "mockup Daten, Screen captures für Shorts und longform",
-    "status": "Backlog",
-    "createdAt": "2026-01-25T11:02:22.570Z",
-    "updatedAt": "2026-01-26T11:53:35.103Z",
-    "tags": [
-      "Cortex",
-      "longform",
-      "shorts"
-    ],
-    "priority": "low",
     "isArchived": false
   },
   {
@@ -402,17 +560,43 @@
     "isArchived": false
   },
   {
-    "id": "33ef687b-52ba-4db2-8eb2-fc1c7cf75754",
-    "type": "step",
-    "title": "next Video Prozess dokumentieren",
-    "description": "next Video Prozess dokumentieren, präzisieren, building",
-    "status": "Backlog",
-    "createdAt": "2026-01-24T15:47:17.960Z",
-    "updatedAt": "2026-01-26T07:39:23.849Z",
+    "id": "57c7c72e-b506-46f5-8a6b-66f6c11af175",
+    "type": "topic",
+    "title": "inside the engine (planned Short 21)",
+    "description": "loop Prozess",
+    "status": "Idea",
+    "createdAt": "2026-01-25T12:19:06.779Z",
+    "updatedAt": "2026-01-26T09:21:29.592Z",
     "tags": [
       "Cortex"
     ],
     "priority": "low",
+    "isArchived": false
+  },
+  {
+    "id": "4f705b9d-4731-4b12-8483-bba3c39162eb",
+    "type": "topic",
+    "title": "Glücks-Hormon",
+    "description": "Glücks-Forschung, Huberman was?, Buch über Glück",
+    "status": "Researching",
+    "createdAt": "2026-01-24T15:46:29.246Z",
+    "updatedAt": "2026-01-26T16:32:23.737Z",
+    "tags": [],
+    "priority": "high",
+    "isArchived": false
+  },
+  {
+    "id": "a4cc4e2e-9817-4a7d-8e47-a9dd99a0b9d0",
+    "type": "topic",
+    "title": "Stress killt Gedächtnis",
+    "description": "1-Minuten-Trick",
+    "status": "Ready",
+    "createdAt": "2026-01-25T10:20:03.833Z",
+    "updatedAt": "2026-01-26T18:30:41.662Z",
+    "tags": [
+      "research needed"
+    ],
+    "priority": "high",
     "isArchived": false
   }
 ]

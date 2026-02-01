@@ -8,11 +8,27 @@ import { ScientificPaper, reconstructAbstract } from "@/lib/openalex";
 import { OutlierVideo } from "@/lib/youtube";
 import { WisdomNugget } from "@/lib/openai";
 import { cn } from "@/lib/utils";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Project } from "@/lib/projects";
+import { HelpTrigger, InsightModeToggle } from "@/components/ui/HelpSystem";
 
 export default function Scanner() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+
+    // Auto-Init Research Mode from URL
+    useEffect(() => {
+        const modeParam = searchParams.get("mode");
+        const qParam = searchParams.get("q");
+
+        if (modeParam === "research") {
+            setMode("research");
+            if (qParam) setQuery(qParam);
+            // Optionally could trigger search immediately if desired, 
+            // but usually better to let user review/click button or auto-trigger via another effect.
+        }
+    }, [searchParams]);
+
     const [emulating, setEmulating] = useState("");
 
     // Collections State & Logic
@@ -38,6 +54,7 @@ export default function Scanner() {
     const [papers, setPapers] = useState<ScientificPaper[]>([]);
     const [loadingResearch, setLoadingResearch] = useState(false);
     const [synthesizing, setSynthesizing] = useState("");
+    const [researchSource, setResearchSource] = useState<"semantic" | "pubmed" | "openalex">("semantic"); // Default: Semantic Scholar
 
     // Trend Scout State
     const [outliers, setOutliers] = useState<OutlierVideo[]>([]);
@@ -263,7 +280,7 @@ GOAL: Combine the strongest hooks, pacing, and visual styles of these videos int
         if (!query.trim() || loadingResearch) return;
         setLoadingResearch(true);
         try {
-            const results = await fetchScientificPapers(query);
+            const results = await fetchScientificPapers(query, researchSource);
             setPapers(results);
         } catch (error) {
             console.error(error);
@@ -322,11 +339,26 @@ GOAL: Combine the strongest hooks, pacing, and visual styles of these videos int
         try {
             // Create a project based on this viral hit
             const title = `Emulation: ${video.title.slice(0, 30)}...`;
-            await createProjectAction(title, `Emulated Format: ${video.title}`);
+            const description = `
+🎯 EMULATED FORMAT
 
-            router.push("/"); // Go to Dashboard to see it
+Original Video: ${video.title}
+URL: https://youtu.be/${video.id}
+Performance: ${video.outlierScore}x Outlier
+Views: ${video.viewCount?.toLocaleString() || "N/A"}
+
+➡️ Next Steps:
+1. Analyze the video structure in Architect
+2. Generate your own script based on this format
+            `.trim();
+
+            const newProject = await createProjectAction(title, description);
+
+            // Navigate directly to the new project
+            router.push(`/architect?project=${newProject.id}`);
         } catch (e) {
             console.error(e);
+            alert("Failed to create emulation project.");
         } finally {
             setEmulating("");
         }
@@ -337,9 +369,12 @@ GOAL: Combine the strongest hooks, pacing, and visual styles of these videos int
         setSynthesizing(paper.id);
 
         try {
-            const abstract = paper.abstract_inverted_index
+            // Support both new "abstract_text" and old inverted index
+            let abstract = paper.abstract_text || (paper.abstract_inverted_index
                 ? reconstructAbstract(paper.abstract_inverted_index)
-                : "Abstract unavailable";
+                : "Abstract unavailable");
+
+            if (abstract.length < 50) abstract = "Abstract missing. Infer from title.";
 
             const overrides = localStorage.getItem("nc_prompts_override");
             const short = await synthesizePaperAction(
@@ -382,10 +417,11 @@ ${short.voiceOver || "N/A"}
                 <div>
                     <h2 className="text-3xl font-bold tracking-tight text-[#38BDF8] flex items-center gap-3">
                         <Radar className="w-8 h-8" />
-                        Scanner
+                        <HelpTrigger helpId="scanner.input">Scanner</HelpTrigger>
                     </h2>
-                    <p className="text-muted-foreground mt-2">
+                    <p className="text-muted-foreground mt-2 flex items-center gap-2">
                         Analyze viral content and extract winning patterns.
+                        <InsightModeToggle />
                     </p>
                 </div>
 
@@ -432,421 +468,442 @@ ${short.voiceOver || "N/A"}
             </div>
 
             {/* --- RESEARCH MODE --- */}
-            {mode === "research" && (
-                <div className="space-y-8">
-                    <div className="bg-card border border-border/40 rounded-xl p-6 shadow-lg">
-                        <form onSubmit={handleResearchSearch} className="flex gap-4">
-                            <input
-                                type="text"
-                                value={query}
-                                onChange={(e) => setQuery(e.target.value)}
-                                placeholder="Search topic (e.g. Dopamine Fasting)..."
-                                className="flex-1 bg-muted/30 border border-border/40 rounded-lg px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
-                            />
-                            <button
-                                type="submit"
-                                disabled={loadingResearch || !query}
-                                className="bg-primary text-background font-bold px-6 py-3 rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors flex items-center gap-2"
-                            >
-                                {loadingResearch ? <Radar className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
-                                Scan Data
-                            </button>
-                        </form>
-                    </div>
-
-
-
-
-                    <div className="grid gap-4">
-                        {papers.map((paper) => (
-                            <div key={paper.id} className="bg-card/50 border border-border/40 p-6 rounded-xl hover:bg-card hover:border-primary/40 transition-all">
-                                <div className="flex justify-between items-start">
-                                    <div className="space-y-2">
-                                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                            <span className="flex items-center gap-1 bg-muted/30 px-2 py-1 rounded">
-                                                <Calendar className="w-3 h-3" /> {paper.publication_year}
-                                            </span>
-                                            <span className="text-secondary">{paper.host_venue?.display_name || "Unknown Venue"}</span>
-                                        </div>
-                                        <h3 className="text-xl font-bold text-foreground leading-tight">
-                                            {paper.title}
-                                        </h3>
-                                        <p className="text-sm text-muted-foreground line-clamp-3">
-                                            {paper.abstract_inverted_index
-                                                ? reconstructAbstract(paper.abstract_inverted_index).slice(0, 300) + "..."
-                                                : "No abstract preview available. Click to read source."}
-                                        </p>
-                                    </div>
-                                    <div className="text-right min-w-[100px]">
-                                        <span className="block text-2xl font-bold text-foreground">{paper.cited_by_count}</span>
-                                        <span className="text-xs text-muted-foreground uppercase tracking-wider">Citations</span>
-                                    </div>
-                                </div>
-                                <div className="mt-4 flex items-center gap-4 text-sm flex-wrap">
+            {
+                mode === "research" && (
+                    <div className="space-y-8 animate-in fade-in">
+                        <div className="bg-card border border-border/40 rounded-xl p-6 shadow-lg">
+                            <div className="flex gap-4 mb-4">
+                                {/* Source Selector */}
+                                {(["semantic", "pubmed", "openalex"] as const).map(s => (
                                     <button
-                                        onClick={() => handleSynthesize(paper)}
-                                        disabled={!!synthesizing}
-                                        className="bg-primary/10 text-primary border border-primary/20 hover:bg-primary hover:text-primary-foreground font-bold px-3 py-1.5 rounded-md transition-all flex items-center gap-2 text-xs"
-                                    >
-                                        {synthesizing === paper.id ? <Zap className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3" />}
-                                        Synthesize Short
-                                    </button>
-
-                                    <span className="text-muted-foreground">Authors: {paper.authorships.map(a => a.author.display_name).slice(0, 3).join(", ")}</span>
-                                    {paper.open_access?.is_oa && (
-                                        <a
-                                            href={paper.open_access.oa_url}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            className="ml-auto text-primary hover:underline flex items-center gap-1"
-                                        >
-                                            Read Full Paper <ExternalLink className="w-3 h-3" />
-                                        </a>
-                                    )}
-                                    {!paper.open_access?.is_oa && paper.doi && (
-                                        <a
-                                            href={paper.doi}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            className="ml-auto text-muted-foreground hover:text-foreground hover:underline flex items-center gap-1"
-                                        >
-                                            View DOI <ExternalLink className="w-3 h-3" />
-                                        </a>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div >
-            )}
-
-            {/* --- WISDOM EXTRACTION MODE --- */}
-            {mode === "wisdom" && (
-                <div className="space-y-8 animate-in fade-in">
-                    <div className="bg-purple-500/5 border border-purple-500/20 rounded-xl p-6 shadow-lg">
-                        <h3 className="text-lg font-bold text-purple-400 mb-4 flex items-center gap-2">
-                            <TrendingUp className="w-5 h-5" /> Meta-Analysis (Extract Wisdom in German)
-                        </h3>
-
-                        {!extractedNuggets ? (
-                            <>
-                                <div className="space-y-4 mb-4">
-                                    <div className="flex gap-2 bg-black/20 p-1 rounded-lg w-max">
-                                        <button
-                                            onClick={() => setExtractionMode("LAW")}
-                                            className={cn(
-                                                "px-4 py-2 text-sm font-bold rounded-md transition-all",
-                                                extractionMode === "LAW"
-                                                    ? "bg-purple-600/20 text-purple-400 border border-purple-500/30"
-                                                    : "text-muted-foreground hover:bg-white/5"
-                                            )}
-                                        >
-                                            <div className="flex items-center gap-2">
-                                                <Target className="w-4 h-4" />
-                                                <span>Strategy Audit (Laws)</span>
-                                            </div>
-                                        </button>
-                                        <button
-                                            onClick={() => setExtractionMode("GROWTH")}
-                                            className={cn(
-                                                "px-4 py-2 text-sm font-bold rounded-md transition-all",
-                                                extractionMode === "GROWTH"
-                                                    ? "bg-yellow-600/20 text-yellow-400 border border-yellow-500/30"
-                                                    : "text-muted-foreground hover:bg-white/5"
-                                            )}
-                                        >
-                                            <div className="flex items-center gap-2">
-                                                <TrendingUp className="w-4 h-4" />
-                                                <span>Creator Growth (Meta)</span>
-                                            </div>
-                                        </button>
-                                        <button
-                                            onClick={() => setExtractionMode("FACT")}
-                                            className={cn(
-                                                "px-4 py-2 text-sm font-bold rounded-md transition-all",
-                                                extractionMode === "FACT"
-                                                    ? "bg-green-600/20 text-green-400 border border-green-500/30"
-                                                    : "text-muted-foreground hover:bg-white/5"
-                                            )}
-                                        >
-                                            <div className="flex items-center gap-2">
-                                                <BookOpen className="w-4 h-4" />
-                                                <span>Topic Research (Facts)</span>
-                                            </div>
-                                        </button>
-                                    </div>
-                                    <p className="text-xs text-muted-foreground">
-                                        {extractionMode === "LAW"
-                                            ? "Extracts TIMELESS PRINCIPLES (Hooks, Pacing). Become Universal Laws in God Mode."
-                                            : extractionMode === "GROWTH"
-                                                ? "Extracts CREATOR STRATEGY (Mindset, Algo, Career). For YOU, not the script."
-                                                : "Extracts FACTS & PROTOCOLS (e.g. Health Science). Saved to Knowledge Base only."}
-                                    </p>
-                                </div>
-                                <div className="flex gap-4">
-                                    <input
-                                        type="text"
-                                        placeholder="Paste Educational Video URL..."
-                                        className="flex-1 bg-muted/30 border border-purple-500/30 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
-                                        id="wisdom-input"
-                                    />
-                                    <button
-                                        onClick={async () => {
-                                            const input = document.getElementById('wisdom-input') as HTMLInputElement;
-                                            const url = input.value;
-                                            if (!url) return;
-
-                                            try {
-                                                setExtractionLoading(true);
-                                                input.disabled = true;
-                                                const { extractWisdomFromVideoUrlAction } = await import("@/app/actions");
-
-                                                // 1. Extract Wisdom from URL (German)
-                                                // @ts-ignore
-                                                const nuggets = await extractWisdomFromVideoUrlAction(url, "DE", extractionMode);
-
-                                                if (!nuggets || nuggets.length === 0) {
-                                                    alert("Could not extract wisdom. Check the URL.");
-                                                    setExtractionLoading(false);
-                                                    input.disabled = false;
-                                                    return;
-                                                }
-
-                                                const videoId = url.includes("v=") ? url.split("v=")[1].split("&")[0] : "Video";
-                                                setExtractionSourceId(videoId);
-                                                setExtractedNuggets(nuggets);
-                                                // Select all by default
-                                                setSelectedNuggetIndices(new Set(nuggets.map((_, i) => i)));
-
-                                                let tags = "Research, Knowledge";
-                                                if (extractionMode === "LAW") tags = "Wisdom, Strategy";
-                                                if (extractionMode === "GROWTH") tags = "Growth, Mindset, Creator";
-
-                                                setExtractionTags(tags);
-                                            } catch (e: any) {
-                                                console.error(e);
-                                                alert(`Analysis failed: ${e.message}`);
-                                            } finally {
-                                                setExtractionLoading(false);
-                                                input.disabled = false;
-                                            }
-                                        }}
-                                        disabled={extractionLoading}
+                                        key={s}
+                                        onClick={() => setResearchSource(s)}
                                         className={cn(
-                                            "font-bold px-4 py-2 rounded-lg transition-colors flex items-center gap-2",
-                                            extractionMode === "LAW"
-                                                ? "bg-purple-600 text-white hover:bg-purple-700"
-                                                : extractionMode === "GROWTH"
-                                                    ? "bg-yellow-600 text-white hover:bg-yellow-700"
-                                                    : "bg-green-600 text-white hover:bg-green-700"
+                                            "px-3 py-1 text-xs font-bold rounded-full border transition-all uppercase",
+                                            researchSource === s
+                                                ? "bg-primary/20 border-primary text-primary"
+                                                : "bg-muted/10 border-border text-muted-foreground hover:bg-muted/20"
                                         )}
                                     >
-                                        {extractionLoading ? <Zap className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
-                                        Extract {extractionMode === "LAW" ? "Laws" : extractionMode === "GROWTH" ? "Growth" : "Facts"}
+                                        {s === "semantic" ? "Semantic Scholar" : s === "pubmed" ? "PubMed (Bio)" : "OpenAlex"}
                                     </button>
+                                ))}
+                            </div>
+                            <form onSubmit={handleResearchSearch} className="flex gap-4">
+                                <input
+                                    type="text"
+                                    value={query}
+                                    onChange={(e) => setQuery(e.target.value)}
+                                    placeholder={`Search research in ${researchSource === 'semantic' ? 'Science' : researchSource === 'pubmed' ? 'Biology/Medicine' : 'Academia'}...`}
+                                    className="flex-1 bg-muted/30 border border-border/40 rounded-lg px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                />
+                                <button
+                                    type="submit"
+                                    disabled={loadingResearch || !query}
+                                    className="bg-primary text-background font-bold px-6 py-3 rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors flex items-center gap-2"
+                                >
+                                    {loadingResearch ? <Radar className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
+                                    Scan Data
+                                </button>
+                            </form>
+                        </div>
 
-                                    {/* Manual Input Trigger */}
-                                    <button
-                                        onClick={() => {
-                                            const text = prompt("Paste your transcript, notes, or summary here (min 50 chars):");
-                                            if (!text || text.length < 50) {
-                                                if (text) alert("Text too short!");
-                                                return;
-                                            }
 
-                                            // Handle Manual Extraction (Inline for speed)
-                                            (async () => {
+
+
+                        <div className="grid gap-4">
+                            {papers.map((paper) => (
+                                <div key={paper.id} className="bg-card/50 border border-border/40 p-6 rounded-xl hover:bg-card hover:border-primary/40 transition-all">
+                                    <div className="flex justify-between items-start">
+                                        <div className="space-y-2">
+                                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                <span className="flex items-center gap-1 bg-muted/30 px-2 py-1 rounded">
+                                                    <Calendar className="w-3 h-3" /> {paper.publication_year}
+                                                </span>
+                                                <span className="text-secondary">{paper.host_venue?.display_name || "Unknown Venue"}</span>
+                                            </div>
+                                            <h3 className="text-xl font-bold text-foreground leading-tight">
+                                                {paper.title}
+                                            </h3>
+                                            <p className="text-sm text-muted-foreground line-clamp-3">
+                                                {paper.abstract_text || (paper.abstract_inverted_index
+                                                    ? reconstructAbstract(paper.abstract_inverted_index).slice(0, 300) + "..."
+                                                    : "No abstract preview available. Click to read source.")}
+                                            </p>
+                                        </div>
+                                        <div className="text-right min-w-[100px]">
+                                            <span className="block text-2xl font-bold text-foreground">{paper.cited_by_count}</span>
+                                            <span className="text-xs text-muted-foreground uppercase tracking-wider">Citations</span>
+                                        </div>
+                                    </div>
+                                    <div className="mt-4 flex items-center gap-4 text-sm flex-wrap">
+                                        <button
+                                            onClick={() => handleSynthesize(paper)}
+                                            disabled={!!synthesizing}
+                                            className="bg-primary/10 text-primary border border-primary/20 hover:bg-primary hover:text-primary-foreground font-bold px-3 py-1.5 rounded-md transition-all flex items-center gap-2 text-xs"
+                                        >
+                                            {synthesizing === paper.id ? <Zap className="w-3 h-3 animate-spin" /> : <Zap className="w-3 h-3" />}
+                                            Synthesize Short
+                                        </button>
+
+                                        <span className="text-muted-foreground">Authors: {paper.authorships.map(a => a.author.display_name).slice(0, 3).join(", ")}</span>
+                                        {paper.open_access?.is_oa && (
+                                            <a
+                                                href={paper.open_access.oa_url}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="ml-auto text-primary hover:underline flex items-center gap-1"
+                                            >
+                                                Read Full Paper <ExternalLink className="w-3 h-3" />
+                                            </a>
+                                        )}
+                                        {!paper.open_access?.is_oa && paper.doi && (
+                                            <a
+                                                href={paper.doi}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="ml-auto text-muted-foreground hover:text-foreground hover:underline flex items-center gap-1"
+                                            >
+                                                View DOI <ExternalLink className="w-3 h-3" />
+                                            </a>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div >
+                )
+            }
+
+            {/* --- WISDOM EXTRACTION MODE --- */}
+            {
+                mode === "wisdom" && (
+                    <div className="space-y-8 animate-in fade-in">
+                        <div className="bg-purple-500/5 border border-purple-500/20 rounded-xl p-6 shadow-lg">
+                            <h3 className="text-lg font-bold text-purple-400 mb-4 flex items-center gap-2">
+                                <TrendingUp className="w-5 h-5" /> Meta-Analysis (Extract Wisdom in German)
+                            </h3>
+
+                            {!extractedNuggets ? (
+                                <>
+                                    <div className="space-y-4 mb-4">
+                                        <div className="flex gap-2 bg-black/20 p-1 rounded-lg w-max">
+                                            <button
+                                                onClick={() => setExtractionMode("LAW")}
+                                                className={cn(
+                                                    "px-4 py-2 text-sm font-bold rounded-md transition-all",
+                                                    extractionMode === "LAW"
+                                                        ? "bg-purple-600/20 text-purple-400 border border-purple-500/30"
+                                                        : "text-muted-foreground hover:bg-white/5"
+                                                )}
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    <Target className="w-4 h-4" />
+                                                    <span>Strategy Audit (Laws)</span>
+                                                </div>
+                                            </button>
+                                            <button
+                                                onClick={() => setExtractionMode("GROWTH")}
+                                                className={cn(
+                                                    "px-4 py-2 text-sm font-bold rounded-md transition-all",
+                                                    extractionMode === "GROWTH"
+                                                        ? "bg-yellow-600/20 text-yellow-400 border border-yellow-500/30"
+                                                        : "text-muted-foreground hover:bg-white/5"
+                                                )}
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    <TrendingUp className="w-4 h-4" />
+                                                    <span>Creator Growth (Meta)</span>
+                                                </div>
+                                            </button>
+                                            <button
+                                                onClick={() => setExtractionMode("FACT")}
+                                                className={cn(
+                                                    "px-4 py-2 text-sm font-bold rounded-md transition-all",
+                                                    extractionMode === "FACT"
+                                                        ? "bg-green-600/20 text-green-400 border border-green-500/30"
+                                                        : "text-muted-foreground hover:bg-white/5"
+                                                )}
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    <BookOpen className="w-4 h-4" />
+                                                    <span>Topic Research (Facts)</span>
+                                                </div>
+                                            </button>
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">
+                                            {extractionMode === "LAW"
+                                                ? "Extracts TIMELESS PRINCIPLES (Hooks, Pacing). Become Universal Laws in God Mode."
+                                                : extractionMode === "GROWTH"
+                                                    ? "Extracts CREATOR STRATEGY (Mindset, Algo, Career). For YOU, not the script."
+                                                    : "Extracts FACTS & PROTOCOLS (e.g. Health Science). Saved to Knowledge Base only."}
+                                        </p>
+                                    </div>
+                                    <div className="flex gap-4">
+                                        <input
+                                            type="text"
+                                            placeholder="Paste Educational Video URL..."
+                                            className="flex-1 bg-muted/30 border border-purple-500/30 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                                            id="wisdom-input"
+                                        />
+                                        <button
+                                            onClick={async () => {
+                                                const input = document.getElementById('wisdom-input') as HTMLInputElement;
+                                                const url = input.value;
+                                                if (!url) return;
+
                                                 try {
                                                     setExtractionLoading(true);
-                                                    const { extractWisdomFromTextAction } = await import("@/app/actions");
+                                                    input.disabled = true;
+                                                    const { extractWisdomFromVideoUrlAction } = await import("@/app/actions");
+
+                                                    // 1. Extract Wisdom from URL (German)
                                                     // @ts-ignore
-                                                    const nuggets = await extractWisdomFromTextAction(text, "DE", extractionMode);
+                                                    const nuggets = await extractWisdomFromVideoUrlAction(url, "DE", extractionMode);
 
-                                                    if (!nuggets) throw new Error("No wisdom found in text.");
+                                                    if (!nuggets || nuggets.length === 0) {
+                                                        alert("Could not extract wisdom. Check the URL.");
+                                                        setExtractionLoading(false);
+                                                        input.disabled = false;
+                                                        return;
+                                                    }
 
-                                                    setExtractionSourceId("Manual Input");
+                                                    const videoId = url.includes("v=") ? url.split("v=")[1].split("&")[0] : "Video";
+                                                    setExtractionSourceId(videoId);
                                                     setExtractedNuggets(nuggets);
                                                     // Select all by default
                                                     setSelectedNuggetIndices(new Set(nuggets.map((_, i) => i)));
-                                                    let tags = "Manual, Research";
-                                                    if (extractionMode === "LAW") tags = "Wisdom, Strategy, Manual";
-                                                    if (extractionMode === "GROWTH") tags = "Growth, Mindset, Creator, Manual";
+
+                                                    let tags = "Research, Knowledge";
+                                                    if (extractionMode === "LAW") tags = "Wisdom, Strategy";
+                                                    if (extractionMode === "GROWTH") tags = "Growth, Mindset, Creator";
+
                                                     setExtractionTags(tags);
                                                 } catch (e: any) {
-                                                    alert("Manual Error: " + e.message);
+                                                    console.error(e);
+                                                    alert(`Analysis failed: ${e.message}`);
                                                 } finally {
                                                     setExtractionLoading(false);
+                                                    input.disabled = false;
                                                 }
-                                            })();
-                                        }}
-                                        disabled={extractionLoading}
-                                        className="bg-muted hover:bg-muted/80 text-foreground font-bold px-4 py-2 rounded-lg transition-colors flex items-center gap-2 border border-border/50"
-                                    >
-                                        <Edit className="w-4 h-4" />
-                                        Manual Input
-                                    </button>
-                                </div>
-                            </>
-                        ) : (
-                            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
-                                <div className="flex justify-between items-center border-b border-border/40 pb-2">
-                                    <h4 className="font-bold text-white">Review & Save Concentrate</h4>
-                                    <button
-                                        onClick={() => setExtractedNuggets(null)}
-                                        className="text-xs text-muted-foreground hover:text-white"
-                                    >
-                                        Discard
-                                    </button>
-                                </div>
+                                            }}
+                                            disabled={extractionLoading}
+                                            className={cn(
+                                                "font-bold px-4 py-2 rounded-lg transition-colors flex items-center gap-2",
+                                                extractionMode === "LAW"
+                                                    ? "bg-purple-600 text-white hover:bg-purple-700"
+                                                    : extractionMode === "GROWTH"
+                                                        ? "bg-yellow-600 text-white hover:bg-yellow-700"
+                                                        : "bg-green-600 text-white hover:bg-green-700"
+                                            )}
+                                        >
+                                            {extractionLoading ? <Zap className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+                                            Extract {extractionMode === "LAW" ? "Laws" : extractionMode === "GROWTH" ? "Growth" : "Facts"}
+                                        </button>
 
-                                {/* Editable Nuggets */}
-                                <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
-                                    {extractedNuggets.map((nugget, idx) => {
-                                        const isSelected = selectedNuggetIndices.has(idx);
-                                        return (
-                                            <div
-                                                key={idx}
-                                                onClick={() => toggleNuggetSelection(idx)}
-                                                className={cn(
-                                                    "bg-background/40 p-3 rounded-lg border space-y-2 cursor-pointer transition-all",
-                                                    isSelected ? "border-white/20 ring-1 ring-white/10 opacity-100" : "border-transparent opacity-40 grayscale hover:opacity-60"
-                                                )}
-                                            >
-                                                <div className="flex justify-between items-start">
-                                                    <input
-                                                        value={nugget.principle}
-                                                        onClick={(e) => e.stopPropagation()} // Prevent toggle on input click
-                                                        onChange={(e) => {
-                                                            const newNuggets = [...extractedNuggets];
-                                                            newNuggets[idx].principle = e.target.value;
-                                                            setExtractedNuggets(newNuggets);
-                                                        }}
-                                                        className="w-full bg-transparent font-bold text-yellow-500 focus:outline-none"
-                                                        placeholder="Principle Name"
-                                                    />
-                                                    {isSelected && <div className="text-green-500 text-xs font-bold">✓ SAVE</div>}
-                                                </div>
-                                                <textarea
-                                                    value={nugget.explanation}
-                                                    onClick={(e) => e.stopPropagation()}
-                                                    onChange={(e) => {
-                                                        const newNuggets = [...extractedNuggets];
-                                                        newNuggets[idx].explanation = e.target.value;
-                                                        setExtractedNuggets(newNuggets);
-                                                    }}
-                                                    className="w-full bg-transparent text-sm text-muted-foreground resize-none focus:outline-none h-16"
-                                                    placeholder="Explanation..."
-                                                />
-                                                <div className="flex gap-2 items-center bg-black/20 p-2 rounded">
-                                                    <Target className="w-3 h-3 text-green-400" />
-                                                    <input
-                                                        value={nugget.actionableTip}
+                                        {/* Manual Input Trigger */}
+                                        <button
+                                            onClick={() => {
+                                                const text = prompt("Paste your transcript, notes, or summary here (min 50 chars):");
+                                                if (!text || text.length < 50) {
+                                                    if (text) alert("Text too short!");
+                                                    return;
+                                                }
+
+                                                // Handle Manual Extraction (Inline for speed)
+                                                (async () => {
+                                                    try {
+                                                        setExtractionLoading(true);
+                                                        const { extractWisdomFromTextAction } = await import("@/app/actions");
+                                                        // @ts-ignore
+                                                        const nuggets = await extractWisdomFromTextAction(text, "DE", extractionMode);
+
+                                                        if (!nuggets) throw new Error("No wisdom found in text.");
+
+                                                        setExtractionSourceId("Manual Input");
+                                                        setExtractedNuggets(nuggets);
+                                                        // Select all by default
+                                                        setSelectedNuggetIndices(new Set(nuggets.map((_, i) => i)));
+                                                        let tags = "Manual, Research";
+                                                        if (extractionMode === "LAW") tags = "Wisdom, Strategy, Manual";
+                                                        if (extractionMode === "GROWTH") tags = "Growth, Mindset, Creator, Manual";
+                                                        setExtractionTags(tags);
+                                                    } catch (e: any) {
+                                                        alert("Manual Error: " + e.message);
+                                                    } finally {
+                                                        setExtractionLoading(false);
+                                                    }
+                                                })();
+                                            }}
+                                            disabled={extractionLoading}
+                                            className="bg-muted hover:bg-muted/80 text-foreground font-bold px-4 py-2 rounded-lg transition-colors flex items-center gap-2 border border-border/50"
+                                        >
+                                            <Edit className="w-4 h-4" />
+                                            Manual Input
+                                        </button>
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
+                                    <div className="flex justify-between items-center border-b border-border/40 pb-2">
+                                        <h4 className="font-bold text-white">Review & Save Concentrate</h4>
+                                        <button
+                                            onClick={() => setExtractedNuggets(null)}
+                                            className="text-xs text-muted-foreground hover:text-white"
+                                        >
+                                            Discard
+                                        </button>
+                                    </div>
+
+                                    {/* Editable Nuggets */}
+                                    <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                                        {extractedNuggets.map((nugget, idx) => {
+                                            const isSelected = selectedNuggetIndices.has(idx);
+                                            return (
+                                                <div
+                                                    key={idx}
+                                                    onClick={() => toggleNuggetSelection(idx)}
+                                                    className={cn(
+                                                        "bg-background/40 p-3 rounded-lg border space-y-2 cursor-pointer transition-all",
+                                                        isSelected ? "border-white/20 ring-1 ring-white/10 opacity-100" : "border-transparent opacity-40 grayscale hover:opacity-60"
+                                                    )}
+                                                >
+                                                    <div className="flex justify-between items-start">
+                                                        <input
+                                                            value={nugget.principle}
+                                                            onClick={(e) => e.stopPropagation()} // Prevent toggle on input click
+                                                            onChange={(e) => {
+                                                                const newNuggets = [...extractedNuggets];
+                                                                newNuggets[idx].principle = e.target.value;
+                                                                setExtractedNuggets(newNuggets);
+                                                            }}
+                                                            className="w-full bg-transparent font-bold text-yellow-500 focus:outline-none"
+                                                            placeholder="Principle Name"
+                                                        />
+                                                        {isSelected && <div className="text-green-500 text-xs font-bold">✓ SAVE</div>}
+                                                    </div>
+                                                    <textarea
+                                                        value={nugget.explanation}
                                                         onClick={(e) => e.stopPropagation()}
                                                         onChange={(e) => {
                                                             const newNuggets = [...extractedNuggets];
-                                                            newNuggets[idx].actionableTip = e.target.value;
+                                                            newNuggets[idx].explanation = e.target.value;
                                                             setExtractedNuggets(newNuggets);
                                                         }}
-                                                        className="w-full bg-transparent text-xs text-green-400/80 focus:outline-none"
-                                                        placeholder="Actionable Tip..."
+                                                        className="w-full bg-transparent text-sm text-muted-foreground resize-none focus:outline-none h-16"
+                                                        placeholder="Explanation..."
                                                     />
+                                                    <div className="flex gap-2 items-center bg-black/20 p-2 rounded">
+                                                        <Target className="w-3 h-3 text-green-400" />
+                                                        <input
+                                                            value={nugget.actionableTip}
+                                                            onClick={(e) => e.stopPropagation()}
+                                                            onChange={(e) => {
+                                                                const newNuggets = [...extractedNuggets];
+                                                                newNuggets[idx].actionableTip = e.target.value;
+                                                                setExtractedNuggets(newNuggets);
+                                                            }}
+                                                            className="w-full bg-transparent text-xs text-green-400/80 focus:outline-none"
+                                                            placeholder="Actionable Tip..."
+                                                        />
+                                                    </div>
                                                 </div>
+                                            );
+                                        })}
+                                    </div>
+
+                                    {/* Metadata Input */}
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-1">
+                                            <label className="text-xs text-muted-foreground uppercase font-bold">Tags</label>
+                                            <input
+                                                value={extractionTags}
+                                                onChange={(e) => setExtractionTags(e.target.value)}
+                                                placeholder="e.g. #Hook, #Retention"
+                                                className="w-full bg-background/50 border border-border/50 rounded px-2 py-1 text-sm"
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-xs text-muted-foreground uppercase font-bold">Impact Rating (1-5)</label>
+                                            <div className="flex gap-1">
+                                                {[1, 2, 3, 4, 5].map(star => (
+                                                    <button
+                                                        key={star}
+                                                        onClick={() => setExtractionRating(star)}
+                                                        className={cn("w-8 h-8 rounded flex items-center justify-center transition-colors",
+                                                            extractionRating >= star ? "bg-yellow-500 text-black font-bold" : "bg-muted/30 text-muted-foreground"
+                                                        )}
+                                                    >
+                                                        {star}
+                                                    </button>
+                                                ))}
                                             </div>
-                                        );
-                                    })}
-                                </div>
-
-                                {/* Metadata Input */}
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-1">
-                                        <label className="text-xs text-muted-foreground uppercase font-bold">Tags</label>
-                                        <input
-                                            value={extractionTags}
-                                            onChange={(e) => setExtractionTags(e.target.value)}
-                                            placeholder="e.g. #Hook, #Retention"
-                                            className="w-full bg-background/50 border border-border/50 rounded px-2 py-1 text-sm"
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <label className="text-xs text-muted-foreground uppercase font-bold">Impact Rating (1-5)</label>
-                                        <div className="flex gap-1">
-                                            {[1, 2, 3, 4, 5].map(star => (
-                                                <button
-                                                    key={star}
-                                                    onClick={() => setExtractionRating(star)}
-                                                    className={cn("w-8 h-8 rounded flex items-center justify-center transition-colors",
-                                                        extractionRating >= star ? "bg-yellow-500 text-black font-bold" : "bg-muted/30 text-muted-foreground"
-                                                    )}
-                                                >
-                                                    {star}
-                                                </button>
-                                            ))}
                                         </div>
                                     </div>
-                                </div>
 
-                                <button
-                                    onClick={async () => {
-                                        try {
-                                            const { saveTemplateAction } = await import("@/app/actions");
+                                    <button
+                                        onClick={async () => {
+                                            try {
+                                                const { saveTemplateAction } = await import("@/app/actions");
 
-                                            // Format tags
-                                            const tagsArray = extractionTags.split(",").map(t => t.trim()).filter(t => t);
+                                                // Format tags
+                                                const tagsArray = extractionTags.split(",").map(t => t.trim()).filter(t => t);
 
-                                            // Filter nuggets by selection
-                                            const nuggetsToSave = extractedNuggets.filter((_, i) => selectedNuggetIndices.has(i));
+                                                // Filter nuggets by selection
+                                                const nuggetsToSave = extractedNuggets.filter((_, i) => selectedNuggetIndices.has(i));
 
-                                            if (nuggetsToSave.length === 0) {
-                                                alert("Please select at least one nugget to save.");
-                                                return;
+                                                if (nuggetsToSave.length === 0) {
+                                                    alert("Please select at least one nugget to save.");
+                                                    return;
+                                                }
+
+                                                // Loop through and save each nugget individually
+                                                for (const nugget of nuggetsToSave) {
+                                                    const principleName = nugget.principle || "Unknown Principle";
+                                                    await saveTemplateAction(
+                                                        "viral-wisdom",
+                                                        `Wisdom: ${principleName.substring(0, 30)}...`, // Better name
+                                                        [nugget], // Save as array of 1 for consistency
+                                                        undefined,
+                                                        tagsArray,
+                                                        extractionRating,
+                                                        extractionMode // PASS THE CORRECT MODE
+                                                    );
+                                                }
+
+                                                setSaveSuccess(true);
+                                                setTimeout(() => setSaveSuccess(false), 3000); // Auto-hide after 3s
+
+                                                setExtractedNuggets(null);
+                                                setExtractionTags("");
+                                                setExtractionSourceId("");
+                                            } catch (e) {
+                                                console.error(e);
+                                                alert("Failed to save to pool.");
                                             }
+                                        }}
+                                        className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-all flex items-center justify-center gap-2"
+                                    >
+                                        <Library className="w-5 h-5" /> Save to Wisdom Pool
+                                    </button>
 
-                                            // Loop through and save each nugget individually
-                                            for (const nugget of nuggetsToSave) {
-                                                const principleName = nugget.principle || "Unknown Principle";
-                                                await saveTemplateAction(
-                                                    "viral-wisdom",
-                                                    `Wisdom: ${principleName.substring(0, 30)}...`, // Better name
-                                                    [nugget], // Save as array of 1 for consistency
-                                                    undefined,
-                                                    tagsArray,
-                                                    extractionRating,
-                                                    extractionMode // PASS THE CORRECT MODE
-                                                );
-                                            }
-
-                                            setSaveSuccess(true);
-                                            setTimeout(() => setSaveSuccess(false), 3000); // Auto-hide after 3s
-
-                                            setExtractedNuggets(null);
-                                            setExtractionTags("");
-                                            setExtractionSourceId("");
-                                        } catch (e) {
-                                            console.error(e);
-                                            alert("Failed to save to pool.");
-                                        }
-                                    }}
-                                    className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-all flex items-center justify-center gap-2"
-                                >
-                                    <Library className="w-5 h-5" /> Save to Wisdom Pool
-                                </button>
-
-                                {/* Success Notification */}
-                                {saveSuccess && (
-                                    <div className="absolute bottom-full mb-4 left-0 right-0 bg-green-500/20 border border-green-500 text-green-200 px-4 py-3 rounded-lg flex items-center justify-center gap-2 animate-in fade-in slide-in-from-bottom-2">
-                                        <div className="bg-green-500 rounded-full p-1">
-                                            <svg className="w-3 h-3 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                            </svg>
+                                    {/* Success Notification */}
+                                    {saveSuccess && (
+                                        <div className="absolute bottom-full mb-4 left-0 right-0 bg-green-500/20 border border-green-500 text-green-200 px-4 py-3 rounded-lg flex items-center justify-center gap-2 animate-in fade-in slide-in-from-bottom-2">
+                                            <div className="bg-green-500 rounded-full p-1">
+                                                <svg className="w-3 h-3 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                                </svg>
+                                            </div>
+                                            <span className="font-bold">Success! Wisdom Pool Updated.</span>
                                         </div>
-                                        <span className="font-bold">Success! Wisdom Pool Updated.</span>
-                                    </div>
-                                )}
-                            </div>
-                        )}
+                                    )}
+                                </div>
+                            )}
+                        </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
 
 

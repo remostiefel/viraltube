@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, RefreshCw, MessageSquare, PencilRuler, FileText, Loader2, PlayCircle, Clock, Save, FolderOpen, Trash2, Eye, Binary, BrainCircuit, Activity, Cloud, Sparkles, Zap, Layout, CheckCircle2, Brain, FileDown, Clapperboard, Copy, Check, Maximize2, GraduationCap } from "lucide-react";
+import { Send, Bot, User, RefreshCw, MessageSquare, PencilRuler, FileText, Loader2, PlayCircle, Clock, Save, FolderOpen, Trash2, Eye, Binary, BrainCircuit, Activity, Cloud, Sparkles, Zap, Layout, CheckCircle2, Brain, FileDown, Clapperboard, Copy, Check, Maximize2, Minimize2, GraduationCap } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { processChat, generateScriptAction, saveTemplateAction, getTemplatesAction, deleteTemplateAction, generateBlueprintAction, saveScriptToVaultAction, getProjectByIdAction, updateProjectAction, synthesizeStrategyAction, refineScriptAction, extendScriptAction, searchOutliersAction, generateVideoPromptsAction, generateImagePromptsAction, generateAudioPromptsAction, generateScriptImagePromptsAction } from "@/app/actions";
+import { processChat, generateScriptAction, saveTemplateAction, getTemplatesAction, deleteTemplateAction, generateBlueprintAction, saveScriptToVaultAction, getProjectByIdAction, updateProjectAction, synthesizeStrategyAction, refineScriptAction, extendScriptAction, condenseScriptAction, searchOutliersAction, generateVideoPromptsAction, generateImagePromptsAction, generateAudioPromptsAction, generateScriptImagePromptsAction, generateVoiceoverStyleAction } from "@/app/actions";
 import { Project } from "@/lib/projects";
 import { ChatMessage, StrategyProfile } from "@/lib/gemini";
 import { GeneratedScript, WisdomNugget } from "@/lib/openai";
@@ -22,10 +22,11 @@ import { TemplateManager } from "@/components/architect/TemplateManager";
 // Removed static import of saveAs to prevent build issues
 // import { saveAs } from "file-saver";
 
-import { generateDocx, generatePromptsDocx, generateImagePromptsDocx, generateAudioPromptsDocx } from "@/lib/docx-exporter";
+import { generateDocx, generatePromptsDocx, generateImagePromptsDocx, generateAudioPromptsDocx, getDocxFilename } from "@/lib/docx-exporter";
 import { VideoPrompt, ScriptImagePrompt, AudioPrompt } from "@/lib/openai";
 import { SnapshotButton } from "@/components/SnapshotButton";
 import { VIRAL_PROTOCOLS } from "@/lib/protocols";
+import { HelpTrigger, InsightModeToggle } from "@/components/ui/HelpSystem";
 
 
 
@@ -65,6 +66,7 @@ function ArchitectContent() {
 
     const [refiningScript, setRefiningScript] = useState(false);
     const [extendingScript, setExtendingScript] = useState(false);
+    const [condensingScript, setCondensingScript] = useState(false);
     const [savingStrategyStatus, setSavingStrategyStatus] = useState<"idle" | "saving" | "saved">("idle");
 
     const [savingBlueprintStatus, setSavingBlueprintStatus] = useState<"idle" | "saving" | "saved">("idle");
@@ -527,6 +529,28 @@ function ArchitectContent() {
         }
     };
 
+    const handleCondenseScript = async () => {
+        if (!content || condensingScript) return;
+        setCondensingScript(true);
+        try {
+            const condensed = await condenseScriptAction(content, targetLanguage);
+            if (condensed) {
+                setScriptResult(condensed);
+                // Sync to editor
+                const fullText = condensed.sections.map(s => `## ${s.heading} (${s.estimatedDuration})\n\n${s.content}\n\n> **Visual:** ${s.visualCue}`).join("\n\n");
+                setContent(fullText);
+                const pacing = calculatePacingProfile(condensed);
+                setPacingData(pacing);
+                setStep("visualize");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Condensing failed.");
+        } finally {
+            setCondensingScript(false);
+        }
+    };
+
     const handleSaveProject = async () => {
         // Consolidated Saving: Updates the Project Entity with EVERYTHING.
         const textToSave = content || (scriptResult ? scriptResult.sections.map(s => s.content).join('\n') : "");
@@ -601,6 +625,16 @@ function ArchitectContent() {
             // Audio Prompts
             setAudioPrompts(template.content as AudioPrompt);
             setActiveTab("audio");
+        } else if (Array.isArray(template.content)) {
+            // It's a Wisdom Nugget Collection (or single nugget in array)
+            const wisdomText = template.content.map((n: any) => {
+                if (n.universalLaw) return `## ${n.universalLaw}\n**Principle**: ${n.principle}\n**Explanation**: ${n.explanation}\n**Tip**: ${n.actionableTip}`;
+                if (n.principle) return `## ${n.principle}\n${n.explanation}\n> ${n.actionableTip}`;
+                return JSON.stringify(n);
+            }).join("\n\n---\n\n");
+
+            setStrategyContent(wisdomText);
+            setActiveTab("strategy");
         } else if (typeof template.content === 'string') {
             // It's a Text Draft (Script)
             setContent(template.content);
@@ -638,9 +672,14 @@ function ArchitectContent() {
     const handleExportDocx = async () => {
         if (!content) return;
         try {
-            const blob = await generateDocx(content, scriptResult?.title || "Draft Script");
+            const titleClean = (scriptResult?.title || "Draft").replace(/[^a-z0-9äöüß]/gi, '_').replace(/_+/g, '_');
+
+            // Generate AI-powered voiceover style instruction
+            const voiceoverStyle = await generateVoiceoverStyleAction(content);
+
+            const blob = await generateDocx(content, scriptResult?.title || "Draft Script", voiceoverStyle);
             const { saveAs } = await import("file-saver");
-            saveAs(blob, `${(scriptResult?.title || "script-draft").replace(/[^a-z0-9]/gi, '_').toLowerCase()}.docx`);
+            saveAs(blob, getDocxFilename("Script", scriptResult?.title || "Draft Script"));
         } catch (e) {
             console.error("Export failed", e);
             alert("Export failed");
@@ -715,7 +754,9 @@ function ArchitectContent() {
                 <div>
                     <h2 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
                         <PencilRuler className="w-8 h-8 text-primary" />
-                        Script Forge <span className="text-xs align-top font-mono border border-red-500/30 bg-red-500/10 rounded px-1 ml-1 text-red-500">automated</span>
+                        <HelpTrigger helpId="architect.frameworks">
+                            Script Forge <span className="text-xs align-top font-mono border border-red-500/30 bg-red-500/10 rounded px-1 ml-1 text-red-500">automated</span>
+                        </HelpTrigger>
                     </h2>
                     <p className="text-muted-foreground mt-2">
                         Draft, structure, and refine your content.
@@ -723,6 +764,7 @@ function ArchitectContent() {
                 </div>
 
                 <div className="flex items-center gap-4">
+                    <InsightModeToggle />
                     <div className="hidden md:block">
                         <SnapshotButton
                             targetId="architect-workspace"
@@ -752,10 +794,10 @@ function ArchitectContent() {
                                 {/* Core Workflow */}
                                 <div className="flex items-center gap-1">
                                     <button onClick={() => setActiveTab("strategy")} className={cn("flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all group", activeTab === "strategy" ? "bg-purple-500/10 text-purple-500" : "hover:bg-muted text-muted-foreground hover:text-foreground")}>
-                                        <BrainCircuit className="w-4 h-4" /> <span className="hidden sm:inline">Strategy</span>
+                                        <BrainCircuit className="w-4 h-4" /> <HelpTrigger helpId="architect.strategy"><span className="hidden sm:inline">Strategy</span></HelpTrigger>
                                     </button>
                                     <button onClick={() => setActiveTab("script")} className={cn("flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all group", activeTab === "script" ? "bg-primary/10 text-primary" : "hover:bg-muted text-muted-foreground hover:text-foreground")}>
-                                        <PencilRuler className="w-4 h-4" /> <span className="hidden sm:inline">Builder</span>
+                                        <PencilRuler className="w-4 h-4" /> <HelpTrigger helpId="architect.builder"><span className="hidden sm:inline">Builder</span></HelpTrigger>
                                     </button>
                                 </div>
 
@@ -1255,6 +1297,15 @@ ${res.adaptation.differentiation.map(e => `- ${e}`).join('\n')}
                                                                 {extendingScript ? <Loader2 className="w-3 h-3 animate-spin" /> : <Maximize2 className="w-3 h-3" />}
                                                                 Extend
                                                             </button>
+                                                            <button
+                                                                onClick={handleCondenseScript}
+                                                                disabled={condensingScript || !content}
+                                                                title="Condense Script (approx -30%)"
+                                                                className="flex items-center gap-1 px-2 py-1 text-[10px] font-bold uppercase tracking-wide rounded border border-rose-500/30 text-rose-500 hover:bg-rose-500/10 transition-colors"
+                                                            >
+                                                                {condensingScript ? <Loader2 className="w-3 h-3 animate-spin" /> : <Minimize2 className="w-3 h-3" />}
+                                                                Condense
+                                                            </button>
                                                             <div className="flex bg-muted/20 rounded p-1">
                                                                 <button
                                                                     onClick={() => setStep("blueprint")}
@@ -1380,7 +1431,7 @@ ${res.adaptation.differentiation.map(e => `- ${e}`).join('\n')}
                                                 onClick={async () => {
                                                     const blob = await generateImagePromptsDocx(imagePrompts, `Visuals - ${scriptResult?.title || "Untitled"}`);
                                                     const { saveAs } = await import("file-saver");
-                                                    saveAs(blob, `Visuals - ${scriptResult?.title || "Untitled"}.docx`);
+                                                    saveAs(blob, getDocxFilename("Visuals", scriptResult?.title || "Untitled"));
                                                 }}
                                                 className="px-4 py-2 rounded-lg font-bold flex items-center gap-2 border border-blue-500/30 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 transition-colors"
                                             >
@@ -1494,7 +1545,7 @@ ${res.adaptation.differentiation.map(e => `- ${e}`).join('\n')}
                                                 onClick={async () => {
                                                     const blob = await generateAudioPromptsDocx(audioPrompts, `Audio - ${scriptResult?.title || "Untitled"}`);
                                                     const { saveAs } = await import("file-saver");
-                                                    saveAs(blob, `Audio - ${scriptResult?.title || "Untitled"}.docx`);
+                                                    saveAs(blob, getDocxFilename("Audio", scriptResult?.title || "Untitled"));
                                                 }}
                                                 className="px-4 py-2 rounded-lg font-bold flex items-center gap-2 border border-blue-500/30 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 transition-colors"
                                             >
@@ -1661,7 +1712,7 @@ ${res.adaptation.differentiation.map(e => `- ${e}`).join('\n')}
                                             onClick={async () => {
                                                 const blob = await generatePromptsDocx(videoPrompts, `Prompts - ${scriptResult?.title || "Untitled"}`);
                                                 const { saveAs } = await import("file-saver");
-                                                saveAs(blob, `Prompts - ${scriptResult?.title || "Untitled"}.docx`);
+                                                saveAs(blob, getDocxFilename("Prompts", scriptResult?.title || "Untitled"));
                                             }}
                                             className="px-4 py-2 rounded-lg font-bold flex items-center gap-2 border border-blue-500/30 bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 transition-colors"
                                         >

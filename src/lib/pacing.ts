@@ -11,6 +11,12 @@ export interface PacingDataPoint {
 
 export function calculatePacingProfile(script: GeneratedScript): PacingDataPoint[] {
     const profile: PacingDataPoint[] = [];
+
+    // Safety check for invalid content
+    if (!script || !script.sections || !Array.isArray(script.sections)) {
+        return [];
+    }
+
     let currentTime = 0;
 
     script.sections.forEach((section) => {

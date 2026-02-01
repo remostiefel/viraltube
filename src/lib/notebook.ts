@@ -38,7 +38,8 @@ export async function createNotebookItem(
     title: string,
     description: string = "",
     priority: "low" | "medium" | "high" = "medium",
-    tags: string[] = []
+    tags: string[] = [],
+    formatId?: string
 ): Promise<NotebookItem> {
     await ensureFile();
     const items = await getNotebookItems();
@@ -56,11 +57,13 @@ export async function createNotebookItem(
         tags,
         priority,
         isArchived: false,
+        formatId
     };
 
     items.unshift(newItem);
     await fs.writeFile(NOTEBOOK_FILE, JSON.stringify(items, null, 2), "utf-8");
     return newItem;
+
 }
 
 export async function updateNotebookItem(id: string, updates: Partial<NotebookItem>): Promise<NotebookItem | null> {

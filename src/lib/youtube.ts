@@ -67,6 +67,7 @@ export interface ChannelData {
         high: { url: string };
     };
     statistics: ChannelStats;
+    publishedAt: string;
 }
 
 export async function getChannelData(apiKey: string): Promise<ChannelData | null> {
@@ -98,6 +99,7 @@ export async function getChannelData(apiKey: string): Promise<ChannelData | null
                 customUrl: item.snippet.customUrl,
                 thumbnails: item.snippet.thumbnails,
                 statistics: item.statistics,
+                publishedAt: item.snippet.publishedAt,
             };
         }
 
@@ -309,7 +311,7 @@ export async function getChannelRecentVideos(channelId: string, apiKey: string):
         // 2. Get Recent Videos
         const searchRes = await fetch(
             `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&type=video&order=date&maxResults=50&key=${apiKey}`,
-            { next: { revalidate: 3600 } }
+            { next: { revalidate: 0 } }
         );
 
         if (!searchRes.ok) return [];
@@ -319,7 +321,8 @@ export async function getChannelRecentVideos(channelId: string, apiKey: string):
         // 3. Get Video Stats
         const videoIds = searchData.items.map((item: YouTubeSearchItem) => item.id.videoId).join(',');
         const statsRes = await fetch(
-            `https://www.googleapis.com/youtube/v3/videos?part=statistics,snippet&id=${videoIds}&key=${apiKey}`
+            `https://www.googleapis.com/youtube/v3/videos?part=statistics,snippet&id=${videoIds}&key=${apiKey}`,
+            { next: { revalidate: 0 } }
         );
         const statsData = await statsRes.json();
 

@@ -1909,5 +1909,279 @@
     "wisdomCategory": "LAW",
     "id": "052cacb1-3572-45fa-a2d8-5f5a02d3476c",
     "createdAt": "2026-01-26T06:58:04.830Z"
+  },
+  {
+    "type": "viral-wisdom",
+    "name": "🧬 Emulation: How Different Foods Affect Blo... (Bluepr. 26.01.)",
+    "content": "# ⚔️ Master Strategy: The Bio-Impact Reveal Loop\n\n## 1. The Hook Formula\n- **Universal Problem/Curiosity Setup:** Immediately poses a broadly relatable question or assumption about a common biological process or daily habit (e.g., \"How does X really affect Y?\").\n- **Promise of Direct Visual Evidence:** Guarantees an immediate, data-driven, and dynamic demonstration of cause-and-effect, often challenging preconceived notions from the outset.\n- **Intrigue by Comparison:** Hints at surprising variations or dramatic differences between seemingly similar inputs.\n\n## 2. Pacing & Structure\n- **Rapid Intro & Premise:** Quickly establishes the core question/experiment and its significance (e.g., \"We tested X foods... here's what happened\").\n- **Iterative \"Reveal Loop\" Structure:** Presents multiple individual examples (foods/variables) in a consistent, repetitive segment format:\n    -   **Introduce Variable:** Clearly name/show the item being tested.\n    -   **Dynamic Impact Visualization:** Immediately show its effect over time using the central visual metric.\n    -   **Concise Explanation:** Briefly explain the underlying mechanism or key takeaway for *this specific item*.\n    -   **Subtle Comparison/Implication:** Connect this item's impact to overall health or previous examples.\n- **Climax of Insights:** Builds up to a collection of actionable conclusions, contrasting the best/worst, and offering general principles.\n- **Empowering Outro:** Summarizes key takeaways and provides viewers with practical advice for informed decision-making.\n\n## 3. Visual Identity\n- **Central Dynamic Data Visualization:** A prominent, consistent, and clear visual representation of the key metric (e.g., a rising/falling line graph, a changing meter, an animated bio-indicator) that updates in real-time as each variable is introduced.\n- **Clean & Uncluttered Interface:** Focuses primarily on the visual data, minimizing extraneous graphics to ensure maximum clarity and impact.\n- **Iconic & Recognizable Representations:** Simple, easy-to-digest visual cues (e.g., food icons, distinct color coding) for each variable to aid quick identification and recall.\n- **Consistent Visual Template:** Each \"reveal\" segment follows the same visual layout and animation style, reinforcing the structure and aiding comparison.\n\n## 4. Psychology (Neuro-Code)\n- **Curiosity Gap Satisfaction:** Continuously opens and closes curiosity gaps with each new item, making viewers eager to see \"what happens next\" and \"how *this* one performs.\"\n- **Problem-Solution & Empowerment:** Addresses widespread health concerns, offering clear, actionable knowledge that gives viewers a sense of control and ability to make better choices. This triggers self-efficacy and dopamine.\n- **Novelty & Surprise:** Often reveals unexpected or counter-intuitive results for common items, creating \"aha!\" moments that are highly memorable and shareable.\n- **Pattern Recognition & Cognitive Ease:** The predictable, iterative structure reduces cognitive load, allowing viewers to easily process complex information and compare various data points without effort.\n- **Visual Learning Dominance:** Leverages the brain's strong visual processing capabilities to make abstract biological processes concrete, memorable, and impactful, enhancing retention.",
+    "projectId": "8564e229-25fc-4ee7-81e1-c6bbe1687b59",
+    "tags": [
+      "Blueprint"
+    ],
+    "rating": 5,
+    "wisdomCategory": "GROWTH",
+    "id": "517aa003-b358-4b04-99ea-2ff8f5f5070b",
+    "createdAt": "2026-01-26T15:39:28.893Z"
+  },
+  {
+    "type": "prompt",
+    "name": "🎬 Prompts: Glückshormone Hacken: Der Verborgene Schalter",
+    "content": [
+      {
+        "sceneId": 1,
+        "voiceoverSegment": "Entdecken Sie den Schalter für Ihre Glückshormone und kontrollieren Sie Ihre innere Chemie!",
+        "focus": "Introduction to the concept",
+        "visualFocus": "Zoom",
+        "prompt": "Zoom on an animated brain graphic with energetic music, intricate neural pathways glowing vibrant neon, dynamic camera angles, intense pulsing atmosphere, macro 8k, highly detailed texture, cinematic lighting, photorealistic, depth of field, 35mm lens"
+      },
+      {
+        "sceneId": 2,
+        "voiceoverSegment": "Glück hängt nicht nur von äußeren Faktoren ab. Es gibt einen inneren Schalter.",
+        "focus": "Myth Busting",
+        "visualFocus": "Fast perspective-swaps",
+        "prompt": "Rapid shifts between illustrations of myths and the concept of an internal switch, vibrant animated graphics, fast perspective-swaps, glowing cyan synapse atmosphere, intense pulsing, macro 8k, highly detailed texture, cinematic lighting, photorealistic, depth of field, 35mm lens"
+      },
+      {
+        "sceneId": 3,
+        "voiceoverSegment": "Der Schalter ist im Gehirn: Fokussierte Atmung verringert Stress.",
+        "focus": "Breathing Mechanism",
+        "visualFocus": "Macro",
+        "prompt": "Extreme macro of breathing mechanisms inside the brain, soft waves of calming colors, corkscrew motion around air particles, meditative stillness, deep blue and violet light, macro 8k, highly detailed texture, cinematic lighting, photorealistic, depth of field, 35mm lens"
+      },
+      {
+        "sceneId": 4,
+        "voiceoverSegment": "Gezielte Pausen steigern Endorphine.",
+        "focus": "Endorphin Boost",
+        "visualFocus": "POV",
+        "prompt": "POV animation of neurons releasing endorphins like an electric surge through the brain, vibrant yellows and oranges illuminating neural pathways, dynamic camera angles, lively and energetic atmosphere, macro 8k, highly detailed texture, cinematic lighting, photorealistic, depth of field, 35mm lens"
+      },
+      {
+        "sceneId": 5,
+        "voiceoverSegment": "Ausreichender Schlaf optimiert Serotonin.",
+        "focus": "Sleep Enhancement",
+        "visualFocus": "Wide",
+        "prompt": "Wide shot of neural brain waves during sleep, flowing harmoniously, soothing deep blue hues and soft lighting, gentle oscillations, calming atmosphere, macro 8k, highly detailed texture, cinematic lighting, photorealistic, depth of field, 35mm lens"
+      },
+      {
+        "sceneId": 6,
+        "voiceoverSegment": "Kontrollieren Sie Atmung, Aktivitäten und Schlaf, um Ihre Glückshormone zu steigern.",
+        "focus": "Empowerment through Control",
+        "visualFocus": "Montage",
+        "prompt": "Dynamic montage of people joyously engaging in activities like meditative breathing, active sports, and restful sleep, bright and uplifting color palette, fast perspective-swaps, energetic and uplifting mood, macro 8k, highly detailed texture, cinematic lighting, photorealistic, depth of field, 35mm lens"
+      },
+      {
+        "sceneId": 7,
+        "voiceoverSegment": "Lebensqualität steigern.",
+        "focus": "Enhancing Life Quality",
+        "visualFocus": "POV",
+        "prompt": "POV experience of hands holding an ethereal glowing light bulb symbolizing life quality, shifting colors of vitality and excitement, soft corkscrew motion, hopeful and inspiring atmosphere, macro 8k, highly detailed texture, cinematic lighting, photorealistic, depth of field, 35mm lens"
+      },
+      {
+        "sceneId": 8,
+        "voiceoverSegment": "Der Schalter liegt in Ihrer Hand!",
+        "focus": "Final Empowerment",
+        "visualFocus": "Macro",
+        "prompt": "Macro shot of a hand holding a glowing neural switch, intricate details of electrical paths, cool blue and violet accents, slow-motion reveal, empowering and mysterious atmosphere, macro 8k, highly detailed texture, cinematic lighting, photorealistic, depth of field, 35mm lens"
+      }
+    ],
+    "id": "bf20c54d-8eed-4a93-a674-fd0e05d2bed1",
+    "createdAt": "2026-01-26T16:39:51.834Z"
+  },
+  {
+    "type": "viral-wisdom",
+    "name": "🧬 Combo: \"Your Brain is A...\" + \"This Habit Sile...\" + \"\"Does Stress Re...\" (Bluepr. 26.01.)",
+    "content": "# ⚔️ Master Strategy: Cognitive Impact Unveiled\n\n## 1. The Hook Formula\n- **Immediate Threat & Direct Address:** Opens with an urgent, direct-to-viewer statement about a common habit, emotion, or overlooked environmental factor directly harming \"Your Brain\" or a core cognitive function (e.g., \"This daily habit is silently *eroding* your focus,\" \"Are you *unwittingly* shrinking your memory?\").\n- **Shocking Fact/Claim:** Follows with a bold, often counter-intuitive or alarmist claim about the severity or hidden nature of the impact (e.g., \"...and it's *scientifically proven* to cause brain damage.\", \"The truth will *shock* you.\").\n- **Promise of Revelation/Urgency:** Implies an immediate, data-backed exposé of the problem and its implications (e.g., \"We reveal the 5 crucial facts you *must* know now before it's too late.\").\n\n## 2. Pacing & Structure\n- **Hyper-Paced Problem Introduction (0-5s):** Rapidly establishes the core threat/question with a bold statement, minimal intro, leveraging fast cuts for immediate impact (especially for short-form).\n- **Iterative \"Impact Reveal\" Segments:** Presents multiple distinct examples or aspects of the impact, each following a micro-narrative within a consistent, repetitive segment format:\n    -   **Identify Trigger:** Clearly names/shows the habit, emotion, or factor (e.g., \"Overthinking,\" \"Chronic Stress,\" \"Poor Sleep\").\n    -   **Dynamic Consequence Visualization:** Immediately shows its specific negative effect on a cognitive metric (e.g., memory, focus, brain volume) using a central, animated visual aid.\n    -   **Concise \"Why\":** Briefly explains the scientific mechanism, statistic, or shocking fact behind *this specific impact*.\n    -   **Relatable Scenario/Warning:** Connects the impact to a common daily experience or offers a direct, urgent warning.\n- **Escalating Insight & Actionable Summary:** Builds towards a cumulative understanding of the overall threat, contrasting different impacts, and concludes with clear, empowering preventative or mitigating actions.\n- **Urgent Call to Awareness:** Ends with a reinforcing statement about the importance of understanding and acting on this information, often with a subtle call to action for further knowledge.\n\n## 3. Visual Identity\n- **Centralized \"Brain Health\" Monitor:** A prominent, consistent, and clear animated graphic (e.g., a stylized brain showing areas of decline, a deteriorating memory meter, a shrinking cortical representation) that dynamically reacts and visibly changes as each new impact is revealed.\n- **Bold, High-Contrast Text Overlays:** Key facts, statistics, and impact statements are prominently displayed using urgent, legible fonts and high-contrast color schemes (e.g., stark white on dark backgrounds, accents of red/orange for warnings).\n- **Concise, High-Impact Imagery/B-roll:** Quick, evocative cuts of relevant, often slightly anxiety-inducing visuals (e.g., clocks ticking, blurred faces, stressed individuals, abstract brain scans showing decline) paired with each impact.\n- **Warning Emblems & Emojis:** Strategic, consistent use of warning signs (⚠️, 🛑) and relevant emojis in text overlays for heightened urgency and visual impact, particularly crucial for short-form content.\n- **Structured \"Fact Card\" Overlays:** Each new fact or impact is introduced with a clean, branded visual card displaying the trigger and its specific effect, maintaining visual consistency across segments.\n\n## 4. Psychology (Neuro-Code)\n- **Loss Aversion & Fear of Impairment:** Directly taps into the primal fear of losing cognitive abilities, memory, or overall brain health, which is a powerful motivator for engagement, sustained attention, and retention.\n- **Curiosity Gap (Problem-Focused):** Creates a continuous \"what else am I doing wrong?\" and \"how bad is this really?\" loop, compelling viewers to watch through multiple reveals, satisfying the brain's need for information closure.\n- **Relatability & Self-Identification:** Addresses common daily struggles (stress, overthinking, bad habits, memory lapses), making the content highly personally relevant and fostering a sense of shared vulnerability and experience.\n- **Empowerment Through Awareness:** While presenting alarming information, the format implicitly offers control by revealing hidden truths and the \"why,\" allowing viewers to feel empowered to make informed changes and avoid further harm, triggering self-efficacy.\n- **Visual & Auditory Urgency:** The combination of alarmist visuals, rapid pacing, direct address, and impactful sound design triggers the brain's alert system, enhancing attention, memorability, and the perceived importance of the information.",
+    "projectId": "03436170-5a6b-4cf2-b700-06727396e0af",
+    "tags": [
+      "Blueprint"
+    ],
+    "rating": 5,
+    "wisdomCategory": "GROWTH",
+    "id": "e2888720-e97b-4f86-96b4-7ac840e1539d",
+    "createdAt": "2026-01-26T18:13:18.368Z"
+  },
+  {
+    "type": "viral-wisdom",
+    "name": "Contrarian Science-Backed Hooks for Health & Productivity",
+    "content": {
+      "description": "The video 'Kaffee morgens = Mittagscrash GARANTIERT (NASA-Forschung)' is the only one gathering significant views (855 of 3832 total), indicating that the specific blend of a common health/productivity myth, a bold, contrarian statement, and a cited scientific authority (NASA) resonates enough to attract initial clicks. This pattern of using 'debunking' or 'counter-intuitive' insights backed by prestigious institutions is the channel's single glimmer of success in terms of view generation and should be continued, but refined.",
+      "optimizationPrompt": "Law: The video 'Kaffee morgens = Mittagscrash GARANTIERT (NASA-Forschung)' is the only one gathering significant views (855 of 3832 total), indicating that the specific blend of a common health/productivity myth, a bold, contrarian statement, and a cited scientific authority (NASA) resonates enough to attract initial clicks. This pattern of using 'debunking' or 'counter-intuitive' insights backed by prestigious institutions is the channel's single glimmer of success in terms of view generation and should be continued, but refined."
+    },
+    "tags": [
+      "CORTEX Insight"
+    ],
+    "rating": 5,
+    "wisdomCategory": "GROWTH",
+    "id": "d03ea8af-dbc5-4875-b497-0c2a67f2e148",
+    "createdAt": "2026-01-26T18:32:19.489Z"
+  },
+  {
+    "type": "viral-wisdom",
+    "name": "Wisdom: Bewegung und kognitive Leistun...",
+    "content": [
+      {
+        "type": "FACT",
+        "principle": "Bewegung und kognitive Leistungsfähigkeit",
+        "explanation": "Regelmäßige Bewegung steigert die kognitive Leistungsfähigkeit sowohl kurzfristig (durch eine einzelne Trainingseinheit) als auch langfristig für die allgemeine Gehirngesundheit.",
+        "actionableTip": "Implementierung eines regelmäßigen Trainingsplans zur Verbesserung von Gedächtnis und Aufmerksamkeit.",
+        "category": "protocol"
+      }
+    ],
+    "tags": [
+      "Research",
+      "Knowledge"
+    ],
+    "rating": 5,
+    "wisdomCategory": "FACT",
+    "id": "8dcdb59d-ac8d-4dfb-9f63-720dec49ba10",
+    "createdAt": "2026-01-27T13:09:46.874Z"
+  },
+  {
+    "type": "viral-wisdom",
+    "name": "Wisdom: Brain-Derived Neurotrophic Fac...",
+    "content": [
+      {
+        "type": "FACT",
+        "principle": "Brain-Derived Neurotrophic Factor (BDNF) und Bewegung",
+        "explanation": "Bewegung stimuliert die Freisetzung von BDNF, was das Wachstum und die Erhaltung von Neuronen unterstützt.",
+        "actionableTip": "Integrieren von Herz-Kreislauf-Übungen in die tägliche Routine, um die Produktion von BDNF zu erhöhen.",
+        "category": "scientific constraint"
+      }
+    ],
+    "tags": [
+      "Research",
+      "Knowledge"
+    ],
+    "rating": 5,
+    "wisdomCategory": "FACT",
+    "id": "d21e30a0-6b83-4f58-9a81-8f231a5bda38",
+    "createdAt": "2026-01-27T13:09:47.468Z"
+  },
+  {
+    "type": "viral-wisdom",
+    "name": "Wisdom: Meditation und kognitive Gesun...",
+    "content": [
+      {
+        "type": "FACT",
+        "principle": "Meditation und kognitive Gesundheit",
+        "explanation": "Meditation trägt zur Stressregulation und zur allgemeinen Verbesserung der kognitiven Gesundheit bei.",
+        "actionableTip": "Tägliche kurze Meditationspraktiken einführen zur Verbesserung von Fokus und Stimmung.",
+        "category": "protocol"
+      }
+    ],
+    "tags": [
+      "Research",
+      "Knowledge"
+    ],
+    "rating": 5,
+    "wisdomCategory": "FACT",
+    "id": "8dbacf90-ad3d-459a-97d0-8a99a4d1e376",
+    "createdAt": "2026-01-27T13:09:47.535Z"
+  },
+  {
+    "type": "viral-wisdom",
+    "name": "Wisdom: Affirmationen und Stimmung...",
+    "content": [
+      {
+        "type": "FACT",
+        "principle": "Affirmationen und Stimmung",
+        "explanation": "Verbal Affirmationen können positive Effekte auf die Stimmung und Selbstwahrnehmung haben, insbesondere in Verbindung mit Bewegung.",
+        "actionableTip": "Verwenden von positiven Affirmationen während des Trainings zur Verstärkung der kognitiven und emotionalen Vorteile der Bewegung.",
+        "category": "behavioral practice"
+      }
+    ],
+    "tags": [
+      "Research",
+      "Knowledge"
+    ],
+    "rating": 5,
+    "wisdomCategory": "FACT",
+    "id": "38c66946-cd10-415d-8152-5f9294054671",
+    "createdAt": "2026-01-27T13:09:47.598Z"
+  },
+  {
+    "type": "viral-wisdom",
+    "name": "Wisdom: Mindeste Bewegung für kognitiv...",
+    "content": [
+      {
+        "type": "FACT",
+        "principle": "Mindeste Bewegung für kognitive Vorteile",
+        "explanation": "Bereits eine minimale Bewegungsquantität kann signifikante kognitive Vorteile für Erwachsene im Alter von 30-50 Jahren erbringen.",
+        "actionableTip": "Täglich mindestens 10 Minuten Spazierengehen einplanen, um die kognitiven Vorteile von Bewegung zu nutzen.",
+        "category": "protocol"
+      }
+    ],
+    "tags": [
+      "Research",
+      "Knowledge"
+    ],
+    "rating": 5,
+    "wisdomCategory": "FACT",
+    "id": "397a52f7-a7f3-4af8-a471-48810eb5b1c3",
+    "createdAt": "2026-01-27T13:09:47.658Z"
+  },
+  {
+    "type": "viral-wisdom",
+    "name": "Wisdom: Brain-Derived Neurotrophic Fac...",
+    "content": [
+      {
+        "type": "FACT",
+        "principle": "Brain-Derived Neurotrophic Factor (BDNF) & Bewegung",
+        "explanation": "Sport erhöht den Spiegel des Brain-Derived Neurotrophic Factor (BDNF), der für das Wachstum und die Erhaltung von Neuronen verantwortlich ist.",
+        "actionableTip": "Durch regelmäßig durchgeführte kardiovaskuläre Übungen kann der BDNF-Spiegel gesteigert werden.",
+        "category": "fact"
+      }
+    ],
+    "tags": [
+      "Research",
+      "Knowledge"
+    ],
+    "rating": 5,
+    "wisdomCategory": "FACT",
+    "id": "6b23c71d-5f95-4560-bed3-0ef8a37217c4",
+    "createdAt": "2026-01-27T13:14:14.578Z"
+  },
+  {
+    "type": "viral-wisdom",
+    "name": "Wisdom: Verbal Affirmations (Verbale A...",
+    "content": [
+      {
+        "type": "FACT",
+        "principle": "Verbal Affirmations (Verbale Affirmationen) zur Stimmungsregulation",
+        "explanation": "Verbale Affirmationen können gemeinsam mit sportlicher Betätigung positive Auswirkungen auf die Stimmung und das Stressmanagement haben.",
+        "actionableTip": "Integriere IntenSati, eine Kombination aus Affirmationen und Bewegung, in dein tägliches Routine.",
+        "category": "protocol"
+      }
+    ],
+    "tags": [
+      "Research",
+      "Knowledge"
+    ],
+    "rating": 5,
+    "wisdomCategory": "FACT",
+    "id": "23a4cc5f-6664-49fe-bd1a-1094484523e2",
+    "createdAt": "2026-01-27T13:14:14.716Z"
+  },
+  {
+    "type": "viral-wisdom",
+    "name": "Master Principle: Geistige Praxis für kognitive ",
+    "content": [
+      {
+        "type": "LAW",
+        "principle": "Mehrstufiger Einleitungspunkt (Layered Hook)",
+        "explanation": "Verwende eine Kombination aus überraschenden Fakten, rhetorischen Fragen und visuellen Elementen, um die Aufmerksamkeit zu gewinnen und das Interesse zu wecken.",
+        "actionableTip": "Beginne das Video mit einer faszinierenden Frage oder überraschender Statistik und füge visuelle Metaphern hinzu, um die Neugier zu steigern.",
+        "category": "mentale und emotionale Gesundheit",
+        "universalLaw": "The Layered Engagement Protocol"
+      }
+    ],
+    "tags": [
+      "Master",
+      "Consolidated"
+    ],
+    "rating": 5,
+    "wisdomCategory": "FACT",
+    "id": "41676c93-5cb3-4960-99cb-0ac02ba4a7f5",
+    "createdAt": "2026-01-27T13:34:40.117Z"
   }
 ]

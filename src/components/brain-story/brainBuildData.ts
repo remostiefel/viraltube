@@ -54,6 +54,24 @@ export const BRAIN_BUILD_HISTORY = [
         icon: "image",
     },
     {
+        id: "beat-bio",
+        date: "JAN 22, 2026",
+        title: "Bio-OS Integration",
+        content: "We acknowledged that the operator is part of the machine. The Bio-OS was installed: Neuro-Priming ('The Upgrade') and Flow State Audio ('Neuro-Sync') to optimize the biological hardware.",
+        type: "BIO",
+        icon: "zap",
+        codeSnippet: "BioOS.optimize(operator)"
+    },
+    {
+        id: "beat-connect-1",
+        date: "JAN 23, 2026",
+        title: "The Feedback Loop",
+        content: "We realized data is useless without action. We hard-wired the Scanner (Input) directly to the Architect (Output). Trends now instantly trigger script blueprints.",
+        type: "ARCH",
+        icon: "workflow",
+        codeSnippet: "Scanner.on('trend', Architect.build)"
+    },
+    {
         id: "beat-7",
         date: "JAN 24, 2026",
         title: "Vision: VIRT VISION",
@@ -69,5 +87,122 @@ export const BRAIN_BUILD_HISTORY = [
         type: "META",
         icon: "book",
         codeSnippet: "<StoryNode content={this_moment} />"
+    },
+    {
+        id: "beat-syn",
+        date: "JAN 27, 2026",
+        title: "Wisdom Synthesis",
+        content: "Knowledge must be compounded. We built the 'Combinator', allowing discrete nuggets of wisdom to be compared, merged, and densified into higher-order truths.",
+        type: "FEAT",
+        icon: "graduation-cap",
+        codeSnippet: "Wisdom.combine(nugget_A, nugget_B)"
+    },
+    {
+        id: "beat-9",
+        date: "JAN 28, 2026",
+        title: "Dashboard Intelligence",
+        content: "The dashboard became interactive. Analytics tiles now drill down into granular insights, offering AI-generated strategies for community re-engagement and view optimization.",
+        type: "FEAT",
+        icon: "activity",
+        codeSnippet: "Analytics.drillDown(METRIC_ID)"
+    },
+    {
+        id: "beat-connect-2",
+        date: "JAN 25, 2026",
+        title: "The Wisdom Economy",
+        content: "To prevent information entropy, we built the Vault. Every video analyzed by the Scanner now deposits its 'Golden Nuggets' into long-term storage, accessible by the Director for future scripts.",
+        type: "LOGIC",
+        icon: "database",
+        codeSnippet: "Vault.deposit(nuggets)"
+    },
+    {
+        id: "beat-10",
+        date: "JAN 28, 2026",
+        title: "Project Niki",
+        content: "We birthed 'Niki', a specialized text generation module designed to bypass AI detection. It introduces human imperfections and burstiness into the synthetic voice.",
+        type: "FEAT",
+        icon: "message-circle",
+        codeSnippet: "Niki.humanize(text, { imperfection: 0.3 })"
+    },
+    {
+        id: "beat-connect-3",
+        date: "JAN 26, 2026",
+        title: "The Human-in-the-Loop",
+        content: "The machine runs fast, but the operator must keep up. We designed the Bio-OS dashboard tiles to monitor *your* state, not just the channel's. A red dial means 'Rest', not 'Work harder'.",
+        type: "UX",
+        icon: "heart",
+        codeSnippet: "Dashboard.monitor(BioMetrics)"
+    },
+    {
+        id: "beat-11",
+        date: "JAN 28, 2026",
+        title: "Synaptic Order",
+        content: "Restored manual control to the Kanban board while maintaining automatic sorting logic. The neural pathways of the Notebook can now be rearranged at will.",
+        type: "UX",
+        icon: "trello",
+        codeSnippet: "dnd.onDragEnd(reorderTasks)"
+    },
+    {
+        id: "beat-12",
+        date: "JAN 28, 2026",
+        title: "High Contrast Cortex",
+        content: "A visual overhaul to eliminate low-contrast ambiguity. We shifted to high-visibility cyan, gold, and amber accents for maximum legibility.",
+        type: "UX",
+        icon: "sun",
+        codeSnippet: "colors: { primary: '#06B6D4', accent: '#F59E0B' }"
+    },
+    {
+        id: "beat-13",
+        date: "JAN 28, 2026",
+        title: "Knowledge Cortex",
+        content: "Designed the architecture for a visual Knowledge Graph. A spatial hub to connect ideas, videos, and concepts in a 3D-like mind map.",
+        type: "VISION",
+        icon: "share-2",
+        codeSnippet: "Graph.connect(Idea_A, Idea_B)"
+    },
+    {
+        id: "beat-14",
+        date: "FEB 01, 2026",
+        title: "Artifact Standardization",
+        content: "Unified the export protocols. All generated wisdom and scripts now follow a strict naming convention for archival consistency.",
+        type: "OPT",
+        icon: "file-text",
+        codeSnippet: "filename: `${Type}-${Title}-${Date}-NC.docx`"
+    },
+    {
+        id: "beat-15",
+        date: "FEB 01, 2026",
+        title: "Distribution Engine",
+        content: "Implemented master prompts for YouTube packaging. The system now generates human-sounding titles, descriptions, and tags, optimized for the algorithm but undetectable as AI.",
+        type: "FEAT",
+        icon: "upload-cloud",
+        codeSnippet: "SEO.generateMetadata(script)"
+    },
+    {
+        id: "beat-16",
+        date: "FEB 01, 2026",
+        title: "The Human Touch",
+        content: "Refined internal script generation to prioritize 'burstiness' and emotional resonance, ensuring the Director's voice feels authentic and alive.",
+        type: "AI",
+        icon: "heart",
+        codeSnippet: "Script.infuseEmotion(BURSTINESS_HIGH)"
+    },
+    {
+        id: "beat-17",
+        date: "FEB 01, 2026",
+        title: "Continuous Learning",
+        content: "Closed the loop. The system now learns from YouTube performance data, refining its own concept generation and script optimization algorithms over time.",
+        type: "ARCH",
+        icon: "refresh-cw",
+        codeSnippet: "LearningLoop.feedback(performanceData)"
+    },
+    {
+        id: "beat-18",
+        date: "FEB 01, 2026",
+        title: "Self-Awareness (Education Layer)",
+        content: "The system became self-explanatory. We integrated the 'Brain Story' directly into the Help Module and deployed 'Contextual Insights', allowing the app to teach its own logic to new users.",
+        type: "META",
+        icon: "book",
+        codeSnippet: "System.explain(System.logic)"
     }
 ];
