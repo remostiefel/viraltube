@@ -62,6 +62,43 @@ export const VIRAL_PROTOCOLS: ScriptProtocol[] = [
             { beat: "The Payoff", timing: "55-60s", instruction: "Final validation." }
         ],
         systemPromptAddon: "You are a patient instructor. Be extremely clear. Focus on the 'How-To'."
+    },
+    {
+        id: "neuro_loop_paradox",
+        name: "♻️ The Paradox Loop (Shorts)",
+        description: "High Retention. The end sentence completes the first sentence. Best for debunking common myths.",
+        structure: [
+            { beat: "The Hook", timing: "0-2s", instruction: "State a provocative, counter-intuitive truth. (e.g. 'Sugar is not food.')" },
+            { beat: "The Interrupt", timing: "2-5s", instruction: "Immedidate negation or perspective shift. ('It is a signal.')" },
+            { beat: "The Neuro-Claim", timing: "5-10s", instruction: "Scientific explanation without the full solution. Create a gap." },
+            { beat: "The Twist", timing: "10-12s", instruction: "Recontextualize the hook concept." },
+            { beat: "The Loop Link", timing: "12-15s", instruction: "End with a sentence that grammatically flows into the Hook. (e.g. 'And that is why...')" }
+        ],
+        systemPromptAddon: "Create a PERFECT VERBAL LOOP. The last sentence MUST be an incomplete thought that is completed by the first sentence of the video. No intro/outro fluff."
+    },
+    {
+        id: "neuro_loop_gap",
+        name: "♻️ The Cognitive Gap (Shorts)",
+        description: "Creates an 'open loop' that forces a re-watch. Focuses on 'What nobody tells you'.",
+        structure: [
+            { beat: "The Missing Piece", timing: "0-3s", instruction: "'Here is the one thing nobody tells you about [Topic]...'" },
+            { beat: "The Context", timing: "3-8s", instruction: "Why standard advice fails. Build tension." },
+            { beat: "The Partial Reveal", timing: "8-12s", instruction: "Give the component, but not the implementation." },
+            { beat: "The Gap", timing: "12-15s", instruction: "'But it only works if you understand...'" }
+        ],
+        systemPromptAddon: "You are creating a 'Knowledge Gap'. Reveal the 'What' but hide the 'How' behind a loop. The start of the video provides the 'How' context."
+    },
+    {
+        id: "neuro_loop_visual",
+        name: "♻️ The Visual Reset (Shorts)",
+        description: "Relies on an identical visual state at start and end. Great for 'Process' or 'Reset' topics.",
+        structure: [
+            { beat: "State A (Start)", timing: "0-3s", instruction: "Describe the 'Before' state (visually). High contrast." },
+            { beat: "The Process", timing: "3-10s", instruction: "Rapid visual transformation or explanation." },
+            { beat: "The Insight", timing: "10-13s", instruction: "The realizaton of why we are back here." },
+            { beat: "State A (Return)", timing: "13-15s", instruction: "End with 'And we simply go back to...' or visual cue reset." }
+        ],
+        systemPromptAddon: "Focus on VISUAL DESCRIPTIONS in the 'VisualCue' fields. The first and last visual cues MUST be identical to create a seamless visual loop."
     }
 ];
 

@@ -25,6 +25,8 @@ import { MILESTONES } from "@/lib/milestones";
 import { ChannelData } from "@/lib/youtube";
 import { Project } from "@/lib/projects";
 import { HelpTrigger, InsightModeToggle } from "@/components/ui/HelpSystem";
+import { CoachWidget } from "@/components/dashboard/CoachWidget";
+import { TrafficLightWidget } from "@/components/dashboard/TrafficLightWidget";
 
 export default function NeuralInterface() {
     const [cortexProfile, setCortexProfile] = useState<StrategyProfile | null>(null);
@@ -110,6 +112,9 @@ export default function NeuralInterface() {
                         <HelpTrigger helpId="dashboard.bio-os">Step 1: Bio-Optimization</HelpTrigger>
                     </h3>
 
+                    {/* Coach Briefing */}
+                    <CoachWidget />
+
                     {/* The Upgrade (Main Module) */}
                     <Link href="/upgrade" className="flex-1">
                         <div className="h-full bg-gradient-to-br from-teal-900/20 to-black border border-teal-500/30 rounded-2xl p-6 relative group overflow-hidden transition-all hover:border-teal-500/60 hover:shadow-[0_0_30px_-5px_rgba(45,212,191,0.2)]">
@@ -146,11 +151,36 @@ export default function NeuralInterface() {
 
                 {/* CENTER: VISUALIZER (Glass Brain) */}
                 <div className="lg:col-span-6 relative">
-                    <div className="absolute top-2 right-2 z-10">
+
+                    {/* Visualizer Help (Left) */}
+                    <div className="absolute top-4 left-4 z-10">
                         <HelpTrigger helpId="dashboard.visualizer" side="left">
-                            <span className="text-[10px] text-white/50 uppercase font-bold tracking-widest bg-black/20 px-2 py-1 rounded-full backdrop-blur-sm cursor-help">Visualizer Info</span>
+                            <span className="text-[10px] text-white/50 uppercase font-bold tracking-widest bg-black/20 px-2 py-1 rounded-full backdrop-blur-sm cursor-help">Analysis Mode</span>
                         </HelpTrigger>
                     </div>
+
+                    {/* TRAFFIC LIGHT ANALYST (Phase 6) - Right Side */}
+                    <div className="absolute top-4 right-4 z-20 w-fit">
+                        {projects.length > 0 && projects[0].scriptData?.analysis ? (
+                            <TrafficLightWidget
+                                score={projects[0].scriptData.analysis.totalScore || 0}
+                                label="Viral Probability"
+                                reasoning={projects[0].scriptData.analysis?.feedback?.[0] || "Analysis complete."}
+                            />
+                        ) : (
+                            <div className="bg-black/40 border border-white/10 rounded-xl p-3 backdrop-blur-sm flex items-center gap-3 animate-pulse">
+                                <div className="flex flex-col gap-1.5 p-1">
+                                    <div className="w-2 h-2 rounded-full bg-white/20" />
+                                    <div className="w-2 h-2 rounded-full bg-white/20" />
+                                    <div className="w-2 h-2 rounded-full bg-white/20" />
+                                </div>
+                                <div className="text-xs text-white/40 font-mono">
+                                    <div>NO SIGNAL</div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
                     <GlassBrain state={systemState} />
 
                     {/* Quick Stats below brain */}
@@ -287,7 +317,7 @@ export default function NeuralInterface() {
                 </div>
             </div>
 
-        </div>
+        </div >
     );
 }
 

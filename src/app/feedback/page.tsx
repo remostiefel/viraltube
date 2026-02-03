@@ -1,7 +1,7 @@
 "use client";
 
-import { Users, Eye, Sparkles, AlertCircle, RefreshCw, ArrowRight, Brain, Zap, Link as LinkIcon, Lock, Film, CheckCircle, Save, X, Activity, Stethoscope, HeartPulse as HeartPulseIcon, ChevronRight, Target, Lightbulb } from "lucide-react";
-import { fetchAnalyticsAction, fetchChannelInsights, fetchChannelVideosAction, analyzeViralVideoAction, generateChannelAuditAction, saveTemplateAction, analyzeHookRetentionAction, generateMetricOptimizationAction } from "@/app/actions";
+import { Users, Eye, Sparkles, AlertCircle, RefreshCw, ArrowRight, Brain, Zap, Link as LinkIcon, Lock, Film, CheckCircle, Save, X, Activity, Stethoscope, HeartPulse as HeartPulseIcon, ChevronRight, Target, Lightbulb, ThumbsUp, Magnet, Percent } from "lucide-react";
+import { fetchAnalyticsAction, fetchChannelInsights, fetchEnhancedChannelVideosAction, analyzeViralVideoAction, generateChannelAuditAction, saveTemplateAction, analyzeHookRetentionAction, generateMetricOptimizationAction } from "@/app/actions";
 import { getAuthUrl } from "@/lib/google-oauth";
 import { useEffect, useState, useMemo } from "react";
 import { ChannelData, OutlierVideo } from "@/lib/youtube";
@@ -13,6 +13,32 @@ import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { saveReport, getReports, deleteReport, SavedReport, exportReport } from "@/lib/reports";
 import { FileText, Download, Trash2, CheckSquare, Square } from "lucide-react";
+import { extractInsightsFromFullScan, extractInsightsFromSurgeonReport, extractInsightsFromChannelAudit, WisdomCandidate } from "@/lib/wisdom-extractor";
+import { InsightHarvester } from "@/components/analytics/InsightHarvester";
+
+function InsightCard({ type, item, onSave }: { type: 'win' | 'loss' | 'opportunity', item: InsightItem, onSave: () => void }) {
+  // Styles updated for high visibility (larger text, brighter backgrounds)
+  const styles = {
+    win: "bg-green-500/10 border-green-500/40 text-green-300",
+    loss: "bg-red-500/10 border-red-500/40 text-red-300",
+    opportunity: "bg-blue-500/10 border-blue-500/40 text-blue-300"
+  };
+  const labels = { win: "WIN", loss: "LOSS", opportunity: "OPPORTUNITY" };
+
+  return (
+    <div className={cn("p-6 rounded-xl border-2 flex gap-4 hover:bg-card/90 transition-all shadow-lg", styles[type])}>
+      <div>{type === 'win' ? <CheckCircle className="w-8 h-8" /> : type === 'loss' ? <AlertCircle className="w-8 h-8" /> : <Sparkles className="w-8 h-8" />}</div>
+      <div className="flex-1 space-y-2">
+        <div className="flex justify-between items-center border-b border-white/10 pb-2">
+          <h5 className="font-bold uppercase tracking-widest text-sm">{labels[type]}</h5>
+          <button onClick={onSave} className="p-1 hover:bg-white/10 rounded transition-colors"><Save className="w-5 h-5 opacity-70 hover:opacity-100" /></button>
+        </div>
+        <h4 className="font-bold text-xl text-white">{item.title}</h4>
+        <p className="text-base opacity-90 leading-relaxed font-medium">{item.description}</p>
+      </div>
+    </div>
+  );
+}
 
 export default function ReflectionRoom() {
   const router = useRouter();
@@ -85,6 +111,47 @@ export default function ReflectionRoom() {
   const [multiSelectMode, setMultiSelectMode] = useState(false);
   const [selectedVideoIds, setSelectedVideoIds] = useState<string[]>([]);
   const [batchAnalyzing, setBatchAnalyzing] = useState(false);
+
+  // INSIGHT HARVESTER
+  const [harvesterOpen, setHarvesterOpen] = useState(false);
+  const [harvestedInsights, setHarvestedInsights] = useState<WisdomCandidate[]>([]);
+  const [harvesterSourceTitle, setHarvesterSourceTitle] = useState("");
+
+  // VIDEO SORTING
+  const [sortBy, setSortBy] = useState<"views" | "likes" | "avd" | "retention" | "date">("views");
+  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
+
+  const sortedVideos = useMemo(() => {
+    return [...recentVideos].sort((a, b) => {
+      let valA = 0;
+      let valB = 0;
+
+      switch (sortBy) {
+        case "views":
+          valA = a.viewCount || 0;
+          valB = b.viewCount || 0;
+          break;
+        case "likes":
+          valA = a.likeCount || 0;
+          valB = b.likeCount || 0;
+          break;
+        case "avd":
+          valA = a.averageViewPercentage || 0;
+          valB = b.averageViewPercentage || 0;
+          break;
+        case "retention":
+          valA = a.averageViewDuration || 0;
+          valB = b.averageViewDuration || 0;
+          break;
+        case "date":
+          valA = new Date(a.publishedAt).getTime();
+          valB = new Date(b.publishedAt).getTime();
+          break;
+      }
+
+      return sortOrder === "desc" ? valB - valA : valA - valB;
+    });
+  }, [recentVideos, sortBy, sortOrder]);
 
   // Notifications
   const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
@@ -168,7 +235,7 @@ export default function ReflectionRoom() {
       avgViewDuration = analytics.averageViewDuration;
     } else if (recentVideos.length > 0) {
       // SIMULATE using stats derived from Recent Videos (Public Data)
-      views = recentVideos.reduce((acc, v) => acc + v.viewCount, 0);
+      views = recentVideos.reduce((acc, v) => acc + (v.viewCount || 0), 0);
       // Heuristic: If views > 10k per video avg (approx), assume better engagement or higher retention
       const avgViews = views / recentVideos.length;
       avgViewDuration = avgViews > 5000 ? 120 : 45;
@@ -181,7 +248,7 @@ export default function ReflectionRoom() {
     const { activeRatio } = calculateZombieScore(views, totalSubs);
 
     // Simulations for metrics that require private data
-    const mockLikes = views * 0.04;
+    const mockLikes = analytics ? analytics.likes : views * 0.04;
     const mockComments = views * 0.005;
     const estLength = 600;
 
@@ -207,7 +274,9 @@ export default function ReflectionRoom() {
     // If we have cached videos, don't show full loading spinner, just background refresh
     if (recentVideos.length === 0) setLoadingVideos(true);
     try {
-      const videos = await fetchChannelVideosAction(channelId);
+      // Use enhanced fetch to get private analytics (AVD, etc.) if token exists
+      const token = localStorage.getItem("nc_google_access_token");
+      const videos = await fetchEnhancedChannelVideosAction(token);
       setRecentVideos(videos);
       localStorage.setItem(STORAGE_KEY_VIDEOS, JSON.stringify(videos));
     } catch (e) { console.error(e); } finally { setLoadingVideos(false); }
@@ -332,11 +401,48 @@ export default function ReflectionRoom() {
   const runFullAnalysis = async () => {
     if (!selectedVideo) return;
     setAnalyzingVideo(true);
+    console.log('[Full Scan] Starting analysis for video:', selectedVideo.id);
     try {
       const url = `https://www.youtube.com/watch?v=${selectedVideo.id}`;
+      console.log('[Full Scan] Calling analyzeViralVideoAction with URL:', url);
       const result = await analyzeViralVideoAction(url);
-      if (result && 'headlines' in result) setVideoAnalysis(result as ViralAnalysisResult);
-    } catch (e) { console.error(e); } finally { setAnalyzingVideo(false); }
+      console.log('[Full Scan] Result received:', result);
+
+      // Check for error response
+      if (result && 'error' in result) {
+        console.error('[Full Scan] Error from API:', result.error);
+        alert(`Full Scan Fehler: ${result.error}`);
+        return;
+      }
+
+      if (result && 'viralScore' in result) {
+        const viralResult = result as ViralAnalysisResult;
+        console.log('[Full Scan] Setting videoAnalysis state:', viralResult);
+        setVideoAnalysis(viralResult);
+
+        // Save Report
+        const sentiment = viralResult.viralScore > 7 ? "positive" : viralResult.viralScore < 5 ? "negative" : "neutral";
+        saveReport({
+          type: "FULL_SCAN",
+          title: `Full Scan: ${selectedVideo.title.slice(0, 30)}...`,
+          summary: `Viral Score: ${viralResult.viralScore}/10 | Target: ${viralResult.targetAudience} | ${viralResult.actionableTakeaway}`,
+          data: viralResult,
+          sentiment: sentiment,
+          sourceId: selectedVideo.id
+        });
+        refreshReports();
+        console.log('[Full Scan] Report saved and UI refreshed');
+      } else {
+        console.error('[Full Scan] Invalid result structure:', result);
+        alert('Full Scan Fehler: Ungültige Antwort vom Server');
+      }
+    } catch (e) {
+      console.error('[Full Scan] Exception:', e);
+      alert(`Full Scan Fehler: ${e instanceof Error ? e.message : String(e)}`);
+    } finally {
+      setAnalyzingVideo(false);
+      console.log('[Full Scan] Analysis complete, analyzingVideo set to false');
+    }
   };
 
   const runRetentionAnalysis = async () => {
@@ -379,6 +485,36 @@ export default function ReflectionRoom() {
     } catch (e) {
       setNotification({ message: "Failed to Save.", type: 'error' });
     }
+  };
+
+  // INSIGHT HARVESTER HANDLERS
+  const openHarvesterFromFullScan = () => {
+    if (!videoAnalysis || !selectedVideo) return;
+    const insights = extractInsightsFromFullScan(videoAnalysis, selectedVideo.id, selectedVideo.title);
+    setHarvestedInsights(insights);
+    setHarvesterSourceTitle(selectedVideo.title);
+    setHarvesterOpen(true);
+  };
+
+  const openHarvesterFromSurgeon = () => {
+    if (!retentionAnalysis || !selectedVideo) return;
+    const insights = extractInsightsFromSurgeonReport(retentionAnalysis, selectedVideo.id, selectedVideo.title);
+    setHarvestedInsights(insights);
+    setHarvesterSourceTitle(selectedVideo.title);
+    setHarvesterOpen(true);
+  };
+
+  const openHarvesterFromAudit = () => {
+    if (!audit) return;
+    const insights = extractInsightsFromChannelAudit(audit);
+    setHarvestedInsights(insights);
+    setHarvesterSourceTitle("Channel Audit");
+    setHarvesterOpen(true);
+  };
+
+  const handleHarvesterClose = () => {
+    setHarvesterOpen(false);
+    setNotification({ message: "Insights added to Pending Review!", type: 'success' });
   };
 
   const subscriberCount = stats ? Number(stats.statistics.subscriberCount).toLocaleString() : "---";
@@ -710,6 +846,16 @@ export default function ReflectionRoom() {
                   {audit.opportunities.map((item, i) => <InsightCard key={i} type="opportunity" item={item} onSave={() => openSaveDialog(item)} />)}
                   {audit.losses.map((item, i) => <InsightCard key={i} type="loss" item={item} onSave={() => openSaveDialog(item)} />)}
                 </div>
+
+                {/* Harvest Insights Button */}
+                <button
+                  onClick={openHarvesterFromAudit}
+                  className="w-full mt-4 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Harvest Growth Patterns
+                </button>
+
                 <button onClick={() => setAudit(null)} className="text-sm underline opacity-50">Reset</button>
               </div>
             )}
@@ -750,14 +896,48 @@ export default function ReflectionRoom() {
           </div>
         </div>
 
+        {/* Sorting Controls */}
+        <div className="flex items-center gap-2 mb-4">
+          <span className="text-xs text-muted-foreground font-bold uppercase">Sort by:</span>
+          {[
+            { key: "views", label: "Views", icon: Eye },
+            { key: "likes", label: "Likes", icon: ThumbsUp },
+            { key: "date", label: "Date", icon: Film }
+          ].map(({ key, label, icon: Icon }) => (
+            <button
+              key={key}
+              onClick={() => {
+                if (sortBy === key) {
+                  setSortOrder(sortOrder === "desc" ? "asc" : "desc");
+                } else {
+                  setSortBy(key as any);
+                  setSortOrder("desc");
+                }
+              }}
+              className={cn(
+                "px-3 py-1 rounded text-xs font-bold transition-all flex items-center gap-1",
+                sortBy === key
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+              )}
+            >
+              <Icon className="w-3 h-3" />
+              {label}
+              {sortBy === key && (
+                <span className="ml-1">{sortOrder === "desc" ? "↓" : "↑"}</span>
+              )}
+            </button>
+          ))}
+        </div>
+
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
-            {recentVideos.map(video => (
+            {sortedVideos.map(video => (
               <div
                 key={video.id}
                 onClick={() => handleAnalyzeVideo(video)}
                 className={cn(
-                  "p-3 rounded-xl border cursor-pointer flex gap-3 hover:bg-card/80 transition-all relative overflow-hidden",
+                  "p-4 rounded-xl border cursor-pointer hover:bg-card/80 transition-all relative overflow-hidden",
                   selectedVideo?.id === video.id && !multiSelectMode ? "bg-primary/10 border-primary" : "bg-card/50",
                   multiSelectMode && selectedVideoIds.includes(video.id) && "bg-blue-500/20 border-blue-500"
                 )}
@@ -772,9 +952,45 @@ export default function ReflectionRoom() {
                   </div>
                 )}
 
-                <img src={video.thumbnailUrl} className="w-24 h-16 object-cover rounded-md bg-black" />
-                <div><h4 className="text-xs font-bold line-clamp-2">{video.title}</h4></div>
+                <div className="flex gap-3">
+                  {/* Thumbnail */}
+                  <img src={video.thumbnailUrl} className="w-32 h-20 object-cover rounded-md bg-black flex-shrink-0" />
+
+                  {/* Content */}
+                  <div className="flex-1 space-y-2">
+                    <h4 className="text-sm font-bold line-clamp-2">{video.title}</h4>
+
+                    {/* 2 Key Stats Grid - Views & Likes Only */}
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {/* Views */}
+                      <div className="bg-blue-500/10 p-1.5 rounded text-center">
+                        <div className="text-[9px] text-blue-400/70 uppercase font-bold">Views</div>
+                        <div className="text-xs font-mono font-bold text-blue-400">
+                          {video.viewCount >= 1000
+                            ? `${(video.viewCount / 1000).toFixed(1)}K`
+                            : video.viewCount}
+                        </div>
+                      </div>
+
+                      {/* Likes */}
+                      <div className="bg-pink-500/10 p-1.5 rounded text-center">
+                        <div className="text-[9px] text-pink-400/70 uppercase font-bold">Likes</div>
+                        <div className="text-xs font-mono font-bold text-pink-400">
+                          {video.likeCount !== undefined && video.likeCount > 0
+                            ? video.likeCount >= 1000
+                              ? `${(video.likeCount / 1000).toFixed(1)}K`
+                              : video.likeCount
+                            : "—"}
+                        </div>
+                      </div>
+
+
+
+                    </div>
+                  </div>
+                </div>
               </div>
+
             ))}
           </div>
 
@@ -782,18 +998,26 @@ export default function ReflectionRoom() {
             {selectedVideo ? (
               <div className="bg-card border border-border/40 rounded-2xl p-6 min-h-[400px]">
                 <div className="flex gap-6 mb-6 pb-6 border-b">
-                  <div className="space-y-2">
+                  <div className="space-y-4">
                     <img src={selectedVideo.thumbnailUrl} className="w-48 rounded-xl shadow-lg" />
-                    {/* MINI STATS */}
-                    <div className="grid grid-cols-2 gap-2 text-xs opacity-70">
-                      <div className="bg-white/5 p-2 rounded">
-                        <div className="uppercase text-[10px]">Views</div>
-                        <div className="font-mono font-bold">{selectedVideo.viewCount.toLocaleString()}</div>
+                    {/* 2 KEY STAT BOXES */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="bg-blue-500/10 p-2 rounded text-center">
+                        <div className="text-[8px] text-blue-400 font-bold uppercase">Views</div>
+                        <div className="text-xs font-mono font-bold text-blue-400">
+                          {selectedVideo.viewCount >= 1000 ? `${(selectedVideo.viewCount / 1000).toFixed(1)}K` : selectedVideo.viewCount}
+                        </div>
                       </div>
-                      <div className="bg-white/5 p-2 rounded">
-                        <div className="uppercase text-[10px]">Score</div>
-                        <div className={cn("font-mono font-bold", selectedVideo.outlierScore > 1 ? "text-green-400" : "text-yellow-400")}>{selectedVideo.outlierScore}x</div>
+                      <div className="bg-pink-500/10 p-2 rounded text-center">
+                        <div className="text-[8px] text-pink-400 font-bold uppercase">Likes</div>
+                        <div className="text-xs font-mono font-bold text-pink-400">
+                          {selectedVideo.likeCount && selectedVideo.likeCount > 0
+                            ? (selectedVideo.likeCount >= 1000 ? `${(selectedVideo.likeCount / 1000).toFixed(1)}K` : selectedVideo.likeCount)
+                            : "—"}
+                        </div>
                       </div>
+
+
                     </div>
                   </div>
 
@@ -816,38 +1040,126 @@ export default function ReflectionRoom() {
                 {retentionAnalysis && (
                   <div className="mb-6 p-4 bg-red-500/5 border border-red-500/20 rounded-xl space-y-4 animate-in fade-in slide-in-from-top-2">
                     <div className="flex justify-between items-center">
-                      <h4 className="font-bold text-red-500 flex items-center gap-2"><Stethoscope className="w-4 h-4" /> SURGEON REPORT</h4>
-                      <div className="text-xs font-bold uppercase bg-red-500/10 px-2 py-1 rounded">Risk: {retentionAnalysis.dropOffRisk}</div>
+                      <h4 className="font-bold text-red-500 flex items-center gap-2"><Stethoscope className="w-4 h-4" /> CHIRURGEN-BERICHT</h4>
+                      <div className="text-xs font-bold uppercase bg-red-500/10 px-2 py-1 rounded">Risiko: {retentionAnalysis.dropOffRisk}</div>
                     </div>
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
-                        <div className="text-xs text-muted-foreground uppercase">Hook Score</div>
+                        <div className="text-xs text-muted-foreground uppercase">Hook-Score</div>
                         <div className="text-2xl font-mono font-bold">{retentionAnalysis.hookScore}/100</div>
                       </div>
                       <div>
-                        <div className="text-xs text-muted-foreground uppercase">Primary Trigger</div>
+                        <div className="text-xs text-muted-foreground uppercase">Primärer Trigger</div>
                         <div className="font-bold">{retentionAnalysis.triggerUsed}</div>
                       </div>
                     </div>
                     <div className="bg-background/50 p-3 rounded-lg border border-red-500/10">
-                      <div className="text-xs font-bold text-red-400 mb-1">PRESCRIPTION:</div>
+                      <div className="text-xs font-bold text-red-400 mb-1">VERSCHREIBUNG:</div>
                       <div className="text-sm italic opacity-80">"{retentionAnalysis.improvement}"</div>
                     </div>
+
+                    {/* Harvest Insights Button */}
+                    <button
+                      onClick={openHarvesterFromSurgeon}
+                      className="w-full mt-4 px-4 py-2 bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg"
+                    >
+                      <Sparkles className="w-4 h-4" />
+                      Harvest Insights
+                    </button>
                   </div>
                 )}
 
                 {videoAnalysis && (
-                  <div className="space-y-4 animate-in fade-in">
-                    <div className="p-4 bg-muted/20 border rounded-xl">
-                      <div className="text-xs uppercase font-bold text-muted-foreground">Key Takeaway</div>
-                      <div>{videoAnalysis.actionableTakeaway}</div>
+                  <div className="mb-6 p-4 bg-blue-500/5 border border-blue-500/20 rounded-xl space-y-4 animate-in fade-in slide-in-from-top-2">
+                    <div className="flex justify-between items-center">
+                      <h4 className="font-bold text-blue-500 flex items-center gap-2"><Brain className="w-4 h-4" /> VOLLSTÄNDIGER SCAN-BERICHT</h4>
+                      <div className="text-xs font-bold uppercase bg-blue-500/10 px-2 py-1 rounded">Viral-Score: {videoAnalysis.viralScore}/10</div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <div className="text-xs text-muted-foreground uppercase">Zielgruppe</div>
+                        <div className="font-bold">{videoAnalysis.targetAudience}</div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-muted-foreground uppercase">Hook-Qualität</div>
+                        <div className="font-bold text-sm line-clamp-2">{videoAnalysis.hookAnalysis}</div>
+                      </div>
+                    </div>
+
+                    {/* Sentiments */}
+                    {videoAnalysis.sentiments && videoAnalysis.sentiments.length > 0 && (
+                      <div className="bg-background/50 p-3 rounded-lg border border-blue-500/10">
+                        <div className="text-xs font-bold text-blue-400 mb-2">SCHLÜSSEL-EMOTIONEN:</div>
+                        <div className="flex flex-wrap gap-2">
+                          {videoAnalysis.sentiments.map((sentiment, i) => (
+                            <span key={i} className="px-2 py-1 bg-blue-500/10 text-blue-300 rounded text-xs font-bold">
+                              {sentiment}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Actionable Takeaway */}
+                    <div className="bg-background/50 p-3 rounded-lg border border-blue-500/10">
+                      <div className="text-xs font-bold text-blue-400 mb-1">UMSETZBARE ERKENNTNIS:</div>
+                      <div className="text-sm italic opacity-80">"{videoAnalysis.actionableTakeaway}"</div>
+                    </div>
+
+                    {/* Wordwall - Top 3 Concepts */}
+                    {videoAnalysis.wordwall && videoAnalysis.wordwall.length > 0 && (
+                      <div className="bg-background/50 p-3 rounded-lg border border-blue-500/10">
+                        <div className="text-xs font-bold text-blue-400 mb-2">TOP 3 SCHLÜSSELKONZEPTE:</div>
+                        <div className="space-y-2">
+                          {videoAnalysis.wordwall.slice(0, 3).map((item, i) => (
+                            <div key={i} className="text-xs">
+                              <span className="font-bold text-blue-300">{item.keyword}:</span>{" "}
+                              <span className="opacity-80">{item.explanation}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Harvest Insights Button */}
+                    <button
+                      onClick={openHarvesterFromFullScan}
+                      className="w-full mt-4 px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 text-white rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg"
+                    >
+                      <Sparkles className="w-4 h-4" />
+                      Harvest Insights
+                    </button>
+                  </div>
+                )}
+                {!videoAnalysis && !retentionAnalysis && (
+                  <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 opacity-50">
+                    <div className="p-4 bg-muted rounded-full">
+                      <Stethoscope className="w-8 h-8 text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-lg">Detailed Analysis Ready</h4>
+                      <p className="text-sm max-w-[200px]">Select any tool above to begin deep diagnostic scan.</p>
                     </div>
                   </div>
                 )}
-                {!videoAnalysis && !retentionAnalysis && <div className="text-center opacity-50 py-12">Select an analysis protocol above.</div>}
 
               </div>
-            ) : <div className="text-center opacity-50 py-12 border-2 border-dashed rounded-xl">Select a video from the archive.</div>}
+            ) : (
+              <div className="bg-card/30 border border-border/40 border-dashed rounded-2xl p-6 min-h-[400px] flex flex-col items-center justify-center text-center space-y-6">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full" />
+                  <Film className="w-16 h-16 text-muted-foreground relative z-10" />
+                </div>
+                <div className="space-y-2 max-w-sm">
+                  <h3 className="text-xl font-bold text-white">No Video Selected</h3>
+                  <p className="text-muted-foreground">Select a video from the list on the left to inspect its vital signs, run a viral scan, or perform a retention surgery.</p>
+                </div>
+                <div className="flex gap-2 text-xs font-mono text-muted-foreground/50 uppercase tracking-widest">
+                  <span>waiting for input</span>
+                  <span className="animate-pulse">_</span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -865,107 +1177,91 @@ export default function ReflectionRoom() {
         )
       }
 
+      {/* INSIGHT HARVESTER MODAL */}
+      <InsightHarvester
+        insights={harvestedInsights}
+        open={harvesterOpen}
+        onClose={handleHarvesterClose}
+        sourceTitle={harvesterSourceTitle}
+      />
+
       {/* METRIC OPTIMIZATION MODAL - RESTORED TO CORRECT SCOPE */}
-      {selectedMetric && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200" onClick={closeMetricModal}>
-          <div className="bg-card border border-border/60 shadow-2xl rounded-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
-            <div className="p-6 border-b border-border/40 flex justify-between items-start bg-muted/20">
-              <div className="flex gap-4 items-center">
-                <div className={cn("p-3 rounded-xl bg-background border border-white/10 shadow-inner", selectedMetric.color.replace('text-', 'bg-').replace('500', '500/20'))}>
-                  <selectedMetric.icon className={cn("w-8 h-8", selectedMetric.color)} />
+      {
+        selectedMetric && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200" onClick={closeMetricModal}>
+            <div className="bg-card border border-border/60 shadow-2xl rounded-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
+              <div className="p-6 border-b border-border/40 flex justify-between items-start bg-muted/20">
+                <div className="flex gap-4 items-center">
+                  <div className={cn("p-3 rounded-xl bg-background border border-white/10 shadow-inner", selectedMetric.color.replace('text-', 'bg-').replace('500', '500/20'))}>
+                    <selectedMetric.icon className={cn("w-8 h-8", selectedMetric.color)} />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">{selectedMetric.name}</h3>
+                    <div className="text-sm text-muted-foreground font-mono">Current Level: <span className="text-foreground font-bold">{selectedMetric.value}</span></div>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-xl font-bold">{selectedMetric.name}</h3>
-                  <div className="text-sm text-muted-foreground font-mono">Current Level: <span className="text-foreground font-bold">{selectedMetric.value}</span></div>
-                </div>
+                <button onClick={closeMetricModal} className="p-2 hover:bg-white/10 rounded-full transition-colors"><X className="w-5 h-5 opacity-70" /></button>
               </div>
-              <button onClick={closeMetricModal} className="p-2 hover:bg-white/10 rounded-full transition-colors"><X className="w-5 h-5 opacity-70" /></button>
-            </div>
 
-            <div className="p-6 space-y-6">
-              {!metricStrategy ? (
-                <div className="space-y-6">
-                  <div className="p-6 rounded-xl bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 flex flex-col items-center text-center gap-4">
-                    <Target className="w-12 h-12 text-primary opacity-80" />
-                    <div>
-                      <h4 className="font-bold text-lg">Neuro-Optimization Protocol</h4>
-                      <p className="text-sm text-muted-foreground max-w-md">Generate a specialized strategic plan to boost your <span className="font-semibold text-primary">{selectedMetric.name.split(' ')[0]}</span>.</p>
-                    </div>
-                    <button
-                      onClick={handleOptimizeMetric}
-                      disabled={optimizingMetric}
-                      className={cn("px-8 py-3 rounded-lg font-bold flex items-center gap-2 shadow-lg transition-all",
-                        optimizingMetric ? "bg-muted text-muted-foreground cursor-wait" : "bg-primary hover:bg-primary/90 text-primary-foreground hover:scale-105")}
-                    >
-                      {optimizingMetric ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                      {optimizingMetric ? "Analyzing Vital Signs..." : "GENERATE GROWTH STRATEGY"}
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4 text-xs text-muted-foreground">
-                    <div className="p-3 bg-muted/30 rounded-lg">🔎 Analyzes historical performance</div>
-                    <div className="p-3 bg-muted/30 rounded-lg">🧠 Uses Neuro-Marketing Psychology</div>
-                    <div className="p-3 bg-muted/30 rounded-lg">🎯 Provides 3 concrete tactics</div>
-                    <div className="p-3 bg-muted/30 rounded-lg">🇩🇪 Returns localized German strategy</div>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-4 animate-in slide-in-from-bottom-4">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-bold text-lg flex items-center gap-2"><Lightbulb className="w-5 h-5 text-amber-500" /> Strategic Treatment Plan</h4>
-                    <span className="text-xs font-mono text-muted-foreground">AI-Generated • {new Date().toLocaleTimeString()}</span>
-                  </div>
-
-                  <div className="grid gap-3">
-                    {metricStrategy.tactics.map((tactic, i) => (
-                      <div key={i} className="p-4 rounded-xl bg-card border border-border/60 hover:border-primary/30 transition-all">
-                        <div className="flex justify-between mb-2">
-                          <div className="font-bold text-primary">{tactic.title}</div>
-                          <div className={cn("text-[10px] font-bold px-2 py-0.5 rounded border uppercase",
-                            tactic.difficulty === 'Easy' ? "bg-green-500/10 text-green-500 border-green-500/20" :
-                              tactic.difficulty === 'Medium' ? "bg-yellow-500/10 text-yellow-500 border-yellow-500/20" : "bg-red-500/10 text-red-500 border-red-500/20")}>
-                            {tactic.difficulty}
-                          </div>
-                        </div>
-                        <p className="text-sm text-foreground/80">{tactic.description}</p>
+              <div className="p-6 space-y-6">
+                {!metricStrategy ? (
+                  <div className="space-y-6">
+                    <div className="p-6 rounded-xl bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 flex flex-col items-center text-center gap-4">
+                      <Target className="w-12 h-12 text-primary opacity-80" />
+                      <div>
+                        <h4 className="font-bold text-lg">Neuro-Optimization Protocol</h4>
+                        <p className="text-sm text-muted-foreground max-w-md">Generate a specialized strategic plan to boost your <span className="font-semibold text-primary">{selectedMetric.name.split(' ')[0]}</span>.</p>
                       </div>
-                    ))}
+                      <button
+                        onClick={handleOptimizeMetric}
+                        disabled={optimizingMetric}
+                        className={cn("px-8 py-3 rounded-lg font-bold flex items-center gap-2 shadow-lg transition-all",
+                          optimizingMetric ? "bg-muted text-muted-foreground cursor-wait" : "bg-primary hover:bg-primary/90 text-primary-foreground hover:scale-105")}
+                      >
+                        {optimizingMetric ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                        {optimizingMetric ? "Analyzing Vital Signs..." : "GENERATE GROWTH STRATEGY"}
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 text-xs text-muted-foreground">
+                      <div className="p-3 bg-muted/30 rounded-lg">🔎 Analyzes historical performance</div>
+                      <div className="p-3 bg-muted/30 rounded-lg">🧠 Uses Neuro-Marketing Psychology</div>
+                      <div className="p-3 bg-muted/30 rounded-lg">🎯 Provides 3 concrete tactics</div>
+                      <div className="p-3 bg-muted/30 rounded-lg">🇩🇪 Returns localized German strategy</div>
+                    </div>
                   </div>
+                ) : (
+                  <div className="space-y-4 animate-in slide-in-from-bottom-4">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-bold text-lg flex items-center gap-2"><Lightbulb className="w-5 h-5 text-amber-500" /> Strategic Treatment Plan</h4>
+                      <span className="text-xs font-mono text-muted-foreground">AI-Generated • {new Date().toLocaleTimeString()}</span>
+                    </div>
 
-                  <div className="p-3 rounded-lg bg-blue-500/5 border border-blue-500/10 text-xs text-blue-400 mt-4">
-                    <span className="font-bold">Predicted Impact:</span> {metricStrategy.impactPrediction}
+                    <div className="grid gap-3">
+                      {metricStrategy.tactics.map((tactic, i) => (
+                        <div key={i} className="p-4 rounded-xl bg-card border border-border/60 hover:border-primary/30 transition-all">
+                          <div className="flex justify-between mb-2">
+                            <div className="font-bold text-primary">{tactic.title}</div>
+                            <div className={cn("text-[10px] font-bold px-2 py-0.5 rounded border uppercase",
+                              tactic.difficulty === 'Easy' ? "bg-green-500/10 text-green-500 border-green-500/20" :
+                                tactic.difficulty === 'Medium' ? "bg-yellow-500/10 text-yellow-500 border-yellow-500/20" : "bg-red-500/10 text-red-500 border-red-500/20")}>
+                              {tactic.difficulty}
+                            </div>
+                          </div>
+                          <p className="text-sm text-foreground/80">{tactic.description}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="p-3 rounded-lg bg-blue-500/5 border border-blue-500/10 text-xs text-blue-400 mt-4">
+                      <span className="font-bold">Predicted Impact:</span> {metricStrategy.impactPrediction}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
     </div >
-  );
-}
-
-function InsightCard({ type, item, onSave }: { type: 'win' | 'loss' | 'opportunity', item: InsightItem, onSave: () => void }) {
-  // Styles updated for high visibility (larger text, brighter backgrounds)
-  const styles = {
-    win: "bg-green-500/10 border-green-500/40 text-green-300",
-    loss: "bg-red-500/10 border-red-500/40 text-red-300",
-    opportunity: "bg-blue-500/10 border-blue-500/40 text-blue-300"
-  };
-  const labels = { win: "WIN", loss: "LOSS", opportunity: "OPPORTUNITY" };
-
-  return (
-    <div className={cn("p-6 rounded-xl border-2 flex gap-4 hover:bg-card/90 transition-all shadow-lg", styles[type])}>
-      <div>{type === 'win' ? <CheckCircle className="w-8 h-8" /> : type === 'loss' ? <AlertCircle className="w-8 h-8" /> : <Sparkles className="w-8 h-8" />}</div>
-      <div className="flex-1 space-y-2">
-        <div className="flex justify-between items-center border-b border-white/10 pb-2">
-          <h5 className="font-bold uppercase tracking-widest text-sm">{labels[type]}</h5>
-          <button onClick={onSave} className="p-1 hover:bg-white/10 rounded transition-colors"><Save className="w-5 h-5 opacity-70 hover:opacity-100" /></button>
-        </div>
-        <h4 className="font-bold text-xl text-white">{item.title}</h4>
-        <p className="text-base opacity-90 leading-relaxed font-medium">{item.description}</p>
-      </div>
-
-
-    </div>
   );
 }

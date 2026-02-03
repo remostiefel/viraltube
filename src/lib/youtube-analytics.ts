@@ -3,6 +3,8 @@ export interface AnalyticsData {
     subscribersGained: number;
     averageViewDuration: number;
     estimatedMinutesWatched: number;
+    likes: number;
+    averageViewPercentage: number;
 }
 
 export async function fetchChannelAnalytics(accessToken: string): Promise<AnalyticsData | null> {
@@ -16,7 +18,7 @@ export async function fetchChannelAnalytics(accessToken: string): Promise<Analyt
 
     // IDs is usually "channel==MINE"
     const ids = "channel==MINE";
-    const metrics = "views,subscribersGained,averageViewDuration,estimatedMinutesWatched";
+    const metrics = "views,subscribersGained,averageViewDuration,estimatedMinutesWatched,likes,averageViewPercentage";
 
     try {
         const url = `https://youtubeanalytics.googleapis.com/v2/reports?ids=${ids}&startDate=${startStr}&endDate=${endStr}&metrics=${metrics}&dimensions=channel&sort=-views`;
@@ -37,7 +39,7 @@ export async function fetchChannelAnalytics(accessToken: string): Promise<Analyt
         const data = await res.json();
         // data.rows[0] contains the metrics.
         // Order matches the metrics param string.
-        // [views, subscribersGained, averageViewDuration, estimatedMinutesWatched]
+        // [views, subscribersGained, averageViewDuration, estimatedMinutesWatched, likes, averageViewPercentage]
 
         if (!data.rows || data.rows.length === 0) return null;
 
@@ -46,7 +48,9 @@ export async function fetchChannelAnalytics(accessToken: string): Promise<Analyt
             views: row[0],
             subscribersGained: row[1],
             averageViewDuration: row[2], // Seconds
-            estimatedMinutesWatched: row[3]
+            estimatedMinutesWatched: row[3],
+            likes: row[4],
+            averageViewPercentage: row[5]
         };
 
     } catch (e) {
@@ -54,6 +58,84 @@ export async function fetchChannelAnalytics(accessToken: string): Promise<Analyt
         return null;
     }
 }
+
+export interface VideoAnalyticsData {
+    videoId: string;
+    likes: number;
+    averageViewPercentage: number; // 0-100
+    averageViewDuration: number; // seconds
+}
+
+/**
+ * Fetches analytics data for specific videos
+ * @param accessToken OAuth access token
+ * @param videoIds Array of video IDs to fetch analytics for
+ * @returns Map of videoId to analytics data
+ */
+export async function fetchVideoAnalytics(
+    accessToken: string,
+    videoIds: string[]
+): Promise<Map<string, VideoAnalyticsData>> {
+    if (!accessToken || videoIds.length === 0) {
+        return new Map();
+    }
+
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(endDate.getDate() - 30); // Last 30 days
+
+    const startStr = startDate.toISOString().split("T")[0];
+    const endStr = endDate.toISOString().split("T")[0];
+
+    const ids = "channel==MINE";
+    const metrics = "likes,averageViewPercentage,averageViewDuration";
+    const filters = `video==${videoIds.join(",")}`;
+
+    try {
+        const url = `https://youtubeanalytics.googleapis.com/v2/reports?ids=${ids}&startDate=${startStr}&endDate=${endStr}&metrics=${metrics}&dimensions=video&filters=${encodeURIComponent(filters)}`;
+
+        const res = await fetch(url, {
+            headers: {
+                "Authorization": `Bearer ${accessToken}`,
+                "Accept": "application/json"
+            },
+            next: { revalidate: 0 }
+        });
+
+        if (!res.ok) {
+            console.error("Video Analytics API Error:", await res.text());
+            return new Map();
+        }
+
+        const data = await res.json();
+
+        // data.rows contains array of [videoId, likes, averageViewPercentage, averageViewDuration]
+        // data.columnHeaders tells us the order
+
+        if (!data.rows || data.rows.length === 0) {
+            return new Map();
+        }
+
+        const resultMap = new Map<string, VideoAnalyticsData>();
+
+        data.rows.forEach((row: any[]) => {
+            // row[0] = videoId, row[1] = likes, row[2] = avgViewPct, row[3] = avgViewDuration
+            resultMap.set(row[0], {
+                videoId: row[0],
+                likes: row[1] || 0,
+                averageViewPercentage: row[2] || 0,
+                averageViewDuration: row[3] || 0
+            });
+        });
+
+        return resultMap;
+
+    } catch (e) {
+        console.error("Fetch Video Analytics Exception:", e);
+        return new Map();
+    }
+}
+
 
 // --- CORTEX v2026: The Satisfaction Core ---
 

@@ -5,6 +5,7 @@ import { Shell } from "@/components/layout/Shell";
 import { ActionHistoryProvider } from "@/components/context/ActionHistoryContext";
 import { ToastProvider } from "@/components/ui/Toast";
 import { HelpProvider } from "@/components/ui/HelpSystem";
+import { checkAndRecordDailyProgress } from "@/lib/brain-build";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,11 +22,13 @@ export const metadata: Metadata = {
   description: "The Creator's Operating System",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  await checkAndRecordDailyProgress();
+
   return (
     <html lang="en" className="dark">
       <body

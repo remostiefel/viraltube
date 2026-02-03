@@ -32,4 +32,9 @@ export interface NotebookItem {
     isArchived: boolean;
     completedAt?: string;
     formatId?: string; // Links to FormatRegistry
+    blueprint?: string; // Markdown content of the generated script
+    sourceUrl?: string; // Original Viral Source (YouTube)
+    rating?: number; // 1-5 Star Rating
+    cluster?: string; // AI-assigned Topic Cluster
+    coreMessage?: string; // 1-Sentence Summary
 }

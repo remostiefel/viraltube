@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { BrainCircuit, Loader2, Sparkles, Plus, X } from "lucide-react";
+import { BrainCircuit, Loader2, Sparkles, Plus, X, Info, Check } from "lucide-react";
 import { researchViralIdeasAction, createNotebookItemAction } from "@/app/actions";
 import { VideoIdea } from "@/lib/gemini";
 import { cn } from "@/lib/utils";
 import { FormatSelector } from "./FormatSelector";
+import { useToast } from "@/components/ui/Toast";
 
 interface IdeaSearchModuleProps {
     onClose: () => void;
@@ -13,10 +14,12 @@ interface IdeaSearchModuleProps {
 }
 
 export function IdeaSearchModule({ onClose, onAddIdea }: IdeaSearchModuleProps) {
+    const { toast } = useToast();
     const [loading, setLoading] = useState(false);
     const [ideas, setIdeas] = useState<VideoIdea[]>([]);
     const [scanned, setScanned] = useState(false);
     const [addingMap, setAddingMap] = useState<Record<number, boolean>>({});
+    const [addedIndices, setAddedIndices] = useState<Set<number>>(new Set());
     const [formatId, setFormatId] = useState<string>("micro-short");
 
     const handleResearch = async () => {
@@ -45,6 +48,12 @@ export function IdeaSearchModule({ onClose, onAddIdea }: IdeaSearchModuleProps) 
             );
             // Visual feedback + Callback
             onAddIdea();
+            setAddedIndices(prev => new Set(prev).add(index));
+            toast({
+                title: "Opportunity Saved",
+                description: "Added to your Notebook Topics. You can now drag it to Scripting.",
+                variant: "success",
+            });
         } catch (e) {
             console.error(e);
         } finally {
@@ -108,48 +117,71 @@ export function IdeaSearchModule({ onClose, onAddIdea }: IdeaSearchModuleProps) 
                                 />
                             </div>
 
+                            <div className="bg-cyan-500/10 border border-cyan-500/20 p-3 rounded-lg mb-4 flex items-start gap-3">
+                                <Info className="w-5 h-5 text-cyan-500 shrink-0 mt-0.5" />
+                                <div className="text-sm text-muted-foreground">
+                                    <span className="text-foreground font-semibold">Workflow Tip:</span> Click <Plus className="inline w-3 h-3" /> to add ideas to your <strong>Notebook Topics</strong>. Once added, you can drag them to "Scripting" to launch the Genesis Engine.
+                                </div>
+                            </div>
+
                             <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-2">
                                 Identified Opportunities ({ideas.length})
                             </h3>
-                            {ideas.map((idea, i) => (
-                                <div key={i} className="bg-muted/10 border border-border p-4 rounded-xl hover:border-cyan-500/50 transition-colors group">
-                                    <div className="flex justify-between items-start gap-4">
-                                        <div className="flex-1">
-                                            <h4 className="font-bold text-lg text-foreground mb-1 group-hover:text-cyan-400 transition-colors">
-                                                {idea.title}
-                                            </h4>
-                                            <div className="flex items-center gap-2 mb-3">
-                                                <span className="text-xs bg-cyan-500/10 text-cyan-500 px-2 py-0.5 rounded font-mono">
-                                                    HOOK
-                                                </span>
-                                                <p className="text-sm text-muted-foreground italic line-clamp-1">
-                                                    &quot;{idea.hook}&quot;
+                            {ideas.map((idea, i) => {
+                                const isAdded = addedIndices.has(i);
+                                return (
+                                    <div key={i} className={cn(
+                                        "bg-muted/10 border p-4 rounded-xl transition-all group",
+                                        isAdded ? "border-emerald-500/50 bg-emerald-500/5" : "border-border hover:border-cyan-500/50"
+                                    )}>
+                                        <div className="flex justify-between items-start gap-4">
+                                            <div className="flex-1">
+                                                <h4 className={cn(
+                                                    "font-bold text-lg mb-1 transition-colors",
+                                                    isAdded ? "text-emerald-400" : "text-foreground group-hover:text-cyan-400"
+                                                )}>
+                                                    {idea.title}
+                                                </h4>
+                                                <div className="flex items-center gap-2 mb-3">
+                                                    <span className={cn(
+                                                        "text-xs px-2 py-0.5 rounded font-mono",
+                                                        isAdded ? "bg-emerald-500/10 text-emerald-500" : "bg-cyan-500/10 text-cyan-500"
+                                                    )}>
+                                                        HOOK
+                                                    </span>
+                                                    <p className="text-sm text-muted-foreground italic line-clamp-1">
+                                                        &quot;{idea.hook}&quot;
+                                                    </p>
+                                                </div>
+                                                <p className="text-sm text-muted-foreground border-l-2 border-border pl-3">
+                                                    <span className="font-bold text-xs text-foreground/70 uppercase">Psych Angle: </span>
+                                                    {idea.angle}
                                                 </p>
                                             </div>
-                                            <p className="text-sm text-muted-foreground border-l-2 border-border pl-3">
-                                                <span className="font-bold text-xs text-foreground/70 uppercase">Psych Angle: </span>
-                                                {idea.angle}
-                                            </p>
+                                            <button
+                                                onClick={() => handleAddToNotebook(idea, i)}
+                                                disabled={addingMap[i] || isAdded}
+                                                className={cn(
+                                                    "p-3 rounded-lg flex items-center gap-2 transition-all min-w-[44px] justify-center",
+                                                    isAdded
+                                                        ? "bg-emerald-500 text-black shadow-none cursor-default"
+                                                        : addingMap[i]
+                                                            ? "bg-muted text-muted-foreground"
+                                                            : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg"
+                                                )}
+                                            >
+                                                {addingMap[i] ? (
+                                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                                ) : isAdded ? (
+                                                    <Check className="w-5 h-5 font-bold" />
+                                                ) : (
+                                                    <Plus className="w-5 h-5" />
+                                                )}
+                                            </button>
                                         </div>
-                                        <button
-                                            onClick={() => handleAddToNotebook(idea, i)}
-                                            disabled={addingMap[i]}
-                                            className={cn(
-                                                "p-3 rounded-lg flex items-center gap-2 transition-all min-w-[44px] justify-center",
-                                                addingMap[i]
-                                                    ? "bg-emerald-500/10 text-emerald-500"
-                                                    : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg"
-                                            )}
-                                        >
-                                            {addingMap[i] ? (
-                                                <Loader2 className="w-5 h-5 animate-spin" />
-                                            ) : (
-                                                <Plus className="w-5 h-5" />
-                                            )}
-                                        </button>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     )}
                 </div>

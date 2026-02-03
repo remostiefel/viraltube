@@ -180,6 +180,10 @@ export interface OutlierVideo {
     channelSubs: number;
     outlierScore: number; // calculated as Views / Subs
     publishedAt: string;
+    // Analytics Metrics (optional - available when fetched)
+    likeCount?: number; // From Data API or Analytics API
+    averageViewPercentage?: number; // From Analytics API only (0-100)
+    averageViewDuration?: number; // From Analytics API only (in seconds)
 }
 
 // ... existing code ...
@@ -244,6 +248,7 @@ export async function searchOutliers(
         // 4. Calculate Scores
         let outliers: OutlierVideo[] = statsData.items.map((v: YouTubeVideoItem) => {
             const views = parseInt(v.statistics.viewCount);
+            const likes = parseInt(v.statistics.likeCount) || 0;
             const subs = channelMap.get(v.snippet.channelId) || 10000; // Assume 10k if unknown
             const score = views / subs;
 
@@ -255,7 +260,8 @@ export async function searchOutliers(
                 channelTitle: v.snippet.channelTitle,
                 channelSubs: subs,
                 outlierScore: parseFloat(score.toFixed(2)),
-                publishedAt: v.snippet.publishedAt
+                publishedAt: v.snippet.publishedAt,
+                likeCount: likes
             };
         });
 
@@ -300,37 +306,61 @@ export async function getChannelRecentVideos(channelId: string, apiKey: string):
     if (!apiKey) return [];
 
     try {
-        // 1. Get Channel Stats first (for outlier score)
+        // OPTIMIZATION: Use "Uploads" Playlist instead of Search API
+        // Search API = 100 units per call
+        // PlaylistItems = 1 unit per call
+        // 99% cost reduction.
+
+        // 1. Get Channel "Uploads" Playlist ID
         const channelRes = await fetch(
-            `https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${apiKey}`,
-            { next: { revalidate: 0 } }
+            `https://www.googleapis.com/youtube/v3/channels?part=contentDetails,statistics&id=${channelId}&key=${apiKey}`,
+            { next: { revalidate: 3600 } } // Cache this for an hour, it rarely changes
         );
+
+        if (!channelRes.ok) {
+            console.error(`Channel Fetch Failed: ${channelRes.status}`);
+            return [];
+        }
+
         const channelData = await channelRes.json();
-        const subs = parseInt(channelData?.items?.[0]?.statistics?.subscriberCount || "1000000");
+        if (!channelData.items || channelData.items.length === 0) return [];
 
-        // 2. Get Recent Videos
-        const searchRes = await fetch(
-            `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${channelId}&type=video&order=date&maxResults=50&key=${apiKey}`,
-            { next: { revalidate: 0 } }
+        const uploadsPlaylistId = channelData.items[0].contentDetails?.relatedPlaylists?.uploads;
+        const subs = parseInt(channelData.items[0].statistics?.subscriberCount || "1000");
+
+        if (!uploadsPlaylistId) return [];
+
+        // 2. Fetch Videos from Uploads Playlist
+        // We need 'snippet' for title/thumb/publishDate and 'contentDetails' for videoId
+        const playlistRes = await fetch(
+            `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet,contentDetails&playlistId=${uploadsPlaylistId}&maxResults=50&key=${apiKey}`,
+            { next: { revalidate: 600 } } // Cache for 10 mins
         );
 
-        if (!searchRes.ok) return [];
-        const searchData = await searchRes.json();
-        if (!searchData.items) return [];
+        if (!playlistRes.ok) {
+            console.error(`Playlist Fetch Failed: ${playlistRes.status}`);
+            return [];
+        }
 
-        // 3. Get Video Stats
-        const videoIds = searchData.items.map((item: YouTubeSearchItem) => item.id.videoId).join(',');
+        const playlistData = await playlistRes.json();
+        if (!playlistData.items) return [];
+
+        // 3. Get Video Statistics (View Counts) 
+        // Playlist items don't have view counts, so we need one more call.
+        const videoIds = playlistData.items.map((item: any) => item.contentDetails.videoId).join(',');
+
         const statsRes = await fetch(
             `https://www.googleapis.com/youtube/v3/videos?part=statistics,snippet&id=${videoIds}&key=${apiKey}`,
-            { next: { revalidate: 0 } }
+            { next: { revalidate: 600 } }
         );
-        const statsData = await statsRes.json();
 
+        const statsData = await statsRes.json();
         if (!statsData.items) return [];
 
-        // 4. Transform
+        // 4. Map to OutlierVideo
         const videos: OutlierVideo[] = statsData.items.map((v: YouTubeVideoItem) => {
             const views = parseInt(v.statistics.viewCount);
+            const likes = parseInt(v.statistics.likeCount) || 0;
             const score = views / subs;
 
             return {
@@ -341,14 +371,15 @@ export async function getChannelRecentVideos(channelId: string, apiKey: string):
                 channelTitle: v.snippet.channelTitle,
                 channelSubs: subs,
                 outlierScore: parseFloat(score.toFixed(2)),
-                publishedAt: v.snippet.publishedAt
+                publishedAt: v.snippet.publishedAt,
+                likeCount: likes
             };
-        }); // Do not sort by score, keep date order for "News Feed" feel
+        });
 
         return videos;
 
     } catch (e) {
-        console.error("Channel Search Error", e);
+        console.error("Channel Recent Videos Error (Optimized)", e);
         return [];
     }
 }
@@ -383,7 +414,8 @@ export async function fetchPlaylistVideos(playlistId: string, apiKey: string): P
             channelTitle: v.snippet.channelTitle,
             channelSubs: 0,
             outlierScore: 0,
-            publishedAt: v.snippet.publishedAt
+            publishedAt: v.snippet.publishedAt,
+            likeCount: parseInt(v.statistics.likeCount) || 0
         }));
 
     } catch (e) {
@@ -395,11 +427,37 @@ export async function fetchPlaylistVideos(playlistId: string, apiKey: string): P
 export async function getVideoBasicInfoFallback(videoId: string): Promise<{ title: string; author: string } | null> {
     try {
         const oembedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
-        const res = await fetch(oembedUrl, { next: { revalidate: 3600 } });
+        console.log("[YouTube] Fetching oEmbed:", oembedUrl);
+        // Force no-cache to avoid sticking to failed attempts with bad IDs (though IDs should be unique keys)
+        const res = await fetch(oembedUrl, { next: { revalidate: 0 } });
 
-        if (!res.ok) return null;
+        if (!res.ok) {
+            console.error("[YouTube] Fetch Failed:", res.status, res.statusText);
+
+            // FALLBACK 2: Direct Page Scraping (Title Tag)
+            try {
+                console.log("[YouTube] Attempting Parsing Fallback...");
+                const pageRes = await fetch(`https://www.youtube.com/watch?v=${videoId}`, {
+                    headers: { "User-Agent": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)" }
+                });
+                const html = await pageRes.text();
+                const titleMatch = html.match(/<title>(.*?) - YouTube<\/title>/) || html.match(/<title>(.*?)<\/title>/);
+
+                if (titleMatch && titleMatch[1]) {
+                    return {
+                        title: titleMatch[1],
+                        author: "YouTube Channel" // Hard to parse cleanly from raw HTML reliably without heavy dom parser
+                    };
+                }
+            } catch (fallbackError) {
+                console.error("Fallback Parsing Failed", fallbackError);
+            }
+
+            return null;
+        }
 
         const data = await res.json();
+        console.log("[YouTube] Fetch Success:", data.title);
         return {
             title: data.title,
             author: data.author_name

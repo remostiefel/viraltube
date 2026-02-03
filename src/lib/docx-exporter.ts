@@ -541,3 +541,218 @@ export const generateWisdomDocx = async (nuggets: Template[], title: string = "W
 
     return await Packer.toBlob(doc);
 };
+// ... (existing exports)
+
+/**
+ * Generates a full Production Package (Script + Assets + Metadata)
+ */
+export const generateProductionDocx = async (
+    title: string,
+    sections: {
+        hook: string;
+        twist: string;
+        outline: string;
+        voiceOver: string;
+        titles: string;
+        thumbnails: { content: string; code: string }[];
+        videos: { content: string; code: string }[];
+        music: { content: string; code: string }[];
+        distribution?: string; // Added optional distribution
+    }
+): Promise<Blob> => {
+    const docChildren: Paragraph[] = [];
+
+    // --- TITLE PAGE ---
+    docChildren.push(
+        new Paragraph({
+            text: title,
+            heading: HeadingLevel.TITLE,
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 200 },
+        }),
+        new Paragraph({
+            text: `Production Script & Asset Manifest`,
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 400 },
+            style: "Subtitle"
+        })
+    );
+
+    // --- 1. SCRIPT SECTION ---
+    docChildren.push(
+        new Paragraph({
+            text: "1. SCRIPT & NARRATIVE",
+            heading: HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 200 }
+        })
+    );
+
+    // Viral Hook
+    docChildren.push(
+        new Paragraph({ text: "🔥 Viral Hook", heading: HeadingLevel.HEADING_2 }),
+        new Paragraph({ text: sections.hook, spacing: { after: 200 } })
+    );
+
+    // Twist / Core Value
+    docChildren.push(
+        new Paragraph({ text: "💎 The Twist / Core Value", heading: HeadingLevel.HEADING_2 }),
+        new Paragraph({ text: sections.twist, spacing: { after: 200 } })
+    );
+
+    // Director's Outline
+    docChildren.push(
+        new Paragraph({ text: "🎬 Director's Outline", heading: HeadingLevel.HEADING_2 }),
+        new Paragraph({ text: sections.outline, spacing: { after: 200 } })
+    );
+
+    // VoiceOver Script
+    docChildren.push(
+        new Paragraph({ text: "🎙️ VoiceOver Script (Production Ready)", heading: HeadingLevel.HEADING_2, spacing: { before: 200 } }),
+        new Paragraph({
+            text: "--------------------------------------------------",
+            alignment: AlignmentType.CENTER
+        })
+    );
+
+    // Add VoiceOver as distinct paragraphs
+    const voLines = sections.voiceOver.split("\n");
+    voLines.forEach(line => {
+        if (line.trim()) {
+            docChildren.push(
+                new Paragraph({
+                    text: line.trim(),
+                    style: "Quote", // Visual distinction
+                    spacing: { after: 120 },
+                    indent: { left: convertInchesToTwip(0.3) }
+                })
+            );
+        }
+    });
+
+    docChildren.push(
+        new Paragraph({
+            text: "--------------------------------------------------",
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 400 }
+        })
+    );
+
+
+    // --- 2. AI ASSETS ---
+    docChildren.push(
+        new Paragraph({
+            text: "2. AI ASSET MANIFEST",
+            heading: HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 200 }
+        })
+    );
+
+    // Video Prompts
+    if (sections.videos.length > 0) {
+        docChildren.push(new Paragraph({ text: "🎥 Video-Prompts (Meta AI / Runway)", heading: HeadingLevel.HEADING_2 }));
+        sections.videos.forEach((v, i) => {
+            docChildren.push(
+                new Paragraph({
+                    text: `Clip ${i + 1}: ${v.content}`,
+                    bullet: { level: 0 },
+                    spacing: { before: 100 }
+                }),
+                new Paragraph({
+                    children: [new TextRun({ text: "PROMPT: ", bold: true, size: 20 }), new TextRun({ text: v.code, size: 20, color: "555555" })],
+                    indent: { left: convertInchesToTwip(0.3) },
+                    spacing: { after: 100 }
+                })
+            );
+        });
+    }
+
+    // Image Prompts
+    if (sections.thumbnails.length > 0) {
+        docChildren.push(new Paragraph({ text: "🖼️ Bilder-Prompts (Thumbnails/Midjourney)", heading: HeadingLevel.HEADING_2, spacing: { before: 200 } }));
+        sections.thumbnails.forEach((t, i) => {
+            docChildren.push(
+                new Paragraph({
+                    text: `Image ${i + 1}: ${t.content}`,
+                    bullet: { level: 0 },
+                    spacing: { before: 100 }
+                }),
+                new Paragraph({
+                    children: [new TextRun({ text: "PROMPT: ", bold: true, size: 20 }), new TextRun({ text: t.code, size: 20, color: "555555" })],
+                    indent: { left: convertInchesToTwip(0.3) },
+                    spacing: { after: 100 }
+                })
+            );
+        });
+    }
+
+    // Music Prompts
+    if (sections.music.length > 0) {
+        docChildren.push(new Paragraph({ text: "🎵 Music Prompts (Tunee.ai)", heading: HeadingLevel.HEADING_2, spacing: { before: 200 } }));
+        sections.music.forEach((m, i) => {
+            docChildren.push(
+                new Paragraph({
+                    text: `Track ${i + 1}: ${m.content}`,
+                    bullet: { level: 0 },
+                    spacing: { before: 100 }
+                }),
+                new Paragraph({
+                    children: [new TextRun({ text: "PROMPT: ", bold: true, size: 20 }), new TextRun({ text: m.code, size: 20, color: "555555" })],
+                    indent: { left: convertInchesToTwip(0.3) },
+                    spacing: { after: 100 }
+                })
+            );
+        });
+    }
+
+
+    // --- 3. METADATA ---
+    docChildren.push(
+        new Paragraph({
+            text: "3. METADATA",
+            heading: HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 200 }
+        })
+    );
+
+    docChildren.push(
+        new Paragraph({ text: "Optimized Titles & Hooks:", heading: HeadingLevel.HEADING_2 }),
+        new Paragraph({ text: sections.titles, spacing: { after: 200 } })
+    );
+
+
+    const doc = new Document({
+        sections: [{ children: docChildren }],
+        styles: {
+            paragraphStyles: [
+                {
+                    id: "Heading1",
+                    name: "Heading 1",
+                    basedOn: "Normal",
+                    next: "Normal",
+                    quickFormat: true,
+                    run: {
+                        size: 32,
+                        bold: true,
+                        color: "2E75B6",
+                    },
+                    paragraph: {
+                        spacing: { before: 240, after: 120 },
+                    },
+                },
+                {
+                    id: "Quote",
+                    name: "Quote",
+                    basedOn: "Normal",
+                    next: "Normal",
+                    quickFormat: true,
+                    run: {
+                        italics: true,
+                        color: "333333"
+                    }
+                }
+            ]
+        }
+    });
+
+    return await Packer.toBlob(doc);
+};

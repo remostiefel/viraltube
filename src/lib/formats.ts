@@ -8,9 +8,31 @@ export interface FormatProfile {
     structure: string[]; // e.g., ["Hook", "Value", "CTA"]
     isLoop: boolean;
     voiceSpeed?: number; // 1.0 = normal, 1.1 = fast
+    customInstructions?: string;
 }
 
 export const CONTENT_FORMATS: FormatProfile[] = [
+    {
+        id: "nano-short",
+        label: "12s-Short (Nano)",
+        description: "Hard Hook + Loop. The NeuroCode Retention Hack.",
+        targetDurationSeconds: 12,
+        targetWordCount: 40,
+        visualPacingSeconds: 2,
+        structure: ["HARD HOOK (0-2s)", "INTERRUPT (2-4s)", "NEURO-CLAIM (4-8s)", "EDGE-TWIST (8-10s)", "LOOP (10-12s)"],
+        isLoop: true,
+        voiceSpeed: 1.2,
+        customInstructions: `
+        [FORMAT: 12s-SHORT RETENTION HACK]
+        Mandatory Structure:
+        1. HARD HOOK (0-2s): Provocative statement, max 6 words.
+        2. INTERRUPT (2-4s): Negation or perspective shift ("Not X, but Y").
+        3. NEURO-CLAIM (4-8s): Scientific sounding explanation, but incomplete.
+        4. EDGE-TWIST (8-10s): Increases tension, implies meaning without explaining.
+        5. LOOP (10-12s): REPEAT the Hook (or near identical) to create an infinite loop.
+        No CTA. No Tips. Pure retention mechanics.
+        `
+    },
     {
         id: "micro-short",
         label: "Micro-Short (30s)",
@@ -30,7 +52,7 @@ export const CONTENT_FORMATS: FormatProfile[] = [
         targetWordCount: 160,
         visualPacingSeconds: 5,
         structure: ["Hook", "Agitation", "Solution", "Evidence", "CTA"],
-        isLoop: false,
+        isLoop: true,
         voiceSpeed: 1.1
     },
     {
@@ -41,7 +63,7 @@ export const CONTENT_FORMATS: FormatProfile[] = [
         targetWordCount: 240,
         visualPacingSeconds: 6,
         structure: ["Context", "The Myth", "The Truth", "The Mechanism", "Application"],
-        isLoop: false,
+        isLoop: true,
         voiceSpeed: 1.05
     },
     {

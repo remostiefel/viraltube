@@ -17,35 +17,36 @@ INPUT DATA:
 1. A transcript of a VIRAL US VIDEO (Source).
 2. A Target Topic for a new VIDEO (Target).
 
-TASK:
-1. DECONSTRUCT the Source Transcript. Separate the "Container" (Format/Structure) from the "Content".
-2. Identify the "Genius Elements" that made it viral (e.g., Open Loops, Pattern Interrupts, Controversy).
-3. RECONSTRUCT a specific plan for the Target Topic in {{targetLanguage}}, using the identified "Container".
-4. APPLY "Neuro-Code" Differentiation.
+    TASK:
+    1. DECONSTRUCT the Source Transcript. Separate the "Container" (Format/Structure) from the "Content".
+    2. Identify the "Genius Elements" that made it viral (e.g., Open Loops, Pattern Interrupts, Controversy).
+    3. RECONSTRUCT a MASTER BLUEPRINT in ENGLISH (The "Brain"). This must be deep, psychological, and format-agnostic.
+    4. CREATE an ADAPTATION in {{targetLanguage}} (The "Execution"). This is the production script.
 
-SOURCE TRANSCRIPT:
-"{{transcript}}..."
+    SOURCE TRANSCRIPT:
+    "{{transcript}}..."
 
-TARGET TOPIC:
-"{{targetTopic}}"
+    TARGET TOPIC:
+    "{{targetTopic}}"
 
-RETURN JSON:
-{
-    "original": {
-        "hook": "Description of original hook strategy",
-        "structure": ["Minute 0-1: ...", "Minute 1-3: ..."],
-        "geniusElements": ["list", "of", "viral", "elements"],
-        "twist": "The payoff/reveal mechanism"
-    },
-    "adaptation": {
-        "hook": "Concrete hook script for the NEW video in {{targetLanguage}}",
-        "structure": ["Minute 0-1: [Specific Plan]...", ...],
-        "differentiation": ["How this version is unique to Neuro-Code"],
-        "germanTwist": "Adapted payoff ({{targetLanguage}})",
-        "culturalAdjustments": "Specific notes on adaptation strategy"
-    },
-    "analysis": "Brief executive summary of why this format works."
-}`
+    RETURN JSON:
+    {
+        "original": {
+            "hook": "Deep analysis of the hook's psychological mechanics (ENGLISH)",
+            "structure": ["Minute 0-1: [Structural Logic]...", "Minute 1-3: ..."],
+            "geniusElements": ["list", "of", "viral", "elements", "(ENGLISH)"],
+            "twist": "The core psychological payoff mechanism (ENGLISH)"
+        },
+        "adaptation": {
+            "hook": "Compelling, viral Hook in GERMAN (Human-sounding, 'Niki-Style').",
+            "voiceOverScript": "Structure for Google AI Studio. FORMAT: '[Tone/Instruction] Text content... [Pause: 0.Xs]'. Use German. Include preamble: 'Read aloud in a [Tone]:'.", 
+            "structure": ["Minute 0-1: [Specific Production Step]...", ...],
+            "differentiation": ["How this version is unique to Neuro-Code"],
+            "germanTwist": "Adapted payoff ({{targetLanguage}})",
+            "culturalAdjustments": "Specific notes on adaptation strategy"
+        },
+        "analysis": "Executive summary of why this format works (ENGLISH)."
+    }`
     },
 
     science: {
@@ -283,8 +284,8 @@ Target Emotion: {{emotion}}
 
 RETURN JSON:
 {
-    "suno": "Genre: Dark Industrial Techno fused with Orchestral Strings. BPM: 120. Mood: Focus, Tension, Intellectual. Instruments: Deep Synth Bass, Staccato Cello, Minimal Percussion, Ticking Clock foley.",
-    "udio": "cinematic ambient, neuro-bass, ticking clock, deep sub, hans zimmer style, glitch textures, hifi production",
+    "suno": "For Tunee.ai (Plain English). 2 Variations: 1x 'Dramatic/Rhythmic', 1x 'Easy/Relaxed'. FORMAT: Plain English description of the vibe and instruments.",
+    "udio": "For Tunee.ai (Plain English). Legacy field kept for compatibility.",
     "voiceDirection": "Voice Actor should speak in a 'Low, Resonant, Urgent' tone. Use a downward inflection at the end of sentences for authority. Pause slightly after the word 'dopamine'."
 }`
     },

@@ -1,6 +1,6 @@
 export interface SavedReport {
     id: string;
-    type: "CHANNEL_AUDIT" | "VIDEO_DEEP_DIVE" | "RETENTION_SURGEON";
+    type: "CHANNEL_AUDIT" | "VIDEO_DEEP_DIVE" | "RETENTION_SURGEON" | "FULL_SCAN";
     title: string;
     createdAt: string; // ISO String
     summary: string;
@@ -191,6 +191,112 @@ export function exportReport(report: SavedReport): void {
         if (data.wins) printList("WINS (Keep Doing)", data.wins, [0, 150, 0]);
         if (data.opportunities) printList("OPPORTUNITIES (Growth Potential)", data.opportunities, [0, 100, 200]);
         if (data.losses) printList("LOSSES (Fix Immediately)", data.losses, [200, 50, 50]);
+    }
+    else if (report.type === "FULL_SCAN") {
+        const data = report.data; // ViralAnalysisResult
+
+        // Draw Box for Viral Score
+        doc.setDrawColor(100, 100, 255);
+        doc.setFillColor(240, 245, 255);
+        doc.rect(margin, y, contentWidth, 35, "F");
+
+        let metricY = y + 15;
+
+        // Viral Score
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text("VIRAL SCORE", margin + 10, metricY);
+        doc.setFontSize(24);
+        doc.setTextColor(0);
+        doc.text(`${data.viralScore}/10`, margin + 10, metricY + 12);
+
+        // Target Audience
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text("TARGET AUDIENCE", margin + 80, metricY);
+        doc.setFontSize(12);
+        doc.setTextColor(0);
+        const audienceLines = doc.splitTextToSize(data.targetAudience, 80);
+        doc.text(audienceLines, margin + 80, metricY + 8);
+
+        y += 45;
+
+        // Hook Analysis
+        doc.setTextColor(0);
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text("Hook Analysis:", margin, y);
+        y += 8;
+
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "normal");
+        const hookLines = doc.splitTextToSize(data.hookAnalysis, contentWidth);
+        doc.text(hookLines, margin, y);
+        y += (hookLines.length * 7) + 10;
+
+        // Sentiments
+        if (data.sentiments && data.sentiments.length > 0) {
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "bold");
+            doc.text("Key Sentiments:", margin, y);
+            y += 8;
+
+            doc.setFontSize(11);
+            doc.setFont("helvetica", "normal");
+            doc.setTextColor(100, 100, 255);
+            doc.text(data.sentiments.join(" • "), margin, y);
+            doc.setTextColor(0);
+            y += 12;
+        }
+
+        // Actionable Takeaway
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text("Actionable Takeaway:", margin, y);
+        y += 8;
+
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "italic");
+        const takeawayLines = doc.splitTextToSize(data.actionableTakeaway, contentWidth);
+        doc.text(takeawayLines, margin, y);
+        y += (takeawayLines.length * 7) + 15;
+
+        // Wordwall (if available)
+        if (data.wordwall && data.wordwall.length > 0) {
+            if (y > 250) {
+                doc.addPage();
+                y = 20;
+            }
+
+            doc.setFontSize(14);
+            doc.setFont("helvetica", "bold");
+            doc.setTextColor(100, 100, 255);
+            doc.text("Key Concepts (Wordwall):", margin, y);
+            y += 10;
+
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            doc.setTextColor(0);
+
+            data.wordwall.slice(0, 5).forEach((item: any) => {
+                const keyword = `• ${item.keyword}`;
+                doc.setFont("helvetica", "bold");
+                doc.text(keyword, margin, y);
+                y += 6;
+
+                doc.setFont("helvetica", "normal");
+                doc.setTextColor(100);
+                const explLines = doc.splitTextToSize(item.explanation, contentWidth - 5);
+                doc.text(explLines, margin + 5, y);
+                doc.setTextColor(0);
+                y += (explLines.length * 6) + 4;
+
+                if (y > 270) {
+                    doc.addPage();
+                    y = 20;
+                }
+            });
+        }
     }
 
     // --- FOOTER ---

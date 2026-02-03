@@ -154,7 +154,7 @@ export default function PackagingPage() {
 
                     {/* Filename */}
                     <OutputSection
-                        title="Filename"
+                        title="Dateiname (SEO-Optimiert)"
                         icon={FileText}
                         loading={loading === 'filename' || loading === 'all'}
                         onGenerate={() => handleOptimize('filename')}
@@ -188,7 +188,7 @@ export default function PackagingPage() {
 
                     {/* Title */}
                     <OutputSection
-                        title="Title Hook"
+                        title="Titel (Primary + Alternatives)"
                         icon={Type}
                         loading={loading === 'title' || loading === 'all'}
                         onGenerate={() => handleOptimize('title')}
@@ -225,7 +225,7 @@ export default function PackagingPage() {
 
                     {/* Description */}
                     <OutputSection
-                        title="Description"
+                        title="Beschreibung (Mit Hooks & Keywords)"
                         icon={Hash}
                         loading={loading === 'description' || loading === 'all'}
                         onGenerate={() => handleOptimize('description')}
@@ -252,7 +252,7 @@ export default function PackagingPage() {
 
                     {/* Tags */}
                     <OutputSection
-                        title="SEO Tags"
+                        title="Tags (Strategisch sortiert)"
                         icon={Tag}
                         loading={loading === 'tags' || loading === 'all'}
                         onGenerate={() => handleOptimize('tags')}

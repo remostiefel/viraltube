@@ -39,6 +39,7 @@ export type NavItem = {
 
 // Neuro-Code OS Navigation
 export const navigation: NavItem[] = [
+    { group: "STRATEGY", name: "The Map", href: "/workflow", icon: Map, subtitle: "Master Workflow", color: "#FBBF24" }, // Amber
     { group: "SYSTEM", name: "Dashboard", href: "/", icon: Home, subtitle: "Mission Control", color: "#F8FAFC" },
 
     { group: "VISIONARY", name: "Virt Vision", href: "/vision", icon: Eye, subtitle: "Future Concept", color: "#D946EF" },
@@ -69,6 +70,7 @@ export const navigation: NavItem[] = [
 ];
 
 export const GROUP_COLORS: Record<string, string> = {
+    "STRATEGY": "#FBBF24",
     "VISIONARY": "#D946EF",
     "BIO-OS": "#2DD4BF",
     "SIGNALS": "#38BDF8",

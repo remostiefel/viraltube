@@ -347,27 +347,27 @@ function ManualSection() {
 function WorkflowSection() {
     const loop = [
         {
-            phase: "1. SENSE",
+            phase: "1. SENSE (Trend Radar)",
             module: "Scanner",
-            action: "Find an Outlier Video with High V/S Score (>3.0).",
-            outcome: "Validated Topic Idea"
+            action: "Find an Outlier. Click '+' to Add to Notebook.",
+            outcome: "Saved Topic (Idea)"
         },
         {
-            phase: "2. DISTILL",
-            module: "Wisdom",
-            action: "Extract the 'Universal Law' from that video. Save to 'AXIOMS'.",
-            outcome: "Core Principle"
+            phase: "2. INCUBATE",
+            module: "Notebook",
+            action: "Refine in 'Topics'. Drag to 'Researching' if needed.",
+            outcome: " vetted Concept"
         },
         {
-            phase: "3. PLAN",
-            module: "Blueprint",
-            action: "Generate a new Title/Hook strategy based on that Principle.",
-            outcome: "Strategic Blueprint"
+            phase: "3. GENESIS TRIGGER",
+            module: "Genesis Engine",
+            action: "CRITICAL: Drag Topic to 'SCRIPTING' column.",
+            outcome: "Auto-Generated Blueprint & Assets (Desktop)"
         },
         {
             phase: "4. ACT",
             module: "Script Forge",
-            action: "Write the script. Use 'Retention Architect' to visualize pacing.",
+            action: "Write the script using the Blueprint.",
             outcome: "Production-Ready Script"
         },
         {

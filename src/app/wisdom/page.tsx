@@ -11,6 +11,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/Toast";
 import { HelpTrigger, InsightModeToggle } from "@/components/ui/HelpSystem";
+import { PendingInsightsManager } from "@/components/wisdom/PendingInsightsManager";
 
 export const dynamic = "force-dynamic";
 
@@ -38,7 +39,7 @@ function WisdomHubContent() {
     const [viewingNugget, setViewingNugget] = useState<Template | null>(null);
     const [exportingDocx, setExportingDocx] = useState(false);
 
-    const [filterMode, setFilterMode] = useState<"ALL" | "LAW" | "GROWTH" | "FACT" | "ARCHIVED">("ALL"); // SEPARATION OF POWERS
+    const [filterMode, setFilterMode] = useState<"ALL" | "LAW" | "GROWTH" | "FACT" | "ARCHIVED" | "PENDING">("ALL"); // SEPARATION OF POWERS
 
     useEffect(() => {
         const filterParam = searchParams.get("filter");
@@ -400,7 +401,7 @@ function WisdomHubContent() {
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="font-bold text-muted-foreground uppercase text-xs tracking-wider">Knowledge Pool ({wisdoms.length})</h2>
                         <div className="flex bg-background/50 rounded-lg p-1 gap-1">
-                            {["ALL", "LAW", "GROWTH", "FACT", "ARCHIVED"].map((m) => (
+                            {["ALL", "LAW", "GROWTH", "FACT", "PENDING", "ARCHIVED"].map((m) => (
                                 <button
                                     key={m}
                                     onClick={() => setFilterMode(m as any)}
@@ -410,19 +411,22 @@ function WisdomHubContent() {
                                             ? m === "LAW" ? "bg-purple-500 text-white"
                                                 : m === "GROWTH" ? "bg-yellow-500 text-black"
                                                     : m === "FACT" ? "bg-green-500 text-white"
-                                                        : m === "ARCHIVED" ? "bg-muted text-muted-foreground"
-                                                            : "bg-white text-black"
+                                                        : m === "PENDING" ? "bg-blue-500 text-white"
+                                                            : m === "ARCHIVED" ? "bg-muted text-muted-foreground"
+                                                                : "bg-white text-black"
                                             : "text-muted-foreground hover:bg-white/10"
                                     )}
                                 >
-                                    {m === "ALL" ? "All" : m === "LAW" ? "AXIOMS" : m === "GROWTH" ? "CREATOR GROWTH" : m === "FACT" ? "TOPIC RESEARCH" : "Archive"}
+                                    {m === "ALL" ? "All" : m === "LAW" ? "AXIOMS" : m === "GROWTH" ? "CREATOR GROWTH" : m === "FACT" ? "TOPIC RESEARCH" : m === "PENDING" ? "⏳ REVIEW" : "Archive"}
                                 </button>
                             ))}
                         </div>
                     </div>
 
                     <div className="grid gap-4">
-                        {loading ? (
+                        {filterMode === "PENDING" ? (
+                            <PendingInsightsManager />
+                        ) : loading ? (
                             <div className="text-center py-20 animate-pulse text-muted-foreground">Scanning archives...</div>
                         ) : wisdoms.length === 0 ? (
                             <div className="text-center py-20 border-2 border-dashed border-border/40 rounded-xl">

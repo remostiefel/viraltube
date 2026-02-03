@@ -1,25 +1,29 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { fetchRecentChannelVideosAction } from "@/app/actions";
+import { fetchEnhancedChannelVideosAction } from "@/app/actions";
 import { OutlierVideo } from "@/lib/youtube";
 import { cn } from "@/lib/utils";
-import { BarChart2, Eye } from "lucide-react";
+import { BarChart2, Eye, ThumbsUp, Percent, RefreshCw } from "lucide-react";
 
 export function RealTimeContent() {
     const [period, setPeriod] = useState<"48h" | "28d">("48h");
     const [videos, setVideos] = useState<OutlierVideo[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
     async function load() {
+        if (!loading) setIsRefreshing(true);
         try {
             // Fetch more videos to ensure we cover 28 days
-            const data = await fetchRecentChannelVideosAction();
+            const token = localStorage.getItem("nc_google_access_token");
+            const data = await fetchEnhancedChannelVideosAction(token);
             setVideos(data);
         } catch (e) {
             console.error(e);
         } finally {
             setLoading(false);
+            setIsRefreshing(false);
         }
     }
 
@@ -47,7 +51,9 @@ export function RealTimeContent() {
             {/* Header */}
             <div className="p-4 border-b border-border/10 flex items-center justify-between bg-black/20">
                 <h3 className="text-sm font-bold text-cyan-400 uppercase flex items-center gap-2">
-                    <BarChart2 className="w-4 h-4 text-cyan-400" /> Popular Content
+                    <BarChart2 className="w-4 h-4 text-cyan-400" />
+                    Popular Content
+                    {isRefreshing && <RefreshCw className="w-3 h-3 animate-spin text-muted-foreground ml-2" />}
                 </h3>
 
                 {/* Toggle */}
@@ -91,14 +97,26 @@ export function RealTimeContent() {
                                 <div className="text-xs font-medium text-white line-clamp-2 leading-tight group-hover:text-blue-300 transition-colors">
                                     {v.title}
                                 </div>
-                                <div className="flex items-center gap-2 mt-1">
-                                    <span className="text-[10px] text-cyan-400 font-bold flex items-center gap-1">
-                                        <Eye className="w-3 h-3" /> {v.viewCount.toLocaleString()}
-                                    </span>
-                                    <span className="text-[10px] text-white/50">•</span>
-                                    <span className="text-[10px] text-white/70">
-                                        {new Date(v.publishedAt).toLocaleDateString()}
-                                    </span>
+                                <div className="grid grid-cols-2 gap-1 mt-1.5 w-full">
+                                    {/* Views */}
+                                    <div className="flex flex-col items-center p-1 bg-blue-500/10 rounded">
+                                        <div className="text-[8px] text-blue-400 font-bold uppercase">Views</div>
+                                        <div className="text-[10px] font-mono font-bold text-blue-400">
+                                            {v.viewCount >= 1000 ? `${(v.viewCount / 1000).toFixed(1)}K` : v.viewCount}
+                                        </div>
+                                    </div>
+
+                                    {/* Likes */}
+                                    <div className="flex flex-col items-center p-1 bg-pink-500/10 rounded">
+                                        <div className="text-[8px] text-pink-400 font-bold uppercase">Likes</div>
+                                        <div className="text-[10px] font-mono font-bold text-pink-400">
+                                            {v.likeCount !== undefined && v.likeCount > 0
+                                                ? (v.likeCount >= 1000 ? `${(v.likeCount / 1000).toFixed(1)}K` : v.likeCount)
+                                                : "—"}
+                                        </div>
+                                    </div>
+
+
                                 </div>
                             </div>
 

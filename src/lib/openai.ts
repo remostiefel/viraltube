@@ -64,7 +64,8 @@ export async function generateScriptWithOpenAI(
     perfectLoop?: boolean,
     formatId?: string, // NEW: Granular Format ID replacing specific "duration" enums
     metaNarrative?: boolean,
-    protocol?: string
+    protocol?: string,
+    evidenceBlob?: string // Phase 5.5: Science Injection
 ): Promise<GeneratedScript | null> {
     if (!openai) {
         console.error("OpenAI API Key missing");
@@ -131,6 +132,12 @@ export async function generateScriptWithOpenAI(
              Mandatory Ending Phrase: ${language === "DE" ? '"...und deshalb:"' : '"...and that is why:"'}
              `;
         }
+
+        if (activeFormat.customInstructions) {
+            systemPrompt += `
+            ${activeFormat.customInstructions}
+            `;
+        }
     } else if (perfectLoop) {
         // Legacy Backup
         systemPrompt += `
@@ -174,6 +181,27 @@ export async function generateScriptWithOpenAI(
         - "According to the Neuro-Code analysis of [Topic]..."
         
         Effect: Use this to build authority. You are not just guessing; you have DATA.
+        `;
+    }
+
+    // PHASE 5.5: DEEP SCIENCE VALIDATOR (Credibility Injector)
+    if (evidenceBlob) {
+        systemPrompt += `
+        
+        [DEEP SCIENCE VALIDATOR ACTIVE]
+        Context: The user has provided RAW SCIENTIFIC EVIDENCE. 
+        Your Authority comes exclusively from this data.
+        
+        EVIDENCE DATA:
+        """
+        ${evidenceBlob.slice(0, 3000)}
+        """
+
+        MANDATORY RULES:
+        1. ACCURACY: You must Simplify the evidence for a lay audience, but NEVER distort the finding.
+        2. TRANSLATION: The evidence might be English. You MUST explain it in simple GERMAN (if language is DE).
+        3. VISUAL PROOF: You MUST include at least one "VisualCue" that explicitly says: "Overlay: Screenshot of Study Title [Insert Title from Evidence]".
+        4. PHRASING: Use authority phrases like "Laut der Studie...", "Die Daten zeigen klar...", "Hier ist der Beweis...".
         `;
     }
 
@@ -422,6 +450,8 @@ export async function analyzeViralVideoContent(
     TASK: Perform a deep forensic analysis of the provided YouTube transcript to extract its "Viral DNA".
     You are looking for specific Biological Triggers and Structural Patterns that allowed this video to succeed.
 
+    IMPORTANT: Provide ALL text outputs in GERMAN language. JSON field names remain in English, but all text values must be in German.
+
     1. **NEURO-SCORING (PEO + Depth)**: Analyze the psychological impact throughout the video.
        - **Dopamine**: Where is the Anticipation/Reward? (Novelty, "Secret" revealed).
        - **Cortisol**: Where is the Tension/Fear/Urgency? (The "Hook", the Stakes).
@@ -442,30 +472,30 @@ export async function analyzeViralVideoContent(
        - **Viral Score**: 0-10 estimated viral potential.
        - **Target Audience**: Who is this specifically for?
        - **Hook Analysis**: One sentence on why the first 30s worked (or didn't).
-       - **Sentiments**: List of 3-5 key emotions (e.g. "Curiosity", "Outrage").
+       - **Sentiments**: List of 3-5 key emotions (e.g. "Neugier", "Empörung").
        - **Takeaway**: One concrete thing to replicate.
 
-    RETURN JSON ONLY:
+    RETURN JSON ONLY (all text values in GERMAN):
     {
       "viralScore": 8.5,
-      "targetAudience": "Productivity enthusiasts",
-      "hookAnalysis": "Strong pattern interrupt with the 'False Fail'...",
-      "sentiments": ["Curiosity", "Fear of Missing Out", "Hope"],
-      "actionableTakeaway": "Start your next video with a failure story.",
+      "targetAudience": "Produktivitäts-Enthusiasten",
+      "hookAnalysis": "Starke Musterunterbrechung mit dem 'Falschen Scheitern'...",
+      "sentiments": ["Neugier", "Angst etwas zu verpassen", "Hoffnung"],
+      "actionableTakeaway": "Beginne dein nächstes Video mit einer Misserfolgsgeschichte.",
       "wordwall": [
-        { "keyword": "The False Fail", "explanation": "Host pretended to fail at 0:30 to build relatability...", "category": "Retention", "relevanceScore": 0.9 }
+        { "keyword": "Das Falsche Scheitern", "explanation": "Host tat so, als würde er bei 0:30 scheitern, um Nachvollziehbarkeit aufzubauen...", "category": "Retention", "relevanceScore": 0.9 }
       ],
       "neuroScore": {
-          "dopamine": { "score": 85, "logic": "High novelty in the 'Secret Protocol' reveal." },
-          "cortisol": { "score": 70, "logic": "Strong hook about 'Silent Killers' created urgency." },
-          "oxytocin": { "score": 40, "logic": "Scientific tone, low personal connection." },
-          "depth": { "score": 90, "logic": "Taps into the universal fear of wasted potential." }
+          "dopamine": { "score": 85, "logic": "Hohe Neuheit in der 'Geheimprotokoll'-Enthüllung." },
+          "cortisol": { "score": 70, "logic": "Starker Hook über 'Stille Killer' erzeugte Dringlichkeit." },
+          "oxytocin": { "score": 40, "logic": "Wissenschaftlicher Ton, geringe persönliche Verbindung." },
+          "depth": { "score": 90, "logic": "Greift die universelle Angst vor verschwendetem Potenzial auf." }
       },
       "structureAnalysis": [
-          { "phase": "The Hook", "description": "counter-intuitive statement...", "visualTrigger": "Fast-paced montage" },
-          { "phase": " The Prestige", "description": "Delivering the solution...", "visualTrigger": "Slow motion reveal" }
+          { "phase": "Der Hook", "description": "Kontraintuitive Aussage...", "visualTrigger": "Schnelle Montage" },
+          { "phase": "Das Prestige", "description": "Lieferung der Lösung...", "visualTrigger": "Zeitlupen-Enthüllung" }
       ],
-      "optimizationPrompt": "Act as a viral strategist. Apply the 'False Fail' structure by starting with..."
+      "optimizationPrompt": "Handle als viraler Stratege. Wende die 'Falsches Scheitern'-Struktur an, indem du beginnst mit..."
     }
     `;
 
@@ -1092,5 +1122,73 @@ export async function standardizeWisdom(nuggets: WisdomNugget[]): Promise<Wisdom
     } catch (e) {
         console.error("Standardization Error", e);
         return null;
+    }
+}
+
+export interface WisdomNugget {
+    type: "LAW" | "FACT" | "GROWTH";
+    principle: string;
+    explanation: string;
+    actionableTip: string;
+    universalLaw?: string; // For "LAW" type
+}
+
+export async function extractWisdomFromScript(
+    scriptContent: string
+): Promise<WisdomNugget[]> {
+    if (!openai) {
+        console.error("OpenAI API Key missing");
+        return [];
+    }
+
+    const systemPrompt = `
+    You are the "Wisdom Harvester" for the Neuro-Code system.
+
+    TASK: Analyze the provided video script and extract 1-3 "Universal Laws" or "Timeless Principles" that are hidden within the content.
+    
+    FILTER: actively discard "common sense" or "fluff". Only harvest HIGH-VALUE, UNIQUE insights that could be reused in future content or strategy.
+
+    CATEGORIES:
+    - LAW: A fundamental rule of human nature or biology (e.g. "The Law of Reciprocity", "Circadian Synchronization").
+    - FACT: A surprising scientific or statistical truth (e.g. "Blue light suppresses melatonin by 50%").
+    - GROWTH: A specific protocol or mindset shift (e.g. "The 15-Minute Sunlight Rule").
+
+    INPUT SCRIPT:
+    (See User Message)
+
+    OUTPUT JSON:
+    {
+      "nuggets": [
+        {
+          "type": "LAW",
+          "universalLaw": "The Law of Biological Priming",
+          "principle": "Biology dictates psychology.",
+          "explanation": "We often try to fix mood with mind, but mood is often a result of light/environment.",
+          "actionableTip": "Fix the light environment before trying to fix the mood."
+        }
+      ]
+    }
+    `;
+
+    try {
+        const completion = await openai.chat.completions.create({
+            messages: [
+                { role: "system", content: systemPrompt },
+                { role: "user", content: `Harvest wisdom from this script:\n\n${scriptContent.slice(0, 10000)}` },
+            ],
+            model: "gpt-4o",
+            response_format: { type: "json_object" },
+        });
+
+        const content = completion.choices[0].message.content;
+        if (!content) return [];
+
+        const parsed = JSON.parse(content);
+        if (parsed.nuggets) return parsed.nuggets;
+        return [];
+
+    } catch (error) {
+        console.error("Wisdom Harvest Error:", error);
+        return [];
     }
 }

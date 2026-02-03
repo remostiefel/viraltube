@@ -186,6 +186,7 @@ export interface Blueprint {
         differentiation: string[];
         germanTwist: string;
         culturalAdjustments: string;
+        voiceOverScript: string;
     };
     analysis: string;
 }
@@ -258,10 +259,78 @@ export async function generateBlueprint(
         console.error("Blueprint Generation Error", error);
         return {
             original: { hook: "Analysis Failed", structure: [], geniusElements: [], twist: "" },
-            adaptation: { hook: "Manual Creation Required", structure: [], differentiation: [], germanTwist: "", culturalAdjustments: "" },
+            adaptation: { hook: "Manual Creation Required", voiceOverScript: "", structure: [], differentiation: [], germanTwist: "", culturalAdjustments: "" },
             analysis: "AI could not process transcript."
         };
     }
+}
+
+export async function generateAdaptationFromMaster(
+    masterBlueprint: Blueprint["original"],
+    targetDuration: "30s" | "60s" | "Long",
+    targetLanguage: "DE" | "EN" = "DE"
+): Promise<{ adaptation: Blueprint["adaptation"]; loopAssets: LoopAssets }> {
+    if (!apiKey) throw new Error("Gemini API Key is missing");
+
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+    // 1. Generate new Adaptation
+    const adaptationPrompt = `
+    You are the "Production Manager".
+    Based on the following MASTER BLUEPRINT (English), create a production-ready ADAPTATION in ${targetLanguage}.
+    
+    TARGET DURATION: ${targetDuration}
+    
+    MASTER HOOK: "${masterBlueprint.hook}"
+    MASTER STRUCTURE: ${JSON.stringify(masterBlueprint.structure)}
+    MASTER TWIST: "${masterBlueprint.twist}"
+
+    TASK:
+    1. Write a viral Hook in ${targetLanguage} (Optimized for ${targetDuration}).
+    2. detailed Structure adapted for ${targetDuration}.
+    3. VoiceOver Script (Production Ready) for ${targetDuration}.
+       - If 30s: Fast paced, max 75 words.
+       - If 60s: Medium pace, max 150 words.
+       - If Long: Detailed, deep dive.
+    4. Unique Selling Point / Differentiation title.
+    
+    RETURN JSON:
+    {
+        "hook": "Viral Hook (${targetLanguage})",
+        "voiceOverScript": "Script text...",
+        "structure": ["Step 1...", "Step 2..."],
+        "differentiation": ["Title Idea 1...", "Title Idea 2..."],
+        "germanTwist": "Core Value (${targetLanguage})",
+        "culturalAdjustments": "Notes"
+    }
+    `;
+
+    let adaptationRes: Blueprint["adaptation"];
+    try {
+        const result = await model.generateContent(adaptationPrompt);
+        const text = result.response.text().replace(/```json/g, "").replace(/```/g, "").trim();
+        adaptationRes = JSON.parse(text);
+    } catch (error) {
+        console.error("Adaptation Error", error);
+        throw new Error("Failed to regenerate adaptation.");
+    }
+
+    // 2. Generate new Assets based on the new context
+    // We synthesize a context string for the asset generator
+    const assetContext = `
+    Title: ${adaptationRes.differentiation[0] || "Viral Video"}
+    Hook: ${adaptationRes.hook}
+    Script: ${adaptationRes.voiceOverScript}
+    `;
+
+    const loopAssets = await generateViralLoopAssets(
+        "Regenerated Adaptation",
+        `Duration: ${targetDuration}`,
+        assetContext,
+        targetDuration // Passing duration to control asset count
+    );
+
+    return { adaptation: adaptationRes, loopAssets };
 }
 
 export interface ScienceShort {
@@ -458,7 +527,7 @@ export async function generateMetricOptimization(metricName: string, currentValu
 
 export interface RetentionAnalysis {
     hookScore: number;
-    dropOffRisk: "High" | "Medium" | "Low";
+    dropOffRisk: "High" | "Medium" | "Low" | "Hoch" | "Mittel" | "Niedrig";
     triggerUsed: string;
     improvement: string;
 }
@@ -477,12 +546,14 @@ export async function analyzeHookRetention(transcriptSnippet: string): Promise<R
     2. Estimate "30s Drop-Off Risk" based on pacing/clarity.
     3. Suggest ONE improvement.
 
+    IMPORTANT: Provide ALL text outputs in GERMAN language. Field names remain in English, but values must be in German.
+
     RETURN JSON:
     {
         "hookScore": number (1-100),
-        "dropOffRisk": "High" | "Medium" | "Low",
-        "triggerUsed": "Name of trigger (e.g. Open Loop, Negativity Bias)",
-        "improvement": "Specific advice"
+        "dropOffRisk": "Hoch" | "Mittel" | "Niedrig",
+        "triggerUsed": "Name des Triggers auf Deutsch (z.B. Offene Schleife, Negativitäts-Bias)",
+        "improvement": "Spezifischer Ratschlag auf Deutsch"
     }
     `;
 
@@ -494,9 +565,9 @@ export async function analyzeHookRetention(transcriptSnippet: string): Promise<R
     } catch (error) {
         return {
             hookScore: 0,
-            dropOffRisk: "High",
-            triggerUsed: "Unknown",
-            improvement: "Analysis Failed"
+            dropOffRisk: "Hoch",
+            triggerUsed: "Unbekannt",
+            improvement: "Analyse fehlgeschlagen"
         };
     }
 }
@@ -562,10 +633,13 @@ export interface LoopAssets {
 export async function generateViralLoopAssets(
     title: string,
     description: string,
-    blueprintContext: string
+    blueprintContext: string,
+    duration: "30s" | "60s" | "Long" = "30s"
 ): Promise<LoopAssets> {
     if (!apiKey) throw new Error("Gemini API Key is missing");
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+    const assetCount = duration === "30s" ? 6 : duration === "60s" ? 12 : 20;
 
     const prompt = `
     You are a CORTEX Asset Engineer.
@@ -573,31 +647,32 @@ export async function generateViralLoopAssets(
     Context: "${description}"
     Blueprint Summary: "${blueprintContext.slice(0, 500)}..."
 
-    TASK: Generate a "Production Asset Manifest" for a 30s Viral Loop Short.
-    Quality Level: S-Tier (Midjourney v6, Runway Gen-3, Suno v3).
+    TASK: Generate a "Production Asset Manifest" for a ${duration} Viral Video.
+    Quality Level: S-Tier (Midjourney v6, Meta.ai Video, Tunee.ai Music).
 
     REQUIREMENTS:
-    1. **Music (3 Options)**:
-       - 1x High Energy / Phonk / Drift
-       - 1x Atmospheric / Tension / Ambient
-       - 1x Viral Trend Style (e.g. "Sigma", "CoreCore")
-       - Format for Suno/Udio (Style description, BPM).
+    1. **Music (Tunee.ai)**:
+       - Generate 2 Options in PLAIN ENGLISH (Language: English).
+       - Option 1: "Dramatic / Fast / Rhythmic" (Background for intense VoiceOver).
+       - Option 2: "Easy / Relaxed / Beautiful" (Background for calm sections).
+       - Context: "No more complicated prompts - just chat to create amazing music. Describe what you're going for in plain English."
 
-    2. **Images (10 Keyframes)**:
+    2. **Images (${assetCount} Keyframes)**:
        - High aesthetic value. 9:16 aspect ratio (--ar 9:16).
        - Style: Cinematic, Photorealistic, 8k.
        - Provide the raw Midjourney prompt.
 
-    3. **Video (10 Motion Clips)**:
-       - 3-5s loops.
-       - Describe motion clearly for Runway Gen-3/Pika.
-       - e.g. "Slow zoom into neural network," "Cyberpunk city flyover".
+    3. **Video (${assetCount} Motion Clips)**:
+       - Optimize for **Meta.ai** (Llama Video) -> High detail, documentary style.
+       - Style Examples: "Overhead shot of...", "First-person POV...", "Wide cinematic shot...".
+       - Include lighting, mood, camera angle.
+       - e.g. "Overhead shot of person sitting at desk..., documentary style realism, cool desaturated colors..."
 
     RETURN JSON ONLY:
     {
-      "musicPrompts": [{ "style": "...", "prompt": "...", "bpm": 120 }],
+      "musicPrompts": [{ "style": "Dramatic/Rhythmic", "prompt": "Plain english description...", "bpm": 120 }, { "style": "Relaxed/Beautiful", "prompt": "...", "bpm": 80 }],
       "imagePrompts": [{ "scene": "...", "midjourney": "/imagine prompt: ..." }],
-      "videoPrompts": [{ "action": "...", "runway": "..." }]
+      "videoPrompts": [{ "action": "...", "runway": "Full detailed prompt for Meta.ai..." }]
     }
     `;
 
@@ -716,5 +791,58 @@ export async function generateVoiceoverStyle(scriptContent: string): Promise<str
     } catch (error) {
         console.error("Voiceover Style Generation Error:", error);
         return "Read aloud in an intense, captivating tone – like a mad scientist revealing forbidden knowledge:";
+    }
+}
+
+export interface ThemeUpdate {
+    id: string;
+    cluster: string;
+    coreMessage: string;
+}
+
+// Circular dependency check: We avoid importing NotebookItem from notebook-types if it causes issues, 
+// but here it should be fine as notebook-types is pure types.
+import { NotebookItem } from "./notebook-types";
+
+export async function synthesizeNotebookThemes(items: NotebookItem[]): Promise<ThemeUpdate[]> {
+    if (!apiKey) throw new Error("Gemini API Key is missing");
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+    const itemsContext = items.map(i => `ID: ${i.id}\nTitle: ${i.title}\nDesc: ${i.description}\n---`).join("\n");
+
+    const prompt = `
+    You are the "Master Librarian" of the CORTEX system.
+    Your task is to organize a chaotic list of accumulated ideas into strategic CLUSTERS.
+
+    INPUT ITEMS:
+    ${itemsContext.slice(0, 30000)}
+
+    TASK:
+    1. Analyze all items to find 5-7 distinct "Themes" or "Clusters" that emerge.
+    2. Assign each item to one of these Clusters.
+    3. Write a "Core Essence" (1 short sentence) for each item that clarifies its value.
+
+    CLUSTERS MUST BE:
+    - High-level (e.g., "Biohacking Routine", "Mental Models", "Nutrition Myths").
+    - Action-oriented.
+
+    RETURN JSON ARRAY:
+    [
+        {
+            "id": "Item ID",
+            "cluster": "Name of Cluster",
+            "coreMessage": "Core essence summary..."
+        }
+    ]
+    `;
+
+    try {
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text().replace(/```json/g, "").replace(/```/g, "").trim();
+        return JSON.parse(text) as ThemeUpdate[];
+    } catch (error) {
+        console.error("Clustering Error:", error);
+        return [];
     }
 }

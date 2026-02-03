@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, RefreshCw, MessageSquare, PencilRuler, FileText, Loader2, PlayCircle, Clock, Save, FolderOpen, Trash2, Eye, Binary, BrainCircuit, Activity, Cloud, Sparkles, Zap, Layout, CheckCircle2, Brain, FileDown, Clapperboard, Copy, Check, Maximize2, Minimize2, GraduationCap } from "lucide-react";
+import { Send, Bot, User, RefreshCw, MessageSquare, PencilRuler, FileText, Loader2, PlayCircle, Clock, Save, FolderOpen, Trash2, Eye, Binary, BrainCircuit, Activity, Cloud, Sparkles, Zap, Layout, CheckCircle2, Brain, FileDown, Clapperboard, Copy, Check, Maximize2, Minimize2, GraduationCap, Image as ImageIcon } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { processChat, generateScriptAction, saveTemplateAction, getTemplatesAction, deleteTemplateAction, generateBlueprintAction, saveScriptToVaultAction, getProjectByIdAction, updateProjectAction, synthesizeStrategyAction, refineScriptAction, extendScriptAction, condenseScriptAction, searchOutliersAction, generateVideoPromptsAction, generateImagePromptsAction, generateAudioPromptsAction, generateScriptImagePromptsAction, generateVoiceoverStyleAction } from "@/app/actions";
 import { Project } from "@/lib/projects";
@@ -19,6 +19,7 @@ import { OraclePrediction } from "@/lib/oracle";
 import { predictPerformanceAction } from "@/app/actions";
 import { OracleCard } from "@/components/analysis/OracleCard";
 import { TemplateManager } from "@/components/architect/TemplateManager";
+import { useArchitectState } from "@/components/architect/useArchitectState";
 // Removed static import of saveAs to prevent build issues
 // import { saveAs } from "file-saver";
 
@@ -45,147 +46,138 @@ export default function ArchitectPage() {
 }
 
 function ArchitectContent() {
-    const searchParams = useSearchParams();
-    const projectId = searchParams.get("project");
-    const templateId = searchParams.get("templateId"); // Support direct loading
+    const {
+        // State
+        strategyProject, setStrategyProject,
+        strategyContent, setStrategyContent,
+        isStrategiesMode, setIsStrategiesMode,
+        analyzingStrategy, setAnalyzingStrategy,
+        cortexProfile, setCortexProfile,
+        content, setContent,
+        scriptTopic, setScriptTopic,
+        thumbnailConcept, setThumbnailConcept,
+        scriptResult, setScriptResult,
+        scriptLoading, setScriptLoading,
+        targetLanguage, setTargetLanguage,
+        selectedProtocol, setSelectedProtocol,
+        activeTab, setActiveTab,
+        activeBlueprintName, setActiveBlueprintName,
+        step, setStep,
+        isBlueprintEngineOpen, setIsBlueprintEngineOpen,
+        refiningScript, setRefiningScript,
+        extendingScript, setExtendingScript,
+        condensingScript, setCondensingScript,
+        savingStrategyStatus, setSavingStrategyStatus,
+        savingBlueprintStatus, setSavingBlueprintStatus,
+        saveCategory, setSaveCategory,
+        videoPrompts, setVideoPrompts,
+        imagePrompts, setImagePrompts,
+        audioPrompts, setAudioPrompts,
+        generatingImages, setGeneratingImages,
+        savingImages, setSavingImages,
+        generatingAudio, setGeneratingAudio,
+        savingAudio, setSavingAudio,
+        generatingPrompts, setGeneratingPrompts,
+        savingPrompts, setSavingPrompts,
+        copiedPromptId, setCopiedPromptId,
+        genesisMode, setGenesisMode,
+        genesisStatus, setGenesisStatus,
+        genesisLogs, setGenesisLogs,
+        messages, setMessages,
+        chatInput, setChatInput,
+        chatLoading, setChatLoading,
+        scrollRef,
+        wisdomTemplates, setWisdomTemplates,
+        selectedWisdomIds, setSelectedWisdomIds,
+        autoIncludeHighImpact, setAutoIncludeHighImpact,
+        sourceMode, setSourceMode,
+        selectedWisdomTemplateId, setSelectedWisdomTemplateId,
+        templates, setTemplates,
+        showTemplateManager, setShowTemplateManager,
+        savingTemplate, setSavingTemplate,
+        currentTemplateId, setCurrentTemplateId,
+        neuroScore, setNeuroScore,
+        analyzingPEO, setAnalyzingPEO,
+        pacingData, setPacingData,
+        oracleData, setOracleData,
+        consultingOracle, setConsultingOracle,
+        savingToVault, setSavingToVault,
 
-    // Strategy Forge State
-    const [strategyProject, setStrategyProject] = useState<Project | null>(null);
-    const [strategyContent, setStrategyContent] = useState("");
-    const [isStrategiesMode, setIsStrategiesMode] = useState(false);
-    const [analyzingStrategy, setAnalyzingStrategy] = useState(false);
-    const [cortexProfile, setCortexProfile] = useState<StrategyProfile | null>(null);
+        // Handlers
+        handleLoadTemplate,
+        loadTemplates,
+        loadStrategyProject,
+        handleChatSubmit,
+        handleScriptGenerate,
+        handleGenesis,
+        handleRefineScript,
+        handleExtendScript,
+        handleCondenseScript,
+        handleSaveProject,
+        handleSaveAsBlueprint: handleExportBlueprint,
+        handleAnalyzePEO,
+        handleConsultOracle,
+        handleThumbnailCritique,
+        handlePreMortem,
 
-    // Load Cortex Profile
-    useEffect(() => {
-        const stored = localStorage.getItem("nc_cortex_profile");
-        if (stored) {
-            setCortexProfile(JSON.parse(stored));
+        // Phase 5.5
+        scientificEvidence, setScientificEvidence
+
+    } = useArchitectState();
+
+    // Additional UI-specific state or overrides can go here, but avoiding them is best.
+    const searchParams = useSearchParams(); // Still needed for projectId display logic if any, but handled in hook mostly
+
+    // Legacy mapping or specific simple handlers if any remain unique to view
+    const handleDeleteTemplate = async (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (confirm("Delete this template?")) {
+            const { deleteTemplateAction } = await import("@/app/actions");
+            await deleteTemplateAction(id);
+            await loadTemplates();
         }
-    }, []);
+    };
 
-    const [refiningScript, setRefiningScript] = useState(false);
-    const [extendingScript, setExtendingScript] = useState(false);
-    const [condensingScript, setCondensingScript] = useState(false);
-    const [savingStrategyStatus, setSavingStrategyStatus] = useState<"idle" | "saving" | "saved">("idle");
+    const handleExportDocx = async () => {
+        if (!content) return;
+        try {
+            const { generateVoiceoverStyleAction } = await import("@/app/actions");
 
-    const [savingBlueprintStatus, setSavingBlueprintStatus] = useState<"idle" | "saving" | "saved">("idle");
-    const [saveCategory, setSaveCategory] = useState<"LAW" | "FACT" | "GROWTH">("GROWTH");
-    const [activeBlueprintName, setActiveBlueprintName] = useState<string | null>(null);
-
-    const [videoPrompts, setVideoPrompts] = useState<VideoPrompt[] | null>(null);
-
-    // Genesis Mode State
-    const [genesisMode, setGenesisMode] = useState(false);
-    const [genesisStatus, setGenesisStatus] = useState<"IDLE" | "SEARCHING" | "ANALYZING" | "WRITING" | "IMAGINING" | "DONE">("IDLE");
-    const [genesisLogs, setGenesisLogs] = useState<string[]>([]);
-    const [generatingPrompts, setGeneratingPrompts] = useState(false);
-    const [savingPrompts, setSavingPrompts] = useState<"idle" | "saving" | "saved">("idle");
-    const [copiedPromptId, setCopiedPromptId] = useState<number | null>(null);
-
-    // Image/Audio State
-    const [imagePrompts, setImagePrompts] = useState<ScriptImagePrompt[] | null>(null);
-    const [audioPrompts, setAudioPrompts] = useState<AudioPrompt | null>(null);
-    const [generatingImages, setGeneratingImages] = useState(false);
-    const [savingImages, setSavingImages] = useState<"idle" | "saving" | "saved">("idle");
-    const [generatingAudio, setGeneratingAudio] = useState(false);
-    const [savingAudio, setSavingAudio] = useState<"idle" | "saving" | "saved">("idle");
-
-    // Wisdom Hub Integration
-    const [wisdomTemplates, setWisdomTemplates] = useState<Template[]>([]);
-    const [selectedWisdomIds, setSelectedWisdomIds] = useState<string[]>([]);
-    const [autoIncludeHighImpact, setAutoIncludeHighImpact] = useState(false);
-
-    // Load wisdom on mount
-    useEffect(() => {
-        getTemplatesAction("viral-wisdom").then(setWisdomTemplates);
-    }, []);
-
-    const [activeTab, setActiveTab] = useState<"chat" | "script" | "strategy" | "director" | "visuals" | "audio">("strategy"); // Updated types
-
-    useEffect(() => {
-        if (projectId) {
-            loadStrategyProject(projectId);
+            // Generate AI-powered voiceover style instruction
+            const voiceoverStyle = await generateVoiceoverStyleAction(content);
+            const blob = await generateDocx(content, scriptResult?.title || "Draft Script", voiceoverStyle);
+            const { saveAs } = await import("file-saver");
+            saveAs(blob, getDocxFilename("Script", scriptResult?.title || "Draft Script"));
+        } catch (e) {
+            console.error("Export failed", e);
+            alert("Export failed");
         }
-    }, [projectId]);
+    };
 
-    // Added: Load specific template if ID is provided
+    // Auto-Open Blueprint Engine if mode=blueprint
     useEffect(() => {
-        if (templateId) {
-            loadSpecificTemplate(templateId);
-        }
-    }, [templateId]);
-
-    // Handle deep-linking to tabs
-    useEffect(() => {
-        const tabParam = searchParams.get("tab");
-        if (tabParam && ["strategy", "script", "visuals", "director", "audio", "chat"].includes(tabParam)) {
-            // @ts-ignore
-            setActiveTab(tabParam);
+        if (searchParams.get("mode") === "blueprint") {
+            setIsBlueprintEngineOpen(true);
+            setTimeout(() => {
+                // Optional: Auto-Run if we want to be aggressive, but letting user review is better.
+                // But we should scroll to it.
+                const el = document.getElementById("blueprint-url");
+                if (el) el.focus();
+            }, 500);
         }
     }, [searchParams]);
 
-    const loadSpecificTemplate = async (id: string) => {
-        // We reuse getTemplatesAction but we need to find the specific one.
-        // Optimized: In a real app we'd have getTemplateByIdAction.
-        // For now, we fetch all (cached usually) and find it.
-        const all = await getTemplatesAction();
-        const target = all.find(t => t.id === id);
-        if (target) {
-            handleLoadTemplate(target);
-        }
-    };
-
-    const loadStrategyProject = async (id: string) => {
-        const project = await getProjectByIdAction(id);
-        if (project) {
-            setStrategyProject(project);
-
-            // 1. Load Strategy Context
-            setStrategyContent(project.format || project.description || "");
-
-            // 2. Load Script Content (The Single Source of Truth)
-            if (project.scriptContent) {
-                setContent(project.scriptContent);
-                setStep("write"); // Go straight to editor
-            }
-
-            // 3. Load Structured Data if available
-            if (project.scriptData) {
-                setScriptResult(project.scriptData);
-                const pacing = calculatePacingProfile(project.scriptData);
-                setPacingData(pacing);
-            }
-
-            setIsStrategiesMode(true);
-
-            // If we have content, default to Builder tab, else Strategy
-            if (project.scriptContent) {
-                setActiveTab("script");
-            } else {
-                setActiveTab("strategy");
-            }
-
-            // Set Active Blueprint Name from Project Title if meaningful
-            if (project.title && !project.title.includes("Video Project")) {
-                setActiveBlueprintName(project.title.replace("Combo: ", ""));
-            }
-        }
-    };
-
-    // Auto-fill Script Topic from Strategy Project
-    useEffect(() => {
-        if (strategyProject && strategyProject.title && !scriptTopic) {
-            // Clean up title (remove "Combo: ", quotes, etc for a cleaner topic)
-            const cleanTopic = strategyProject.title.replace("Combo: ", "").replace(/"/g, "").split("+")[0].trim();
-            setScriptTopic(cleanTopic.substring(0, 50)); // Keep it short
-        }
-    }, [strategyProject]);
+    // Need to handle handleAutoAnalyze locally or move to hook? 
+    // It depends on `wisdomTemplates` which is in hook. Ideally move to hook.
+    // I missed `handleAutoAnalyze` in hook. I'll add a quick wrapper here or better, add to hook later.
+    // For now, let's reimplement strict necessary ones or assume I added them (I checked and missed it).
+    // Re-implementing handleAutoAnalyze using hook state:
 
     const handleAutoAnalyze = async () => {
         if (!strategyProject || analyzingStrategy) return;
         setAnalyzingStrategy(true);
         try {
+            const { synthesizeStrategyAction } = await import("@/app/actions");
             // Prepare Wisdom Context
             const highImpactIds = autoIncludeHighImpact ? wisdomTemplates.filter(w => (w.rating || 0) >= 4).map(w => w.id) : [];
             const allSelectedIds = Array.from(new Set([...selectedWisdomIds, ...highImpactIds]));
@@ -194,9 +186,8 @@ function ArchitectContent() {
             let wisdomContext = "";
             if (selectedWisdom.length > 0) {
                 wisdomContext = "\n\n[APPLIED VIRAL WISDOM PRINCIPLES]\n" + selectedWisdom.map(w => {
-                    // Handle both old sting content and new object content
                     if (typeof w.content === 'string') return `- ${w.name}: ${w.content}`;
-                    if (Array.isArray(w.content)) return w.content.map((n: WisdomNugget) => `- ${n.principle}: ${n.actionableTip}`).join("\n");
+                    if (Array.isArray(w.content)) return w.content.map((n: any) => `- ${n.principle}: ${n.actionableTip}`).join("\n");
                     return "";
                 }).join("\n");
             }
@@ -210,528 +201,28 @@ function ArchitectContent() {
         }
     };
 
+    // saveStrategy also separate
     const saveStrategy = async () => {
         if (!strategyProject || !strategyContent) return;
         setSavingStrategyStatus("saving");
+        const { updateProjectAction } = await import("@/app/actions");
         await updateProjectAction(strategyProject.id, { format: strategyContent });
 
         setSavingStrategyStatus("saved");
         setTimeout(() => setSavingStrategyStatus("idle"), 2000);
     };
 
-    const saveAsBlueprint = async () => {
-        if (!strategyContent) return;
-
-        // Auto-naming: Project Title + Date
-        const baseName = strategyProject ? strategyProject.title : "Master Strategy";
-        const date = new Date().toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
-        const name = `${baseName} (Bluepr. ${date})`;
-
-        setSavingBlueprintStatus("saving");
-        // FIX: saveTemplateAction takes (type, name, content) arguments directly
-        await saveTemplateAction(
-            "viral-wisdom", // Explicit type for Blueprints
-            `🧬 ${name}`,
-            strategyContent,
-            undefined, // projectId default
-            undefined, // tags
-            undefined, // rating
-            saveCategory // Pass selected category (Growth/Law/Fact)
-        );
-
-        setSavingBlueprintStatus("saved");
-        await loadTemplates();
-
-        // UPDATE ACTIVE STATE IMMEDIATELY
-        setActiveBlueprintName(name.replace("🧬 ", ""));
-
-        setTimeout(() => setSavingBlueprintStatus("idle"), 2000);
-    };
-
-    // Chat State
-    const [messages, setMessages] = useState<ChatMessage[]>([]);
-    const [chatInput, setChatInput] = useState("");
-    const [chatLoading, setChatLoading] = useState(false);
-    const scrollRef = useRef<HTMLDivElement>(null);
-
-    // Script State
-    const [scriptTopic, setScriptTopic] = useState("");
-    const [scriptResult, setScriptResult] = useState<GeneratedScript | null>(null);
-    const [scriptLoading, setScriptLoading] = useState(false);
-    const [targetLanguage, setTargetLanguage] = useState<"DE" | "EN">("DE");
-    const [selectedProtocol, setSelectedProtocol] = useState<string>(""); // Default: no specific protocol
-
-    // Source Selector State
-    const [sourceMode, setSourceMode] = useState<"strategy" | "wisdom" | "scratch">("strategy");
-    const [selectedWisdomTemplateId, setSelectedWisdomTemplateId] = useState<string>("");
-
-    // Template State
-    const [templates, setTemplates] = useState<Template[]>([]);
-    const [showTemplateManager, setShowTemplateManager] = useState(false);
-    const [savingTemplate, setSavingTemplate] = useState<"idle" | "saving" | "saved">("idle");
-
-    // Blueprint State
-    const [step, setStep] = useState<"blueprint" | "write" | "visualize">("write");
-    const [blueprintUrl, setBlueprintUrl] = useState("");
-    const [isBlueprintEngineOpen, setIsBlueprintEngineOpen] = useState(false);
-    const [blueprintLoading, setBlueprintLoading] = useState(false);
-    const [blueprintResult, setBlueprintResult] = useState<string>("");
-    const [content, setContent] = useState(""); // For manual editing / blueprint injection
-    const [currentTemplateId, setCurrentTemplateId] = useState<string | null>(null); // Track loaded ID
-
-    // Neuro-Scoring State (PEO)
-    const [neuroScore, setNeuroScore] = useState<PEOScore | null>(null);
-    const [analyzingPEO, setAnalyzingPEO] = useState(false);
-    const [pacingData, setPacingData] = useState<PacingDataPoint[] | null>(null);
-
-    const handleAnalyzePEO = async () => {
-        // Combine script content for analysis
-        let textToAnalyze = "";
-        if (scriptResult) {
-            textToAnalyze = scriptResult.sections.map(s => s.heading + "\n" + s.content).join("\n\n");
-        } else {
-            textToAnalyze = content || chatInput; // Fallback to manual content
-        }
-
-        if (!textToAnalyze) {
-            alert("No content to analyze. Generate a script or write something first.");
-            return;
-        }
-
-        setAnalyzingPEO(true);
-        try {
-            const score = await analyzePEOAction(textToAnalyze);
-            setNeuroScore(score);
-        } catch (e) {
-            console.error(e);
-        } finally {
-            setAnalyzingPEO(false);
-        }
-    };
-
-    // Auto-scroll chat
-    useEffect(() => {
-        if (scrollRef.current) {
-            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-        }
-    }, [messages]);
-
-    // Load templates on mount
-    useEffect(() => {
-        loadTemplates();
-    }, []);
-
-    const loadTemplates = async () => {
-        const data = await getTemplatesAction(); // Fetch all types (script, prompt, viral-wisdom)
-        setTemplates(data);
-    };
-
-    const handleChatSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!chatInput.trim() || chatLoading) return;
-
-        const userMsg: ChatMessage = { role: "user", parts: chatInput };
-        setMessages((prev) => [...prev, userMsg]);
-        setChatInput("");
-        setChatLoading(true);
-
-        try {
-            const history = messages;
-            const response = await processChat(history, userMsg.parts);
-            const aiMsg: ChatMessage = { role: "model", parts: response };
-            setMessages((prev) => [...prev, aiMsg]);
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setChatLoading(false);
-        }
-    };
-
-    const handleScriptGenerate = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!scriptTopic.trim() || scriptLoading) return;
-
-        setScriptLoading(true);
-        setScriptResult(null);
-
-        try {
-            // DIRECT STRATEGY INJECTION
-            let contextToUse: string | undefined = undefined;
-
-            if (sourceMode === "strategy") {
-                contextToUse = strategyContent && strategyContent.length > 20 ? strategyContent : undefined;
-            } else if (sourceMode === "wisdom") {
-                const template = wisdomTemplates.find(t => t.id === selectedWisdomTemplateId);
-                if (template) {
-                    // Normalize template content to string
-                    if (typeof template.content === 'string') {
-                        contextToUse = template.content;
-                    } else if (Array.isArray(template.content)) {
-                        contextToUse = template.content.map((n: any) => `- ${n.principle}: ${n.actionableTip}`).join("\n");
-                    }
-                }
-            }
-
-            const data = await generateScriptAction(
-                scriptTopic,
-                targetLanguage,
-                contextToUse,
-                cortexProfile?.perfectLoop,
-                cortexProfile?.durationConstraint,
-                cortexProfile?.metaNarrative,
-                selectedProtocol || undefined // PASS PROTOCOL
-            );
-            setScriptResult(data);
-            if (data) {
-                // AUTO-SYNC TO EDITOR CONTENT (For Director Flow)
-                const fullText = data.sections.map(s => `## ${s.heading} (${s.estimatedDuration})\n\n${s.content}\n\n> **Visual:** ${s.visualCue}`).join("\n\n");
-                setContent(fullText);
-
-                const pacing = calculatePacingProfile(data);
-                setPacingData(pacing);
-            }
-        } catch (error) {
-            console.error("Script Gen Error", error);
-        } finally {
-            setScriptLoading(false);
-        }
-    };
-
-    const handleGenesis = async () => {
-        if (!scriptTopic.trim()) return;
-        setGenesisMode(true);
-        setGenesisStatus("SEARCHING");
-        setGenesisLogs([]);
-
-        const addLog = (msg: string) => setGenesisLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`]);
-
-        try {
-            // STEP 1: SEARCH OUTLIERS
-            addLog(`Scanning YouTube for viral outliers on: "${scriptTopic}"...`);
-            const outliers = await searchOutliersAction(scriptTopic);
-
-            if (!outliers || outliers.length === 0) {
-                addLog("No outliers found. Aborting Genesis.");
-                setGenesisStatus("IDLE");
-                return;
-            }
-
-            const winner = outliers[0];
-            addLog(`WINNER IDENTIFIED: "${winner.title}" (${winner.viewCount} views)`);
-            setGenesisStatus("ANALYZING");
-
-            // STEP 2: BLUEPRINT EMULATION
-            addLog(`Emulating viral dna from video ID: ${winner.id}...`);
-            const blueprint = await generateBlueprintAction(winner.id, scriptTopic, targetLanguage, cortexProfile || undefined);
-
-            // Format Strategy Context from Blueprint
-            const strategyContext = `
-            EMULATED STRATEGY FROM: ${winner.title}
-            HOOK STRATEGY: ${blueprint.adaptation.hook}
-            STRUCTURE: ${blueprint.adaptation.structure.join(" -> ")}
-            CULTURAL TWIST: ${blueprint.adaptation.germanTwist}
-            `;
-            setStrategyContent(strategyContext); // Save visualization
-
-            // STEP 3: SCRIPT GENERATION
-            setGenesisStatus("WRITING");
-            addLog("Synthesizing script with Neuro-Code + Outlier DNA...");
-            const script = await generateScriptAction(
-                scriptTopic,
-                targetLanguage,
-                strategyContext,
-                cortexProfile?.perfectLoop,
-                cortexProfile?.durationConstraint,
-                cortexProfile?.metaNarrative,
-                selectedProtocol || undefined // PASS PROTOCOL
-            );
-
-            if (!script) {
-                throw new Error("Script generation failed");
-            }
-
-            setScriptResult(script);
-            const fullText = script.sections.map(s => `## ${s.heading} (${s.estimatedDuration})\n\n${s.content}\n\n> **Visual:** ${s.visualCue}`).join("\n\n");
-            setContent(fullText);
-
-            // STEP 4: IMAGINING (Prompts)
-            setGenesisStatus("IMAGINING");
-            addLog("Dreaming up visuals and audio...");
-
-            // Parallel Generation
-            const [videoPromptsResRaw, audioPromptsRes, imagePromptsRes] = await Promise.all([
-                generateVideoPromptsAction(fullText, 10), // 10 Video Prompts
-                generateAudioPromptsAction(fullText),     // 3 Audio Prompts (inside object)
-                generateScriptImagePromptsAction(fullText) // 10 Image Prompts (approx)
-            ]);
-
-            const videoPromptsRes = videoPromptsResRaw as VideoPrompt[];
-
-            // @ts-ignore
-            setVideoPrompts(videoPromptsRes);
-            // We don't have a dedicated state for the others yet displayed in this view specifically, 
-            // but we will save them implicitly or show them if we add UI.
-            // For now, let's just log success.
-
-            addLog(`Generated ${videoPromptsRes?.length || 0} Video Prompts.`);
-            addLog(`Generated Audio Concept: ${audioPromptsRes ? "Success" : "Failed"}.`);
-
-            setGenesisStatus("DONE");
-            addLog("Genesis Complete. Neuro-Code Link Established.");
-
-        } catch (e) {
-            console.error("Genesis Error", e);
-            addLog("CRITICAL FAILURE IN GENESIS PROTOCOL.");
-            setGenesisStatus("IDLE");
-        }
-    };
-
-    const handleRefineScript = async () => {
-        if (!content || !strategyContent || refiningScript) return;
-        setRefiningScript(true);
-        try {
-            const refined = await refineScriptAction(content, strategyContent, targetLanguage);
-            if (refined) {
-                setScriptResult(refined);
-
-                // AUTO-SYNC TO EDITOR CONTENT
-                const fullText = refined.sections.map(s => `## ${s.heading} (${s.estimatedDuration})\n\n${s.content}\n\n> **Visual:** ${s.visualCue}`).join("\n\n");
-                setContent(fullText);
-
-                const pacing = calculatePacingProfile(refined);
-                setPacingData(pacing);
-                setStep("visualize"); // Show the result
-            }
-        } catch (e) {
-            console.error(e);
-            alert("Refinement failed.");
-        } finally {
-            setRefiningScript(false);
-        }
-    };
-
-    const handleExtendScript = async () => {
-        if (!content || extendingScript) return;
-        setExtendingScript(true);
-        try {
-            const extended = await extendScriptAction(content, targetLanguage);
-            if (extended) {
-                setScriptResult(extended);
-                const pacing = calculatePacingProfile(extended);
-                setPacingData(pacing);
-                setStep("visualize");
-            }
-        } catch (e) {
-            console.error(e);
-            alert("Extension failed.");
-        } finally {
-            setExtendingScript(false);
-        }
-    };
-
-    const handleCondenseScript = async () => {
-        if (!content || condensingScript) return;
-        setCondensingScript(true);
-        try {
-            const condensed = await condenseScriptAction(content, targetLanguage);
-            if (condensed) {
-                setScriptResult(condensed);
-                // Sync to editor
-                const fullText = condensed.sections.map(s => `## ${s.heading} (${s.estimatedDuration})\n\n${s.content}\n\n> **Visual:** ${s.visualCue}`).join("\n\n");
-                setContent(fullText);
-                const pacing = calculatePacingProfile(condensed);
-                setPacingData(pacing);
-                setStep("visualize");
-            }
-        } catch (e) {
-            console.error(e);
-            alert("Condensing failed.");
-        } finally {
-            setCondensingScript(false);
-        }
-    };
-
-    const handleSaveProject = async () => {
-        // Consolidated Saving: Updates the Project Entity with EVERYTHING.
-        const textToSave = content || (scriptResult ? scriptResult.sections.map(s => s.content).join('\n') : "");
-
-        if (!strategyProject) {
-            alert("No active project. Please create or select a project first.");
-            return;
-        }
-
-        setSavingTemplate("saving"); // Reuse state for UI feedback
-
-        try {
-            await updateProjectAction(strategyProject.id, {
-                format: strategyContent, // Save the Strategy
-                scriptContent: textToSave, // Save the Script Text
-                scriptData: scriptResult || undefined, // Save the JSON Data
-                title: strategyProject.title // Ensure title persists
-            });
-
-            // Reload to ensure sync
-            await loadStrategyProject(strategyProject.id);
-
-            setSavingTemplate("saved");
-            setTimeout(() => setSavingTemplate("idle"), 2000);
-        } catch (e) {
-            console.error("Project Save Failed", e);
-            alert("Failed to save project.");
-            setSavingTemplate("idle");
-        }
-    };
-
-    // Legacy/Export Function
-    const handleExportBlueprint = async () => {
-        if (!strategyContent) return;
-        const baseName = strategyProject ? strategyProject.title : "Master Strategy";
-        const date = new Date().toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
-        const name = `${baseName} (Bluepr. ${date})`;
-
-        await saveTemplateAction(
-            "viral-wisdom",
-            `🧬 ${name}`,
-            strategyContent,
-            strategyProject?.id,
-            ["Blueprint"],
-            5,
-            saveCategory
-        );
-        await loadTemplates();
-        alert("Strategy exported as Blueprint to Library.");
-    };
-
-    const handleLoadTemplate = (template: Template) => {
-        // Robust detection of Blueprints vs Drafts
-        const isBlueprint = template.type === "viral-wisdom" || template.name.includes("Blueprint") || template.name.includes("🧬");
-
-        setCurrentTemplateId(template.id); // Track URL/ID
-
-        if (isBlueprint && typeof template.content === 'string') {
-            // It's a Strategy Blueprint
-            setStrategyContent(template.content);
-            setActiveBlueprintName(template.name.replace('🧬 ', '')); // Remove icon for cleaner display
-            setActiveTab("script");
-        } else if (template.type === "prompt") {
-            // Video Prompts
-            setVideoPrompts(template.content as VideoPrompt[]);
-            setActiveTab("director");
-        } else if (template.type === "visual") {
-            // Image Prompts
-            setImagePrompts(template.content as ScriptImagePrompt[]);
-            setActiveTab("visuals");
-        } else if (template.type === "audio") {
-            // Audio Prompts
-            setAudioPrompts(template.content as AudioPrompt);
-            setActiveTab("audio");
-        } else if (Array.isArray(template.content)) {
-            // It's a Wisdom Nugget Collection (or single nugget in array)
-            const wisdomText = template.content.map((n: any) => {
-                if (n.universalLaw) return `## ${n.universalLaw}\n**Principle**: ${n.principle}\n**Explanation**: ${n.explanation}\n**Tip**: ${n.actionableTip}`;
-                if (n.principle) return `## ${n.principle}\n${n.explanation}\n> ${n.actionableTip}`;
-                return JSON.stringify(n);
-            }).join("\n\n---\n\n");
-
-            setStrategyContent(wisdomText);
-            setActiveTab("strategy");
-        } else if (typeof template.content === 'string') {
-            // It's a Text Draft (Script)
-            setContent(template.content);
-            setActiveTab("script"); // Switch to Script tab
-
-            // Try to parse sections for visual sync
-            const sectionsRegex = /##\s+(.*?)\n\n([\s\S]*?)(?=\n##|$)/g;
-            const sections = [];
-            let match;
-            while ((match = sectionsRegex.exec(template.content)) !== null) {
-                sections.push({
-                    heading: match[1].trim(),
-                    content: match[2].trim(),
-                    visualCue: "",
-                    estimatedDuration: "5s"
-                });
-            }
-
-            setScriptResult({
-                title: template.name.replace("Draft: ", ""),
-                sections: sections.length > 0 ? sections : []
-            });
-            setStep("write"); // Focus Editor
-        } else {
-            // It's a full Script Object (Legacy or strict save)
-            setScriptResult(template.content as GeneratedScript);
-            if (template.content) {
-                const pacing = calculatePacingProfile(template.content as GeneratedScript);
-                setPacingData(pacing);
-            }
-        }
-        setShowTemplateManager(false);
-    };
-
-    const handleExportDocx = async () => {
-        if (!content) return;
-        try {
-            const titleClean = (scriptResult?.title || "Draft").replace(/[^a-z0-9äöüß]/gi, '_').replace(/_+/g, '_');
-
-            // Generate AI-powered voiceover style instruction
-            const voiceoverStyle = await generateVoiceoverStyleAction(content);
-
-            const blob = await generateDocx(content, scriptResult?.title || "Draft Script", voiceoverStyle);
-            const { saveAs } = await import("file-saver");
-            saveAs(blob, getDocxFilename("Script", scriptResult?.title || "Draft Script"));
-        } catch (e) {
-            console.error("Export failed", e);
-            alert("Export failed");
-        }
-    };
-
-    const handleDeleteTemplate = async (id: string, e: React.MouseEvent) => {
-        e.stopPropagation();
-        if (confirm("Delete this template?")) {
-            await deleteTemplateAction(id);
-            await loadTemplates();
-        }
-    };
-
-
-
-    // Oracle State
-    const [oracleData, setOracleData] = useState<OraclePrediction | null>(null);
-    const [consultingOracle, setConsultingOracle] = useState(false);
-
-    const handleConsultOracle = async () => {
-        if (!scriptResult) return;
-
-        let content = scriptResult.sections.map(s => s.content).join("\n\n");
-        // Add manual content if exists
-
-        setConsultingOracle(true);
-        try {
-            const res = await predictPerformanceAction(scriptResult.title, content, "Auto-generated from content");
-            setOracleData(res);
-        } catch (e) {
-            console.error(e);
-        } finally {
-            setConsultingOracle(false);
-        }
-    };
-
-    // VAULT SAVING LOGIC
-    const [savingToVault, setSavingToVault] = useState(false);
-
+    // handleSaveToVault
     const handleSaveToVault = async () => {
         if (!scriptResult) return;
 
         setSavingToVault(true);
         try {
-            // Try to load config from localStorage, fallback to empty object (server will use env)
+            const { saveScriptToVaultAction } = await import("@/app/actions");
             const configStr = localStorage.getItem("nc_vault_config");
             const config = configStr ? JSON.parse(configStr) : {};
 
             const content = scriptResult.sections.map(s => `## ${s.heading} (${s.estimatedDuration})\n\n${s.content}\n\n> **Visual:** ${s.visualCue}`).join("\n\n---\n\n");
-
-            // Prepend Title
             const fullContent = `# ${scriptResult.title}\n\n${content}`;
 
             const res = await saveScriptToVaultAction(config, fullContent, scriptResult.title);
@@ -853,14 +344,22 @@ function ArchitectContent() {
                             <p className="mt-4 text-xs text-muted-foreground">
                                 Analyze the inputs above and synthesize your Master Strategy on the right.
                             </p>
-                            <button
-                                onClick={handleAutoAnalyze}
-                                disabled={analyzingStrategy}
-                                className="w-full mt-6 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition-all shadow-lg shadow-purple-900/20 disabled:opacity-50"
-                            >
-                                {analyzingStrategy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                                {analyzingStrategy ? "Synthesizing Strategy..." : "Auto-Synthesize Strategy"}
-                            </button>
+                            <div className="grid grid-cols-2 gap-3 mt-6">
+                                <button
+                                    onClick={handleAutoAnalyze}
+                                    disabled={analyzingStrategy}
+                                    className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition-all shadow-lg shadow-purple-900/20 disabled:opacity-50 text-xs"
+                                >
+                                    {analyzingStrategy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                                    {analyzingStrategy ? "Synthesizing..." : "Auto-Synthesize"}
+                                </button>
+                                <button
+                                    onClick={handlePreMortem}
+                                    className="bg-red-900/20 hover:bg-red-900/40 border border-red-500/30 text-red-400 font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition-all text-xs"
+                                >
+                                    <Activity className="w-4 h-4" /> Run Pre-Mortem
+                                </button>
+                            </div>
 
 
                             {/* Wisdom Selection (New Feature) */}
@@ -978,7 +477,45 @@ function ArchitectContent() {
                         <div className="flex-1 overflow-y-auto space-y-6 relative">
                             <div className="bg-card border border-border/40 rounded-xl p-6 shadow-lg flex items-start gap-4">
                                 <form onSubmit={handleScriptGenerate} className="flex-1 flex gap-4 items-center">
-                                    <div className="flex-1 space-y-2">
+                                    <div className="flex-1 space-y-4">
+
+                                        {/* THUMBNAIL GATEKEEPER (PHASE 4) */}
+                                        <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-3 space-y-2 relative group transition-all hover:bg-orange-500/20">
+                                            <div className="flex justify-between items-center">
+                                                <label className="text-xs font-bold text-orange-400 uppercase tracking-widest flex items-center gap-2">
+                                                    <ImageIcon className="w-4 h-4" /> Thumbnail Concept (Required)
+                                                </label>
+                                                <HelpTrigger helpId="coach.thumbnail_first">
+                                                    <span className="text-[10px] bg-orange-500/20 text-orange-300 px-2 py-0.5 rounded border border-orange-500/30 cursor-help">
+                                                        Coach: "No Click, No Script."
+                                                    </span>
+                                                </HelpTrigger>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <input
+                                                    type="text"
+                                                    value={thumbnailConcept}
+                                                    onChange={(e) => setThumbnailConcept(e.target.value)}
+                                                    placeholder="Describe the visual hook (e.g., 'Blue nervous system on black w/ glowing text')..."
+                                                    className="flex-1 bg-black/40 border border-orange-500/20 rounded px-3 py-2 text-sm focus:outline-none focus:border-orange-500/50 text-white placeholder:text-muted-foreground/50 font-medium"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={handleThumbnailCritique}
+                                                    disabled={!thumbnailConcept.trim()}
+                                                    className="bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 border border-orange-500/30 px-3 py-2 rounded text-xs font-bold uppercase tracking-wider transition-colors disabled:opacity-50"
+                                                    title="Ask Coach to critique this concept"
+                                                >
+                                                    Critique
+                                                </button>
+                                            </div>
+                                            {!thumbnailConcept.trim() && (
+                                                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-orange-500/50 pointer-events-none text-xs font-bold uppercase tracking-wider animate-pulse hidden md:block">
+                                                    Required to Proceed
+                                                </div>
+                                            )}
+                                        </div>
+
                                         <input
                                             type="text"
                                             value={scriptTopic}
@@ -1046,6 +583,14 @@ function ArchitectContent() {
                                         </div>
                                     </div>
 
+                                    {/* Smart Hint for Loops */}
+                                    {selectedProtocol.includes("loop") && (
+                                        <div className="flex items-center gap-2 mt-2 text-[10px] text-blue-400 bg-blue-900/10 px-2 py-1 rounded border border-blue-500/20 animate-in fade-in slide-in-from-top-1">
+                                            <Sparkles className="w-3 h-3" />
+                                            <span>Coach Tip: Loops work best with <strong>&lt;60s formats</strong>.</span>
+                                        </div>
+                                    )}
+
                                     {/* Genesis Toggle */}
                                     <div className="flex items-center gap-2 mt-2">
                                         <button
@@ -1061,7 +606,7 @@ function ArchitectContent() {
                                     <button
                                         type={genesisMode ? "button" : "submit"}
                                         onClick={genesisMode ? handleGenesis : undefined}
-                                        disabled={scriptLoading || !scriptTopic || (genesisMode && genesisStatus !== "IDLE" && genesisStatus !== "DONE")}
+                                        disabled={scriptLoading || !scriptTopic || !thumbnailConcept.trim() || (genesisMode && genesisStatus !== "IDLE" && genesisStatus !== "DONE")}
                                         className={cn("bg-primary text-background font-bold px-6 py-3 rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors flex items-center gap-2 min-w-[140px] justify-center h-[52px]",
                                             genesisMode ? "bg-red-600 hover:bg-red-500 text-white" : "bg-primary text-background hover:bg-primary/90"
                                         )}
@@ -1110,24 +655,35 @@ function ArchitectContent() {
                                                 <p className="text-xs text-muted-foreground">
                                                     Paste a YouTube URL to deconstruct its viral DNA and adapt it for Neuro-Code.
                                                 </p>
-                                                <div className="flex gap-2">
-                                                    <input
-                                                        placeholder="Paste Viral Source URL (YouTube)..."
-                                                        className="flex-1 bg-black/50 border border-blue-500/30 rounded px-3 py-2 text-white"
-                                                        id="blueprint-url"
-                                                    />
+                                                <div className="flex flex-col gap-3">
+                                                    <div className="flex gap-2">
+                                                        <input
+                                                            placeholder="Target Context (e.g. Neuroscience / Productivity)..."
+                                                            defaultValue={searchParams.get("ctx") || strategyProject?.title || "Neuroscience / Productivity"}
+                                                            className="w-1/3 bg-black/50 border border-blue-500/30 rounded px-3 py-2 text-white text-xs"
+                                                            id="blueprint-context"
+                                                        />
+                                                        <input
+                                                            placeholder="Paste Viral Source URL (YouTube)..."
+                                                            defaultValue={searchParams.get("url") || ""}
+                                                            className="flex-1 bg-black/50 border border-blue-500/30 rounded px-3 py-2 text-white text-xs"
+                                                            id="blueprint-url"
+                                                        />
+                                                    </div>
                                                     <button
                                                         onClick={async () => {
                                                             const url = (document.getElementById('blueprint-url') as HTMLInputElement).value;
+                                                            const context = (document.getElementById('blueprint-context') as HTMLInputElement).value || "General";
                                                             const videoId = url.split("v=")[1]?.substring(0, 11);
+
                                                             if (!videoId) return alert("Invalid URL");
 
                                                             try {
                                                                 // Quick spinner or loading state here in a real app
-                                                                const res = await generateBlueprintAction(videoId, "Neuroscience / Productivity");
+                                                                const res = await generateBlueprintAction(videoId, context);
                                                                 // Inject into editor mostly, but for now just show result
                                                                 const blueprintText = `
-# 🧬 VIRAL BLUEPRINT
+# 🧬 VIRAL BLUEPRINT (${context})
 
 ## 🇺🇸 ORIGINAL (The Container)
 **HOOK:** ${res.original.hook}
@@ -1152,9 +708,9 @@ ${res.adaptation.differentiation.map(e => `- ${e}`).join('\n')}
                                                                 alert("Analysis Failed: " + e.message);
                                                             }
                                                         }}
-                                                        className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded font-bold"
+                                                        className="w-full bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded font-bold transition-colors"
                                                     >
-                                                        Analyze
+                                                        Analyze & Reverse Engineer
                                                     </button>
                                                 </div>
                                             </div>

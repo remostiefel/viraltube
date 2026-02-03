@@ -27,6 +27,15 @@ export async function simulatePerformance(
     scriptContent: string,
     thumbnailIdea: string = "Not specified"
 ): Promise<OraclePrediction | null> {
+    // ...
+    return predictViralPerformance(title, scriptContent, thumbnailIdea);
+}
+
+export async function predictViralPerformance(
+    title: string,
+    scriptContent: string,
+    thumbnailIdea: string = "Not specified"
+): Promise<OraclePrediction | null> {
     if (!openai) {
         console.error("OpenAI API Key missing");
         return null;
